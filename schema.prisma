@@ -1,0 +1,91 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum OrderSide {
+  BUY
+  SELL
+}
+
+enum OrderType {
+  MARKET
+  LIMIT
+}
+
+enum OrderStatus {
+  PENDING
+  PARTIALLY_FILLED
+  FILLED
+  CANCELLED
+}
+
+model User {
+  id       Int     @id @default(autoincrement())
+  username String  @unique
+  password String?
+
+  orders Order[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Stock {
+  id     Int    @id @default(autoincrement())
+  title  String
+  symbol String @unique
+
+  orders Order[]
+  fills  Fill[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Order {
+  id Int @id @default(autoincrement())
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  stockId Int
+  stock   Stock @relation(fields: [stockId], references: [id])
+
+  side OrderSide
+  type OrderType
+
+  price     Decimal? @db.Decimal(12, 2)
+  qty       Int
+  filledQty Int      @default(0)
+
+  status OrderStatus @default(PENDING)
+
+  // Relations for fills
+  buyFills  Fill[] @relation("BuyOrderFills")
+  sellFills Fill[] @relation("SellOrderFills")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Fill {
+  id      Int   @id @default(autoincrement())
+  stockId Int
+  stock   Stock @relation(fields: [stockId], references: [id])
+
+  price Decimal @db.Decimal(12, 2)
+  qty   Int
+
+  buyOrderId Int
+  buyOrder   Order @relation("BuyOrderFills", fields: [buyOrderId], references: [id])
+
+  sellOrderId Int
+  sellOrder   Order @relation("SellOrderFills", fields: [sellOrderId], references: [id])
+
+  createdAt DateTime @default(now())
+}
