@@ -1,0 +1,21 @@
+{
+  "name": "engine",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "bun run src/index.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@prisma/client": "^6",
+    "dotenv": "^17.4.2",
+    "prisma": "^6",
+    "redis": "^5.12.1"
+  }
+}
