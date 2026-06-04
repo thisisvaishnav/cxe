@@ -78,12 +78,29 @@ while (1) {
       continue;
     }
 
-    // DEDUCT AND UPDATE CACHED BALANCE IN REDIS
+    // DEDUCT AND UPDATE CACHED BALANCE IN REDIS AND IN DATABASE
     const newBalance = userBalance - totalPriceOfOrder;
     await client.hSet("balances", userId.toString(), newBalance.toString());
-
+    await prisma.balance.update({
+      where: {
+        userId: userId,
+      },
+      data: {
+        usd: newBalance,
+      },
+    });
     console.log(`New cached balance for User ${userId}: $${newBalance}`);
 
+    await client.lPush(
+      `order-history:${userId}`,
+      JSON.stringify({
+        userId,
+        price,
+        quantity,
+        status: "OPEN",
+        createdAt: new Date().toISOString(),
+      }),
+    );
     // RESPOND TO BACKEND
     await client.lPush(
       responseQueue,
