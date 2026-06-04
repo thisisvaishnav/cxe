@@ -24,7 +24,7 @@ export async function signup(req: Request, res: Response): Promise<void> {
     });
 
     res.status(201).json({
-      token: createToken({ userId: user.id }),
+      token: createToken({ userId: user.id.toString() }), // Convert Int to string to match TokenPayload
       userId: user.id,
       username: user.username,
     });
@@ -34,5 +34,40 @@ export async function signup(req: Request, res: Response): Promise<void> {
 }
 
 export async function signin(req: Request, res: Response): Promise<void> {
-  //TODO: Implement signin logic
+  // 1. Validate the body using the existing Zod schema
+  const parsedBody = authSchema.safeParse(req.body);
+  if (!parsedBody.success) {
+    sendValidationError(res, parsedBody.error);
+    return;
+  }
+
+  const { username, password } = parsedBody.data;
+
+  try {
+    // 2. Find the user by username
+    const user = await prisma.user.findUnique({
+      where: { username },
+    });
+
+    if (!user) {
+      res.status(401).json({ error: "invalid credentials" });
+      return;
+    }
+
+    // 3. Compare the request password with the stored hashed password
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      res.status(401).json({ error: "invalid credentials" });
+      return;
+    }
+
+    // 4. Return JWT token & user details
+    res.status(200).json({
+      token: createToken({ userId: user.id.toString() }), // Convert Int to string to match TokenPayload
+      userId: user.id,
+      username: user.username,
+    });
+  } catch (error) {
+    res.status(500).json({ error: "internal_server_error" });
+  }
 }

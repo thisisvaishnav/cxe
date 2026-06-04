@@ -35,6 +35,19 @@ model User {
   balance Balance?
 }
 
+model Balance {
+  id        String @id @default(uuid())
+  userId    String
+  asset     String // e.g., 'USDT', 'BTC'
+  available Float  @default(0)
+  locked    Float  @default(0)
+
+  user User @relation(fields: [userId], references: [id])
+
+  // A user can only have one balance record per specific asset
+  @@unique([userId, asset])
+}
+
 model Order {
   id        Int         @id @default(autoincrement())
   userId    Int
