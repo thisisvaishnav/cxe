@@ -8,7 +8,7 @@
  *
  * 🟢 You can import this file directly.
  */
-import type * as runtime from "@prisma/client/runtime/library"
+import type * as runtime from "@prisma/client/runtime/client"
 import type * as $Enums from "../enums.ts"
 import type * as Prisma from "../internal/prismaNamespace.ts"
 
@@ -236,7 +236,7 @@ export type FillGroupByOutputType = {
   _max: FillMaxAggregateOutputType | null
 }
 
-type GetFillGroupByPayload<T extends FillGroupByArgs> = Prisma.PrismaPromise<
+export type GetFillGroupByPayload<T extends FillGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<FillGroupByOutputType, T['by']> &
       {
@@ -1325,6 +1325,11 @@ export type FillFindManyArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
    * Skip the first `n` Fills.
    */
   skip?: number
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+   * 
+   * Filter by unique combinations of Fills.
+   */
   distinct?: Prisma.FillScalarFieldEnum | Prisma.FillScalarFieldEnum[]
 }
 

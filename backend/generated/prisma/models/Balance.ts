@@ -8,7 +8,7 @@
  *
  * 🟢 You can import this file directly.
  */
-import type * as runtime from "@prisma/client/runtime/library"
+import type * as runtime from "@prisma/client/runtime/client"
 import type * as $Enums from "../enums.ts"
 import type * as Prisma from "../internal/prismaNamespace.ts"
 
@@ -186,7 +186,7 @@ export type BalanceGroupByOutputType = {
   _max: BalanceMaxAggregateOutputType | null
 }
 
-type GetBalanceGroupByPayload<T extends BalanceGroupByArgs> = Prisma.PrismaPromise<
+export type GetBalanceGroupByPayload<T extends BalanceGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<BalanceGroupByOutputType, T['by']> &
       {
@@ -1059,6 +1059,11 @@ export type BalanceFindManyArgs<ExtArgs extends runtime.Types.Extensions.Interna
    * Skip the first `n` Balances.
    */
   skip?: number
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+   * 
+   * Filter by unique combinations of Balances.
+   */
   distinct?: Prisma.BalanceScalarFieldEnum | Prisma.BalanceScalarFieldEnum[]
 }
 

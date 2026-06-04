@@ -5,7 +5,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 enum OrderStatus {
@@ -33,19 +32,6 @@ model User {
   orders  Order[]
   fills   Fill[]
   balance Balance?
-}
-
-model Balance {
-  id        String @id @default(uuid())
-  userId    String
-  asset     String // e.g., 'USDT', 'BTC'
-  available Float  @default(0)
-  locked    Float  @default(0)
-
-  user User @relation(fields: [userId], references: [id])
-
-  // A user can only have one balance record per specific asset
-  @@unique([userId, asset])
 }
 
 model Order {

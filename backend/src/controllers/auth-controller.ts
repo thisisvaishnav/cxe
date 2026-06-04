@@ -20,6 +20,14 @@ export async function signup(req: Request, res: Response): Promise<void> {
       data: {
         username,
         password: hashedPassword,
+        balance: {
+          create: {
+            usd: 1000.0, // Set initial USD balance to 1000 for development testing
+          },
+        },
+      },
+      include: {
+        balance: true,
       },
     });
 
@@ -27,8 +35,10 @@ export async function signup(req: Request, res: Response): Promise<void> {
       token: createToken({ userId: user.id.toString() }), // Convert Int to string to match TokenPayload
       userId: user.id,
       username: user.username,
+      balance: user.balance?.usd ?? 0,
     });
-  } catch {
+  } catch (error) {
+    console.error("Signup error:", error);
     res.status(409).json({ error: "username already exists" });
   }
 }
@@ -44,9 +54,12 @@ export async function signin(req: Request, res: Response): Promise<void> {
   const { username, password } = parsedBody.data;
 
   try {
-    // 2. Find the user by username
+    // 2. Find the user by username, including their balance
     const user = await prisma.user.findUnique({
       where: { username },
+      include: {
+        balance: true,
+      },
     });
 
     if (!user) {
@@ -61,13 +74,15 @@ export async function signin(req: Request, res: Response): Promise<void> {
       return;
     }
 
-    // 4. Return JWT token & user details
+    // 4. Return JWT token, user details, and balance
     res.status(200).json({
       token: createToken({ userId: user.id.toString() }), // Convert Int to string to match TokenPayload
       userId: user.id,
       username: user.username,
+      balance: user.balance?.usd ?? 0,
     });
   } catch (error) {
+    console.error("Signin error:", error);
     res.status(500).json({ error: "internal_server_error" });
   }
 }
