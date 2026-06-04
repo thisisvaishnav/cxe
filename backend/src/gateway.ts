@@ -2,6 +2,7 @@ import express from "express";
 import Redis from "ioredis";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
+import { requireAuth } from "./utils/auth.js";
 
 const app = express();
 app.use(express.json());
@@ -46,11 +47,11 @@ const OrderSchema = z
     },
   );
 
-app.post("/api/v1/orders", async (req, res) => {
+app.post("/api/v1/orders", requireAuth, async (req, res) => {
   try {
     const validatedData = OrderSchema.parse(req.body);
 
-    // 2. Mock Auth (In reality, extract from JWT middleware)
+    // 2. Extract userId from request (populated by requireAuth middleware)
     const userId = req.userId;
     if (!userId) {
       res.status(401).json({ error: "Missing authenticated user" });
