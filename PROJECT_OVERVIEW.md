@@ -55,7 +55,7 @@ GET    /order/:orderId
 DELETE /order/:orderId
 ```
 
-`POST /signup` hashes the password, creates a user, creates an initial USD balance of `1000`, and returns a JWT. `POST /signin` validates credentials with bcrypt and returns the same auth response shape.
+`POST /signup` hashes the password, creates a user, creates an initial USD balance of `10000`, and returns a JWT. `POST /signin` validates credentials with bcrypt and returns the same auth response shape.
 
 ### `engine/`
 
@@ -146,6 +146,7 @@ Enums:
 The backend expects:
 
 ```text
+DATABASE_URL
 REDIS_URL
 JWT_SECRET
 PORT optional, defaults to 3000
@@ -154,11 +155,41 @@ BACKEND_QUEUE_ID optional
 ENGINE_TIMEOUT_MS optional, defaults to 30000
 ```
 
-The engine currently uses Redis and Prisma directly from `engine/src/index.ts`.
+The engine currently uses Redis and Prisma directly from `engine/src/index.ts`. It connects to Redis with the default Redis client settings, so local Redis should be available at `localhost:6379`. It also needs access to the same Supabase PostgreSQL database through `DATABASE_URL`.
 
 ## Running Locally
 
-Start Redis and PostgreSQL first, then install dependencies in each workspace:
+Prerequisites:
+
+- Bun installed.
+- Redis running locally on port `6379`.
+- Supabase PostgreSQL database access.
+
+Create `backend/.env`:
+
+```bash
+DATABASE_URL="postgresql://postgres:%40%23up54q5399@db.khjwqtonmoipkkdjkmpt.supabase.co:5432/postgres?sslmode=require"
+REDIS_URL="redis://localhost:6379"
+JWT_SECRET="replace-with-a-long-random-secret"
+PORT=3000
+```
+
+The raw Supabase password contains `@` and `#`, so it must be URL-encoded in the connection string:
+
+```text
+@  becomes  %40
+#  becomes  %23
+```
+
+That is why the password part is written as `%40%23up54q5399` in `DATABASE_URL`.
+
+Create `engine/.env` with the same database URL:
+
+```bash
+DATABASE_URL="postgresql://postgres:%40%23up54q5399@db.khjwqtonmoipkkdjkmpt.supabase.co:5432/postgres?sslmode=require"
+```
+
+Then install dependencies:
 
 ```bash
 cd backend
@@ -168,14 +199,23 @@ cd ../engine
 bun install
 ```
 
-Run the backend:
+Apply the Prisma migration from the backend workspace:
+
+```bash
+cd backend
+bunx prisma migrate dev
+```
+
+If Prisma asks for a migration name, use something simple such as `init`.
+
+Run Redis first, then start the backend:
 
 ```bash
 cd backend
 bun run dev
 ```
 
-Run the engine in another terminal:
+Start the engine in another terminal:
 
 ```bash
 cd engine
@@ -183,3 +223,142 @@ bun run dev
 ```
 
 The backend listens on `http://localhost:3000` unless `PORT` is set.
+
+### Health Check
+
+After the backend is running, verify that it can talk to Redis:
+
+```bash
+curl http://localhost:3000/health
+```
+
+Expected response:
+
+```json
+{
+  "ok": true
+}
+```
+
+### Signup
+
+Create a new user:
+
+```bash
+curl -X POST http://localhost:3000/signup \
+  -H "Content-Type: application/json" \
+  -d '{"username":"alice","password":"password123"}'
+```
+
+Expected response shape:
+
+```json
+{
+  "token": "JWT_TOKEN_HERE",
+  "userId": 1,
+  "username": "alice",
+  "balance": 10000
+}
+```
+
+Save the returned `token`; protected exchange routes require it in the `Authorization` header.
+
+### Signin
+
+Sign in with the same credentials:
+
+```bash
+curl -X POST http://localhost:3000/signin \
+  -H "Content-Type: application/json" \
+  -d '{"username":"alice","password":"password123"}'
+```
+
+Expected response shape:
+
+```json
+{
+  "token": "JWT_TOKEN_HERE",
+  "userId": 1,
+  "username": "alice",
+  "balance": 10000
+}
+```
+
+Invalid usernames or passwords return:
+
+```json
+{
+  "error": "invalid credentials"
+}
+```
+
+### Calling Protected Routes
+
+Use the JWT from signup or signin:
+
+```bash
+TOKEN="paste-token-here"
+
+curl http://localhost:3000/balance \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Example order request:
+
+```bash
+curl -X POST http://localhost:3000/order \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{"type":"limit","side":"buy","symbol":"BTC","price":100,"qty":1}'
+```
+
+Current implementation note: engine-backed routes depend on the backend and engine agreeing on the Redis message payload shape. Signup and signin are DB-only routes and should work once Supabase, Redis, `.env`, and migrations are set up.
+
+## Quick Command Summary
+
+Terminal 1:
+
+```bash
+redis-server
+```
+
+Terminal 2:
+
+```bash
+cd backend
+bun install
+bunx prisma migrate dev
+bun run dev
+```
+
+Terminal 3:
+
+```bash
+cd engine
+bun install
+bun run dev
+```
+
+Terminal 4:
+
+```bash
+curl -X POST http://localhost:3000/signup \
+  -H "Content-Type: application/json" \
+  -d '{"username":"alice","password":"password123"}'
+
+curl -X POST http://localhost:3000/signin \
+  -H "Content-Type: application/json" \
+  -d '{"username":"alice","password":"password123"}'
+```
+
+## Frontend
+
+The frontend currently only contains a Bun/TypeScript scaffold. There is no web UI yet, so use `curl`, Postman, Insomnia, or another HTTP client to call the backend endpoints.
+
+If you want to run the scaffold anyway:
+
+```bash
+cd frontend
+bun install
+bun run index.ts
+```

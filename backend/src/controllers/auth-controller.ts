@@ -22,7 +22,7 @@ export async function signup(req: Request, res: Response): Promise<void> {
         password: hashedPassword,
         balance: {
           create: {
-            usd: 1000.0, // Set initial USD balance to 1000 for development testing
+            usd: 10000.0, // default user balance
           },
         },
       },
