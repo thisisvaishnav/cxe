@@ -1,5 +1,6 @@
 import { createClient } from "redis";
 import { PrismaClient } from "@prisma/client";
+import { PriceOracle } from "./PriceOracle";
 
 // Initialize Prisma and Redis Client
 const prisma = new PrismaClient();
@@ -38,6 +39,23 @@ async function hydrateBalancesToRedis() {
 
 // Run the hydration once only when starting the engine
 await hydrateBalancesToRedis();
+// priceoracle import
+const oracle = new PriceOracle(client);
+
+oracle.on("tick", (symbol: string, price: number) => {
+  console.log(`[tick] ${symbol} → $${price}`);
+});
+
+oracle.connect("BTCUSDT"); // non-blocking — WebSocket opens in background
+
+// Graceful shutdown
+function shutdown() {
+  console.log("Shutting down...");
+  process.exit(0);
+}
+process.on("SIGINT", shutdown);
+process.on("SIGTERM", shutdown);
+// ───────────────────────────────────────────────────────────────────────────
 
 console.log("Matching Engine started, listening for messages...");
 

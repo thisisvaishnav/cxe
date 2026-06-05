@@ -5,9 +5,9 @@
     "": {
       "name": "engine",
       "dependencies": {
-        "@prisma/client": "^6",
+        "@prisma/client": "6",
         "dotenv": "^17.4.2",
-        "prisma": "^6",
+        "prisma": "6",
         "redis": "^5.12.1",
         "zod": "^4.4.3",
       },
