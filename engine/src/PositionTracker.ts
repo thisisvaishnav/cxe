@@ -1,7 +1,7 @@
 export interface Position {
   symbol: string;
-  qty: number;        // negative for short, positive for long
-  avgCost: number;    // weighted average entry price
+  qty: number; // negative for short, positive for long
+  avgCost: number; // weighted average entry price
   side: "LONG" | "SHORT";
 }
 
@@ -21,6 +21,21 @@ export class PositionTracker {
     const userPositions = this.positions.get(userId);
     if (!userPositions) return [];
     return Array.from(userPositions.values()).filter((pos) => pos.qty !== 0);
+  }
+
+  /**
+   * Get all userIds that currently hold a non-zero position for this symbol.
+   * Used by PnLCalculator to find who needs a PnL update on each tick.
+   */
+  getUsersForSymbol(symbol: string): number[] {
+    const result: number[] = [];
+    for (const [userId, userPositions] of this.positions.entries()) {
+      const pos = userPositions.get(symbol);
+      if (pos && pos.qty !== 0) {
+        result.push(userId);
+      }
+    }
+    return result;
   }
 
   /**
@@ -46,7 +61,7 @@ export class PositionTracker {
     symbol: string,
     side: "BUY" | "SELL",
     qty: number,
-    price: number
+    price: number,
   ): PositionUpdateResult {
     let userPositions = this.positions.get(userId);
     if (!userPositions) {

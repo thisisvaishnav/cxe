@@ -2,6 +2,7 @@ import { createClient } from "redis";
 import { PrismaClient } from "@prisma/client";
 import { PriceOracle } from "./PriceOracle";
 import { PaperEngine } from "./PaperEngine";
+import { PnLCalculator } from "./PnLCalculator";
 
 // ─── Initialize clients ───────────────────────────────────────────────────────
 const prisma = new PrismaClient();
@@ -58,6 +59,16 @@ async function hydratePositionsFromFills() {
 }
 
 await hydratePositionsFromFills();
+
+// ─── Boot PnLCalculator ───────────────────────────────────────────────────────
+// Shares the same PositionTracker instance that PaperEngine uses.
+// On every tick it recomputes unrealized PnL, writes to Redis, and publishes
+// to the "pnl-updates" pub/sub channel for the WebSocket server to consume.
+const pnlCalculator = new PnLCalculator(
+  client,
+  oracle,
+  engine.getPositionTracker(),
+);
 
 oracle.on("tick", (symbol: string, price: number) => {
   console.log(`[tick] ${symbol} → $${price}`);
@@ -212,22 +223,64 @@ while (true) {
       const userId = Number(payload.userId);
       const orderId = Number(payload.orderId);
 
+      // Find the order first to ensure it exists and is OPEN
+      const order = await prisma.order.findFirst({
+        where: { id: orderId, userId },
+      });
+
+      if (!order || order.status !== "OPEN") {
+        await client.lPush(
+          responseQueue,
+          JSON.stringify({
+            correlationId,
+            ok: false,
+            error: "ORDER_NOT_FOUND_OR_ALREADY_FILLED",
+          })
+        );
+        continue;
+      }
+
       // Remove from in-memory OrderBook (if it's still resting)
       engine.cancelOrder(orderId);
 
       // Mark as CANCELLED in the database
-      const result = await prisma.order.updateMany({
-        where: { id: orderId, userId, status: "OPEN" },
+      await prisma.order.update({
+        where: { id: orderId },
         data: { status: "CANCELLED" },
       });
 
+      // If it was a BUY LIMIT order, refund the locked funds
+      if (order.side === "BUY" && order.type === "LIMIT") {
+        const refundAmount = order.price! * order.qty;
+        const cachedBalanceStr = await client.hGet(
+          "balances",
+          userId.toString()
+        );
+        const userBalance = cachedBalanceStr ? Number(cachedBalanceStr) : 0;
+        const newBalance = userBalance + refundAmount;
+
+        await client.hSet(
+          "balances",
+          userId.toString(),
+          newBalance.toString()
+        );
+        await prisma.balance.update({
+          where: { userId },
+          data: { usd: newBalance },
+        });
+
+        console.log(
+          `[index] Refunded $${refundAmount} to User ${userId} for cancelled LIMIT BUY Order #${orderId}. New balance: $${newBalance}`
+        );
+      }
+
       await client.lPush(
         responseQueue,
-        JSON.stringify(
-          result.count > 0
-            ? { correlationId, ok: true, data: { message: "Order cancelled" } }
-            : { correlationId, ok: false, error: "ORDER_NOT_FOUND_OR_ALREADY_FILLED" }
-        )
+        JSON.stringify({
+          correlationId,
+          ok: true,
+          data: { message: "Order cancelled" },
+        })
       );
 
     // ── get_depth ─────────────────────────────────────────────────────────────
