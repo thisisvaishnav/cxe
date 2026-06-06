@@ -102,6 +102,7 @@ export class PaperEngine {
         // Remove from book FIRST to prevent double-fills on rapid ticks
         this.orderBook.removeLimitOrder(order.id);
         // Fill at the limit price (not the tick price)
+        //
         await this.fillOrder(order, order.price!);
       }
     }
@@ -115,6 +116,40 @@ export class PaperEngine {
     );
 
     try {
+      // here we update the user that order ahve been filled but do not dedect the balance
+      // here how we goan do it
+      // calculate the transaction value / cost of order
+      // Fetch the user's current balance from Redis
+      //Determine the new balance based on side and type
+      // Update the balance in Redis
+      //Update the balance in the PostgreSQL database
+      //
+      const totalCost = order.qty * fillPrice;
+      const currentBalance = await this.redis.hGet(
+        "balances",
+        order.userId.toString(),
+      );
+      let usdBalance = Number(currentBalance ?? 0);
+      if (order.side === "BUY") {
+        if (order.type === "MARKET") {
+          usdBalance -= totalCost;
+        }
+      } else if (order.side === "SELL") {
+        usdBalance += totalCost;
+      }
+
+      await this.redis.hSet(
+        "balances",
+        order.userId.toString(),
+        usdBalance.toString(),
+      );
+      // 5. Update the balance in the PostgreSQL database
+      await this.prisma.balance.update({
+        where: { userId: order.userId },
+        data: { usd: usdBalance },
+      });
+
+      console.log("USD Balance:", usdBalance);
       // 1. Create a Fill record in the database
       const fill = await this.prisma.fill.create({
         data: {
@@ -155,10 +190,10 @@ export class PaperEngine {
         order.market,
         order.side,
         order.qty,
-        fillPrice
+        fillPrice,
       );
       console.log(
-        `[PaperEngine] Position updated for User #${order.userId} (${order.market}): qty=${posResult.position?.qty ?? 0}, avgCost=${posResult.position?.avgCost ?? 0}, side=${posResult.position?.side ?? "NONE"}. Realized PnL: $${posResult.realizedPnL}`
+        `[PaperEngine] Position updated for User #${order.userId} (${order.market}): qty=${posResult.position?.qty ?? 0}, avgCost=${posResult.position?.avgCost ?? 0}, side=${posResult.position?.side ?? "NONE"}. Realized PnL: $${posResult.realizedPnL}`,
       );
     } catch (err) {
       console.error(
