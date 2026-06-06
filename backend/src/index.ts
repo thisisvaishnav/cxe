@@ -25,7 +25,6 @@ app.get("/health", async (_req, res) => {
   res.json({ ok: true });
 });
 
-app.post();
 app.use(appRouter);
 
 app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {

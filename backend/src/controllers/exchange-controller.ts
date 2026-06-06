@@ -62,6 +62,16 @@ export async function getBalance(req: Request, res: Response): Promise<void> {
   });
 }
 
+export async function getPositions(req: Request, res: Response): Promise<void> {
+  const engineResponse = await sendToEngine("get_positions", {
+    userId: getUserId(req),
+  });
+
+  res.status(engineResponse.ok ? 200 : 400).json(engineResponse.ok ? engineResponse.data : {
+    error: engineResponse.error,
+  });
+}
+
 export async function getOrder(req: Request, res: Response): Promise<void> {
   const parsedParams = orderIdParamSchema.safeParse(req.params);
   if (!parsedParams.success) {
