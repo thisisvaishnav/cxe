@@ -29,16 +29,16 @@ export class OrderBook {
       let index = -1;
 
       for (let i = 0; i < orders.length; i++) {
-        if (String(orders[i].id) === idToFind) {
+        const order = orders[i];
+        if (order && String(order.id) === idToFind) {
           index = i;
           break;
         }
       }
 
       if (index !== -1) {
-        const removedOrder = orders[index];
-
-        orders.splice(index, 1);
+        // index is verified valid above, so splice returns exactly one element
+        const [removedOrder] = orders.splice(index, 1) as [Order];
 
         if (orders.length === 0) {
           this.pendingLimits.delete(symbol);
