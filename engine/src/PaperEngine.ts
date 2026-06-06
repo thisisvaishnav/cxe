@@ -2,25 +2,36 @@ import type { PrismaClient, Order } from "@prisma/client";
 import type { createClient } from "redis";
 import { OrderBook } from "./OrderBook";
 import { PriceOracle } from "./PriceOracle";
+import { PositionTracker, type Position } from "./PositionTracker";
 
 type RedisClient = ReturnType<typeof createClient>;
 
 export class PaperEngine {
   private orderBook: OrderBook;
+  private positionTracker: PositionTracker;
 
   constructor(
     private readonly redis: RedisClient,
     private readonly prisma: PrismaClient,
-    private readonly oracle: PriceOracle
+    private readonly oracle: PriceOracle,
   ) {
     this.orderBook = new OrderBook();
+    this.positionTracker = new PositionTracker();
 
     // TRIGGER 2: React to every Binance price tick
     this.oracle.on("tick", (symbol: string, price: number) => {
       this.onTick(symbol, price).catch((err) =>
-        console.error("[PaperEngine] onTick error:", err)
+        console.error("[PaperEngine] onTick error:", err),
       );
     });
+  }
+
+  getPositionTracker(): PositionTracker {
+    return this.positionTracker;
+  }
+
+  getPositions(userId: number): Position[] {
+    return this.positionTracker.getPositions(userId);
   }
 
   // ─── TRIGGER 1: Called from the brPop loop in index.ts ───────────────────
@@ -31,7 +42,7 @@ export class PaperEngine {
 
       if (currentPrice === undefined) {
         console.error(
-          `[PaperEngine] No price yet for ${order.market} — cannot fill MARKET order #${order.id}`
+          `[PaperEngine] No price yet for ${order.market} — cannot fill MARKET order #${order.id}`,
         );
         return;
       }
@@ -54,7 +65,7 @@ export class PaperEngine {
         // Rest in the order book and wait for the next tick
         this.orderBook.addLimitOrder(order);
         console.log(
-          `[PaperEngine] Resting LIMIT ${order.side} ${order.qty} ${order.market} @ $${order.price} (Order #${order.id})`
+          `[PaperEngine] Resting LIMIT ${order.side} ${order.qty} ${order.market} @ $${order.price} (Order #${order.id})`,
         );
       }
     }
@@ -76,7 +87,7 @@ export class PaperEngine {
     return this.orderBook.getOrdersForSymbol(symbol);
   }
 
-  // ─── TRIGGER 2: Fires on every Binance price tick ────────────────────────
+  //TRIGGER 2: Fires on every Binance price tick
 
   private async onTick(symbol: string, price: number): Promise<void> {
     const restingOrders = this.orderBook.getOrdersForSymbol(symbol);
@@ -96,11 +107,11 @@ export class PaperEngine {
     }
   }
 
-  // ─── Shared fill logic ───────────────────────────────────────────────────
+  //Shared fill logic
 
   private async fillOrder(order: Order, fillPrice: number): Promise<void> {
     console.log(
-      `[PaperEngine] FILL: ${order.side} ${order.qty} ${order.market} @ $${fillPrice} (Order #${order.id})`
+      `[PaperEngine] FILL: ${order.side} ${order.qty} ${order.market} @ $${fillPrice} (Order #${order.id})`,
     );
 
     try {
@@ -135,12 +146,24 @@ export class PaperEngine {
           qty: order.qty,
           price: fillPrice,
           filledAt: new Date().toISOString(),
-        })
+        }),
+      );
+
+      // 4. Update the Position Tracker and log the update
+      const posResult = this.positionTracker.addFill(
+        order.userId,
+        order.market,
+        order.side,
+        order.qty,
+        fillPrice
+      );
+      console.log(
+        `[PaperEngine] Position updated for User #${order.userId} (${order.market}): qty=${posResult.position?.qty ?? 0}, avgCost=${posResult.position?.avgCost ?? 0}, side=${posResult.position?.side ?? "NONE"}. Realized PnL: $${posResult.realizedPnL}`
       );
     } catch (err) {
       console.error(
         `[PaperEngine] fillOrder failed for Order #${order.id}:`,
-        err
+        err,
       );
     }
   }

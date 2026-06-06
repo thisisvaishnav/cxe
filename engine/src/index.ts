@@ -5,7 +5,9 @@ import { PaperEngine } from "./PaperEngine";
 
 // ─── Initialize clients ───────────────────────────────────────────────────────
 const prisma = new PrismaClient();
-const client = await createClient()
+const client = await createClient({
+  url: process.env.REDIS_URL || "redis://localhost:6379"
+})
   .on("error", (err) => console.log("Redis Client Error", err))
   .connect();
 
@@ -32,6 +34,30 @@ await hydrateBalancesToRedis();
 // ─── Boot PriceOracle + PaperEngine ──────────────────────────────────────────
 const oracle = new PriceOracle(client);
 const engine = new PaperEngine(client, prisma, oracle);
+
+async function hydratePositionsFromFills() {
+  console.log("Hydrating positions by replaying database fills...");
+  try {
+    const dbFills = await prisma.fill.findMany({
+      orderBy: { id: "asc" },
+    });
+    const tracker = engine.getPositionTracker();
+    for (const record of dbFills) {
+      tracker.addFill(
+        record.userId,
+        record.asset,
+        record.side,
+        record.qty,
+        record.price ?? 0
+      );
+    }
+    console.log(`Cached positions from ${dbFills.length} replayed fills.`);
+  } catch (error) {
+    console.error("Failed to hydrate positions:", error);
+  }
+}
+
+await hydratePositionsFromFills();
 
 oracle.on("tick", (symbol: string, price: number) => {
   console.log(`[tick] ${symbol} → $${price}`);
@@ -151,6 +177,16 @@ while (true) {
       await client.lPush(
         responseQueue,
         JSON.stringify({ correlationId, ok: true, data: { balance } })
+      );
+
+    // ── get_positions ─────────────────────────────────────────────────────────
+    } else if (commandType === "get_positions") {
+      const userId = Number(payload.userId);
+      const positions = engine.getPositions(userId);
+
+      await client.lPush(
+        responseQueue,
+        JSON.stringify({ correlationId, ok: true, data: { positions } })
       );
 
     // ── get_order ─────────────────────────────────────────────────────────────
