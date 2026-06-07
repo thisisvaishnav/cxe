@@ -77,9 +77,9 @@ export const OrderBook: React.FC<OrderBookProps> = ({
         return { price, size, total: bidTotal };
       });
 
-      // Keep standard sizes (up to 10 levels for vertical spacing)
-      setAsks(aggregatedAsks.slice(0, 10).reverse()); // Reverse asks so highest is at the top of the UI
-      setBids(aggregatedBids.slice(0, 10));
+      // Keep standard sizes (up to 8 levels for vertical spacing)
+      setAsks(aggregatedAsks.slice(0, 8).reverse()); // Reverse asks so highest is at the top of the UI
+      setBids(aggregatedBids.slice(0, 8));
     } catch (err: any) {
       console.error(err);
       setError("Failed to load depth book");
@@ -114,8 +114,8 @@ export const OrderBook: React.FC<OrderBookProps> = ({
 
   return (
     <div
-      className="nes-container"
-      style={{ height: "100%", minHeight: "420px" }}
+      className="nes-container orderbook-container"
+      style={{ height: "100%" }}
     >
       {/* Tabs */}
       <div
@@ -154,8 +154,8 @@ export const OrderBook: React.FC<OrderBookProps> = ({
               gridTemplateColumns: "1.2fr 1fr 1fr",
               fontWeight: "bold",
               fontFamily: "var(--font-press-start)",
-              fontSize: "8px",
-              paddingBottom: "8px",
+              fontSize: "var(--orderbook-header-font-size, 8px)",
+              paddingBottom: "var(--orderbook-header-padding, 8px)",
               borderBottom: "2px solid #000000",
               opacity: 0.7,
             }}
@@ -204,11 +204,13 @@ export const OrderBook: React.FC<OrderBookProps> = ({
               return (
                 <div
                   key={`ask-${idx}`}
+                  className="orderbook-row"
                   style={{
                     display: "grid",
                     gridTemplateColumns: "1.2fr 1fr 1fr",
-                    padding: "4px 0",
+                    padding: "var(--orderbook-row-padding, 4px) 0",
                     fontFamily: "var(--font-mono)",
+                    fontSize: "var(--orderbook-row-font-size, 14px)",
                     background: `linear-gradient(to left, rgba(211, 47, 47, 0.15) ${widthPct}%, transparent ${widthPct}%)`,
                     borderBottom: "1px solid rgba(0,0,0,0.05)",
                   }}
@@ -233,13 +235,13 @@ export const OrderBook: React.FC<OrderBookProps> = ({
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
-              padding: "10px 8px",
-              margin: "6px 0",
+              padding: "var(--orderbook-spread-padding, 10px 8px)",
+              margin: "var(--orderbook-spread-margin, 6px 0)",
               background: "#eeeeee",
               borderTop: "2px solid #000000",
               borderBottom: "2px solid #000000",
               fontFamily: "var(--font-press-start)",
-              fontSize: "9px",
+              fontSize: "var(--orderbook-spread-font-size, 9px)",
             }}
           >
             <span
@@ -278,11 +280,13 @@ export const OrderBook: React.FC<OrderBookProps> = ({
               return (
                 <div
                   key={`bid-${idx}`}
+                  className="orderbook-row"
                   style={{
                     display: "grid",
                     gridTemplateColumns: "1.2fr 1fr 1fr",
-                    padding: "4px 0",
+                    padding: "var(--orderbook-row-padding, 4px) 0",
                     fontFamily: "var(--font-mono)",
+                    fontSize: "var(--orderbook-row-font-size, 14px)",
                     background: `linear-gradient(to left, rgba(56, 142, 60, 0.15) ${widthPct}%, transparent ${widthPct}%)`,
                     borderBottom: "1px solid rgba(0,0,0,0.05)",
                   }}
@@ -319,8 +323,8 @@ export const OrderBook: React.FC<OrderBookProps> = ({
               gridTemplateColumns: "1.2fr 1fr 1fr",
               fontWeight: "bold",
               fontFamily: "var(--font-press-start)",
-              fontSize: "8px",
-              paddingBottom: "8px",
+              fontSize: "var(--orderbook-header-font-size, 8px)",
+              paddingBottom: "var(--orderbook-header-padding, 8px)",
               borderBottom: "2px solid #000000",
               opacity: 0.7,
             }}
@@ -404,11 +408,13 @@ export const OrderBook: React.FC<OrderBookProps> = ({
             ].map((trade, idx) => (
               <div
                 key={`trade-${idx}`}
+                className="orderbook-trade-row"
                 style={{
                   display: "grid",
                   gridTemplateColumns: "1.2fr 1fr 1fr",
-                  padding: "4px 0",
+                  padding: "var(--orderbook-row-padding, 4px) 0",
                   fontFamily: "var(--font-mono)",
+                  fontSize: "var(--orderbook-row-font-size, 14px)",
                 }}
               >
                 <span style={{ opacity: 0.6 }}>{trade.time}</span>

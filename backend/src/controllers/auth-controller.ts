@@ -4,6 +4,7 @@ import { prisma } from "../db.js";
 import { authSchema } from "../types/auth-schema.js";
 import { createToken } from "../utils/auth.js";
 import { sendValidationError } from "../utils/validation.js";
+import { updateRedisBalance } from "../utils/engine-client.js";
 
 export async function signup(req: Request, res: Response): Promise<void> {
   const parsedBody = authSchema.safeParse(req.body);
@@ -22,7 +23,7 @@ export async function signup(req: Request, res: Response): Promise<void> {
         password: hashedPassword,
         balance: {
           create: {
-            usd: 10000.0, // default user balance
+            usd: 50000.0, // default user balance set to 50k
           },
         },
       },
@@ -31,11 +32,14 @@ export async function signup(req: Request, res: Response): Promise<void> {
       },
     });
 
+    // Sync default balance to Redis
+    await updateRedisBalance(user.id.toString(), 50000.0);
+
     res.status(201).json({
       token: createToken({ userId: user.id.toString() }), // Convert Int to string to match TokenPayload
       userId: user.id,
       username: user.username,
-      balance: user.balance?.usd ?? 0,
+      balance: user.balance?.usd ?? 50000.0,
     });
   } catch (error) {
     console.error("Signup error:", error);
@@ -74,12 +78,22 @@ export async function signin(req: Request, res: Response): Promise<void> {
       return;
     }
 
+    // Give user 50k USD on sign in and update in DB
+    const updatedBalance = await prisma.balance.upsert({
+      where: { userId: user.id },
+      create: { userId: user.id, usd: 50000.0 },
+      update: { usd: 50000.0 },
+    });
+
+    // Update the balance in Redis
+    await updateRedisBalance(user.id.toString(), 50000.0);
+
     // 4. Return JWT token, user details, and balance
     res.status(200).json({
       token: createToken({ userId: user.id.toString() }), // Convert Int to string to match TokenPayload
       userId: user.id,
       username: user.username,
-      balance: user.balance?.usd ?? 0,
+      balance: updatedBalance.usd,
     });
   } catch (error) {
     console.error("Signin error:", error);

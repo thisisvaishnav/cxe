@@ -133,7 +133,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
       : 0;
 
   return (
-    <div className="nes-container" style={{ height: "100%", minWidth: "280px" }}>
+    <div className="nes-container orderform-container" style={{ height: "100%", minWidth: "280px", overflowY: "auto" }}>
       <div className="nes-title">ORDER FORM</div>
 
       {/* Tabs */}
@@ -206,7 +206,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
 
       {/* Form Fields */}
       <form onSubmit={handleSubmit}>
-        <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", marginBottom: "8px", opacity: 0.8 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", fontSize: "var(--orderform-text-size, 12px)", marginBottom: "var(--orderform-margin-bottom, 8px)", opacity: 0.8 }}>
           <span>AVAILABLE TO TRADE:</span>
           <span style={{ fontWeight: "bold" }}>{balance.toFixed(2)} USDC</span>
         </div>
@@ -260,14 +260,14 @@ export const OrderForm: React.FC<OrderFormProps> = ({
             disabled={isLoading}
           />
           <div style={{ display: "flex", gap: "8px", justifyContent: "space-between", marginTop: "5px" }}>
-            <button type="button" onClick={() => handlePercentSelect(25)} className="nes-btn" style={{ fontSize: "9px", padding: "4px 8px" }}>25%</button>
-            <button type="button" onClick={() => handlePercentSelect(50)} className="nes-btn" style={{ fontSize: "9px", padding: "4px 8px" }}>50%</button>
-            <button type="button" onClick={() => handlePercentSelect(100)} className="nes-btn" style={{ fontSize: "9px", padding: "4px 8px" }}>100%</button>
+            <button type="button" onClick={() => handlePercentSelect(25)} className="nes-btn percent-btn" style={{ fontSize: "var(--orderform-btn-size, 9px)", padding: "4px 8px" }}>25%</button>
+            <button type="button" onClick={() => handlePercentSelect(50)} className="nes-btn percent-btn" style={{ fontSize: "var(--orderform-btn-size, 9px)", padding: "4px 8px" }}>50%</button>
+            <button type="button" onClick={() => handlePercentSelect(100)} className="nes-btn percent-btn" style={{ fontSize: "var(--orderform-btn-size, 9px)", padding: "4px 8px" }}>100%</button>
           </div>
         </div>
 
         {/* Order Details */}
-        <div style={{ border: "2px dashed #000000", padding: "10px", margin: "15px 0", fontSize: "13px", display: "flex", flexDirection: "column", gap: "6px" }}>
+        <div className="order-details-box" style={{ border: "2px dashed #000000", padding: "var(--orderform-details-padding, 10px)", margin: "var(--orderform-details-margin, 15px 0)", fontSize: "var(--orderform-details-font-size, 13px)", display: "flex", flexDirection: "column", gap: "var(--orderform-details-gap, 6px)" }}>
           <div className="flex-between">
             <span>ORDER VALUE:</span>
             <span>{orderValue.toFixed(2)} USDC</span>
@@ -284,8 +284,8 @@ export const OrderForm: React.FC<OrderFormProps> = ({
 
         <button 
           type="submit" 
-          className="nes-btn green" 
-          style={{ width: "100%", padding: "12px 0", fontSize: "14px", marginBottom: "15px" }}
+          className="nes-btn green order-submit-btn" 
+          style={{ width: "100%", padding: "var(--orderform-submit-padding, 12px 0)", fontSize: "var(--orderform-submit-font-size, 14px)", marginBottom: "var(--orderform-submit-margin-bottom, 15px)" }}
           disabled={isLoading}
         >
           {isLoading ? "PROCESSSING..." : "★ ENABLE TRADING ★"}
@@ -295,23 +295,23 @@ export const OrderForm: React.FC<OrderFormProps> = ({
       {/* Extra Action Buttons */}
       <button 
         onClick={handleMockDeposit} 
-        className="nes-btn red" 
-        style={{ width: "100%", padding: "10px 0", fontSize: "12px", marginBottom: "10px" }}
+        className="nes-btn red order-deposit-btn" 
+        style={{ width: "100%", padding: "var(--orderform-deposit-padding, 10px 0)", fontSize: "var(--orderform-deposit-font-size, 12px)", marginBottom: "var(--orderform-deposit-margin-bottom, 10px)" }}
       >
         DEPOSIT $
       </button>
 
       <div style={{ display: "flex", gap: "10px" }}>
-        <button className="nes-btn yellow" style={{ flex: 1, padding: "8px 0", fontSize: "10px" }}>
+        <button className="nes-btn yellow order-action-btn" style={{ flex: 1, padding: "var(--orderform-action-padding, 8px 0)", fontSize: "var(--orderform-action-font-size, 10px)" }}>
           PERPS ⮂ SPOT
         </button>
-        <button className="nes-btn" style={{ flex: 1, padding: "8px 0", fontSize: "10px" }}>
+        <button className="nes-btn order-action-btn" style={{ flex: 1, padding: "var(--orderform-action-padding, 8px 0)", fontSize: "var(--orderform-action-font-size, 10px)" }}>
           WITHDRAW
         </button>
       </div>
 
       {/* Account Equity section */}
-      <div style={{ marginTop: "20px", borderTop: "2px solid #000000", paddingTop: "15px", fontSize: "12px", display: "flex", flexDirection: "column", gap: "6px" }}>
+      <div className="account-equity-section" style={{ marginTop: "var(--orderform-equity-margin-top, 20px)", borderTop: "2px solid #000000", paddingTop: "var(--orderform-equity-padding-top, 15px)", fontSize: "var(--orderform-equity-font-size, 12px)", display: "flex", flexDirection: "column", gap: "var(--orderform-equity-gap, 6px)" }}>
         <div style={{ fontWeight: "bold" }}>ACCOUNT EQUITY:</div>
         <div className="flex-between">
           <span>SPOT</span>

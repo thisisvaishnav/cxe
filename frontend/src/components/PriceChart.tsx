@@ -278,7 +278,7 @@ export const PriceChart: React.FC<PriceChartProps> = ({
         style={{
           width: "100%",
           flex: 1,
-          minHeight: "350px",
+          minHeight: "180px",
           background: "#ffffff",
           border: "2px solid #000",
         }}

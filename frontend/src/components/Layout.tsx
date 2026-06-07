@@ -7,16 +7,35 @@ interface HeaderProps {
   username: string | null;
   onLogout: () => void;
   wsStatus: "disconnected" | "connecting" | "connected" | "error";
+  balance: number;
 }
 
-export const Header: React.FC<HeaderProps> = ({ username, onLogout, wsStatus }) => {
+export const Header: React.FC<HeaderProps> = ({ username, onLogout, wsStatus, balance }) => {
   return (
     <header className="pixel-corners" style={{ borderBottom: "3px solid #000000" }}>
+      {/* Sign-in Bonus Banner */}
+      {username && (
+        <div 
+          style={{ 
+            background: "var(--mario-yellow)", 
+            color: "#000000", 
+            padding: "var(--header-banner-padding, 8px 20px)", 
+            textAlign: "center", 
+            fontFamily: "var(--font-press-start)", 
+            fontSize: "var(--header-banner-font-size, 10px)", 
+            borderBottom: "2px solid #000000",
+            letterSpacing: "1px",
+            boxShadow: "inset 0 -2px 0 rgba(0,0,0,0.1)"
+          }}
+        >
+          ★ 1-UP! SIGN-IN BONUS: $50,000.00 USD HAS BEEN CREDITED TO YOUR BALANCE ★
+        </div>
+      )}
       {/* Top Red Bar */}
       <div 
         style={{ 
           background: "var(--mario-red)", 
-          padding: "10px 20px", 
+          padding: "var(--header-padding, 10px 20px)", 
           display: "flex", 
           justifyContent: "space-between", 
           alignItems: "center",
@@ -30,8 +49,8 @@ export const Header: React.FC<HeaderProps> = ({ username, onLogout, wsStatus }) 
               background: "#ffffff", 
               color: "var(--mario-red)", 
               fontFamily: "var(--font-press-start)", 
-              fontSize: "14px", 
-              padding: "6px 8px", 
+              fontSize: "var(--header-logo-font-size, 14px)", 
+              padding: "var(--header-logo-padding, 6px 8px)", 
               border: "2px solid #000000",
               fontWeight: "bold",
               boxShadow: "2px 2px 0px #000000"
@@ -42,7 +61,7 @@ export const Header: React.FC<HeaderProps> = ({ username, onLogout, wsStatus }) 
           <span 
             style={{ 
               fontFamily: "var(--font-press-start)", 
-              fontSize: "18px", 
+              fontSize: "var(--header-title-font-size, 18px)", 
               color: "var(--mario-yellow)",
               textShadow: "2px 2px 0px #000000",
               letterSpacing: "1px"
@@ -78,8 +97,8 @@ export const Header: React.FC<HeaderProps> = ({ username, onLogout, wsStatus }) 
               style={{ 
                 background: "var(--mario-green)", 
                 border: "2px solid #000000", 
-                padding: "6px 12px", 
-                fontSize: "12px", 
+                padding: "var(--header-box-padding, 6px 12px)", 
+                fontSize: "var(--header-box-font-size, 12px)", 
                 fontFamily: "var(--font-press-start)", 
                 color: "#ffffff",
                 boxShadow: "2px 2px 0px #000000",
@@ -98,6 +117,25 @@ export const Header: React.FC<HeaderProps> = ({ username, onLogout, wsStatus }) 
                 }}
               />
               {username.toUpperCase()}
+            </div>
+          )}
+
+          {username && (
+            <div 
+              style={{ 
+                background: "var(--mario-yellow)", 
+                border: "2px solid #000000", 
+                padding: "var(--header-box-padding, 6px 12px)", 
+                fontSize: "var(--header-box-font-size, 12px)", 
+                fontFamily: "var(--font-press-start)", 
+                color: "#000000",
+                boxShadow: "2px 2px 0px #000000",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px"
+              }}
+            >
+              🪙 ${balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD
             </div>
           )}
 

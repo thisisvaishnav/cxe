@@ -18,7 +18,7 @@ function App() {
   const [username, setUsername] = useState<string | null>(
     localStorage.getItem("cxe_username"),
   );
-  const [balance, setBalance] = useState<number>(10000);
+  const [balance, setBalance] = useState<number>(50000);
   const [positions, setPositions] = useState<Position[]>([]);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
@@ -107,10 +107,11 @@ function App() {
 
   return (
     <div
+      className="app-container"
       style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}
     >
       {/* Top Header & Ticker */}
-      <Header username={username} onLogout={handleLogout} wsStatus={wsStatus} />
+      <Header username={username} onLogout={handleLogout} wsStatus={wsStatus} balance={balance} />
 
       {/* Main trading deck workspace grid */}
       <main
@@ -118,7 +119,7 @@ function App() {
           flex: 1,
           padding: "20px",
           display: "grid",
-          gridTemplateColumns: "2fr 1fr 1fr",
+          gridTemplateColumns: "2.2fr 0.8fr 1fr",
           gap: "20px",
           background: "var(--bg-canvas)",
         }}
@@ -158,6 +159,22 @@ function App() {
 
       {/* Simple responsive layout styles */}
       <style>{`
+        @media (min-width: 1025px) {
+          .app-container {
+            height: 100vh !important;
+            overflow: hidden !important;
+          }
+          .trading-dashboard-layout {
+            flex: 1 !important;
+            grid-template-columns: 2.2fr 0.8fr 1fr !important;
+            grid-template-rows: 4fr 1fr !important;
+            overflow: hidden !important;
+            height: 0;
+          }
+          .trading-dashboard-layout > * {
+            min-height: 0 !important;
+          }
+        }
         @media (max-width: 1024px) {
           .trading-dashboard-layout {
             grid-template-columns: 1fr !important;

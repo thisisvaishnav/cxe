@@ -125,7 +125,14 @@ while (true) {
           "balances",
           userId.toString()
         );
-        const userBalance = cachedBalanceStr ? Number(cachedBalanceStr) : 0;
+        let userBalance = cachedBalanceStr ? Number(cachedBalanceStr) : null;
+        if (userBalance === null) {
+          const dbBalance = await prisma.balance.findUnique({
+            where: { userId }
+          });
+          userBalance = dbBalance ? dbBalance.usd : 0;
+          await client.hSet("balances", userId.toString(), userBalance.toString());
+        }
 
         if (userBalance < totalCost) {
           console.log(
@@ -183,7 +190,14 @@ while (true) {
     } else if (commandType === "get_user_balance") {
       const userId = Number(payload.userId);
       const cachedBalanceStr = await client.hGet("balances", userId.toString());
-      const balance = cachedBalanceStr ? Number(cachedBalanceStr) : 0;
+      let balance = cachedBalanceStr ? Number(cachedBalanceStr) : null;
+      if (balance === null) {
+        const dbBalance = await prisma.balance.findUnique({
+          where: { userId }
+        });
+        balance = dbBalance ? dbBalance.usd : 0;
+        await client.hSet("balances", userId.toString(), balance.toString());
+      }
 
       await client.lPush(
         responseQueue,
