@@ -118,7 +118,7 @@ export const PositionsTable: React.FC<PositionsTableProps> = ({
   };
 
   return (
-    <div className="nes-container" style={{ flex: 1, minHeight: "300px" }}>
+    <div className="nes-container positions-container" style={{ flex: 1 }}>
       {/* Tabs */}
       <div className="nes-tabs-header" style={{ margin: "-24px -24px 15px -24px" }}>
         <div 

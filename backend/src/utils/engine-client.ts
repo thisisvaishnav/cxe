@@ -26,6 +26,10 @@ export async function pingRedis(): Promise<string> {
   return publisher.ping();
 }
 
+export async function updateRedisBalance(userId: string, amount: number): Promise<void> {
+  await publisher.hSet("balances", userId, amount.toString());
+}
+
 export async function sendToEngine(
   type: EngineCommandType,
   payload: Record<string, unknown>,

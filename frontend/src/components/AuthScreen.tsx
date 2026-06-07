@@ -82,7 +82,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess }) => {
             zIndex: 10,
           }}
         >
-          LET'S-A GO! JOIN THE PARTY ★ START YOUR 10,000 USD PAPER BALANCE NOW!
+          LET'S-A GO! JOIN THE PARTY ★ START YOUR 50,000 USD PAPER BALANCE NOW!
           {/* Arrow */}
           <div
             style={{

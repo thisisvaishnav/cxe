@@ -29,6 +29,49 @@
   --border-retro: 3px solid #000000;
   --shadow-retro: 4px 4px 0px #000000;
   --shadow-retro-small: 2px 2px 0px #000000;
+
+  /* Sizing custom variables - Header */
+  --header-banner-padding: 8px 20px;
+  --header-banner-font-size: 10px;
+  --header-padding: 10px 20px;
+  --header-logo-font-size: 14px;
+  --header-logo-padding: 6px 8px;
+  --header-title-font-size: 18px;
+  --header-box-padding: 6px 12px;
+  --header-box-font-size: 12px;
+
+  /* Sizing custom variables - Order Book */
+  --orderbook-row-padding: 4px;
+  --orderbook-row-font-size: 14px;
+  --orderbook-spread-padding: 10px 8px;
+  --orderbook-spread-margin: 6px 0;
+  --orderbook-spread-font-size: 9px;
+  --orderbook-header-font-size: 8px;
+  --orderbook-header-padding: 8px;
+
+  /* Sizing custom variables - Order Form */
+  --orderform-text-size: 12px;
+  --orderform-margin-bottom: 8px;
+  --orderform-btn-size: 9px;
+  --orderform-details-padding: 10px;
+  --orderform-details-margin: 15px 0;
+  --orderform-details-font-size: 13px;
+  --orderform-details-gap: 6px;
+  --orderform-submit-padding: 12px 0;
+  --orderform-submit-font-size: 14px;
+  --orderform-submit-margin-bottom: 15px;
+  --orderform-deposit-padding: 10px 0;
+  --orderform-deposit-font-size: 12px;
+  --orderform-deposit-margin-bottom: 10px;
+  --orderform-action-padding: 8px 0;
+  --orderform-action-font-size: 10px;
+  --orderform-equity-margin-top: 20px;
+  --orderform-equity-padding-top: 15px;
+  --orderform-equity-font-size: 12px;
+  --orderform-equity-gap: 6px;
+
+  /* Sizing custom variables - Positions */
+  --positions-min-height: 300px;
 }
 
 * {
@@ -361,4 +404,95 @@ h1, h2, h3, h4, h5, h6 {
 @keyframes ticker {
   0% { transform: translate3d(0, 0, 0); }
   100% { transform: translate3d(-100%, 0, 0); }
+}
+
+.positions-container {
+  min-height: var(--positions-min-height);
+}
+
+.orderbook-container {
+  min-height: 420px;
+}
+
+@media (max-height: 900px) and (min-width: 1025px) {
+  :root {
+    /* Scale down Header */
+    --header-banner-padding: 4px 15px;
+    --header-banner-font-size: 8px;
+    --header-padding: 6px 15px;
+    --header-logo-font-size: 11px;
+    --header-logo-padding: 4px 6px;
+    --header-title-font-size: 13px;
+    --header-box-padding: 4px 8px;
+    --header-box-font-size: 10px;
+
+    /* Scale down Order Book */
+    --orderbook-row-padding: 2px;
+    --orderbook-row-font-size: 12px;
+    --orderbook-spread-padding: 6px 8px;
+    --orderbook-spread-margin: 4px 0;
+    --orderbook-spread-font-size: 8px;
+    --orderbook-header-font-size: 7px;
+    --orderbook-header-padding: 4px;
+
+    /* Scale down Order Form */
+    --orderform-text-size: 11px;
+    --orderform-margin-bottom: 4px;
+    --orderform-btn-size: 8px;
+    --orderform-details-padding: 6px;
+    --orderform-details-margin: 8px 0;
+    --orderform-details-font-size: 11px;
+    --orderform-details-gap: 4px;
+    --orderform-submit-padding: 6px 0;
+    --orderform-submit-font-size: 12px;
+    --orderform-submit-margin-bottom: 8px;
+    --orderform-deposit-padding: 6px 0;
+    --orderform-deposit-font-size: 10px;
+    --orderform-deposit-margin-bottom: 6px;
+    --orderform-action-padding: 5px 0;
+    --orderform-action-font-size: 9px;
+    --orderform-equity-margin-top: 10px;
+    --orderform-equity-padding-top: 8px;
+    --orderform-equity-font-size: 11px;
+    --orderform-equity-gap: 4px;
+
+    /* Scale down Positions */
+    --positions-min-height: 180px;
+  }
+
+  .nes-container {
+    padding: 1rem !important;
+  }
+  .nes-container .nes-tabs-header {
+    margin: -16px -16px 10px -16px !important;
+  }
+  .nes-field {
+    margin-bottom: 0.5rem !important;
+  }
+  .nes-label {
+    margin-bottom: 3px !important;
+    font-size: 9px !important;
+  }
+  .nes-input, .nes-select {
+    font-size: 14px !important;
+    padding: 4px 8px !important;
+  }
+  .nes-slider-container {
+    margin: 0.4rem 0 !important;
+  }
+  .nes-slider {
+    margin: 4px 0 !important;
+  }
+  .positions-container .retro-table th {
+    padding: 6px !important;
+    font-size: 8px !important;
+  }
+  .positions-container .retro-table td {
+    padding: 6px !important;
+    font-size: 12px !important;
+  }
+  .orderbook-container {
+    min-height: 200px !important;
+    overflow: hidden !important;
+  }
 }
