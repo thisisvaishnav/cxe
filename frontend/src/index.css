@@ -1,0 +1,364 @@
+/* index.css - SuperCoin Retro NES Styling System */
+
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&family=VT323&display=swap');
+
+:root {
+  /* NES / Mario Color Palette */
+  --bg-canvas: #f4eedb; /* Retro cream/beige */
+  --bg-card: #ffffff;
+  --bg-dark: #121212;
+  --color-border: #000000;
+  
+  --mario-red: #d32f2f;
+  --mario-red-dark: #9e1c1c;
+  --mario-yellow: #fbc02d;
+  --mario-yellow-dark: #c49000;
+  --mario-green: #388e3c;
+  --mario-green-dark: #205c24;
+  --mario-blue: #1976d2;
+  --mario-sky-blue: #5c94fc; /* NES Sky Blue */
+  --mario-orange: #f57c00;
+
+  /* Fonts */
+  --font-press-start: 'Press Start 2P', monospace;
+  --font-mono: 'Share Tech Mono', monospace;
+  --font-vt: 'VT323', monospace;
+
+  /* Border and shadows */
+  --border-width: 3px;
+  --border-retro: 3px solid #000000;
+  --shadow-retro: 4px 4px 0px #000000;
+  --shadow-retro-small: 2px 2px 0px #000000;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-canvas);
+  color: #000000;
+  font-family: var(--font-mono);
+  font-size: 16px;
+  image-rendering: pixelated;
+  overflow-x: hidden;
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-press-start);
+  text-transform: uppercase;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-canvas);
+  border-left: var(--border-retro);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--color-border);
+  border: 3px solid var(--bg-canvas);
+}
+
+/* NES Style Layout Containers */
+.nes-container {
+  background: var(--bg-card);
+  border: var(--border-retro);
+  box-shadow: var(--shadow-retro);
+  padding: 1.5rem;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.nes-container.dark {
+  background: var(--bg-dark);
+  color: #ffffff;
+}
+
+/* Titles for Containers */
+.nes-title {
+  position: absolute;
+  top: -12px;
+  left: 16px;
+  background: var(--bg-card);
+  padding: 0 8px;
+  font-family: var(--font-press-start);
+  font-size: 10px;
+  border: var(--border-retro);
+  box-shadow: var(--shadow-retro-small);
+}
+
+.nes-container.dark .nes-title {
+  background: var(--bg-dark);
+  color: #ffffff;
+}
+
+/* NES Buttons */
+.nes-btn {
+  font-family: var(--font-press-start);
+  font-size: 12px;
+  padding: 8px 16px;
+  border: var(--border-retro);
+  background: #ffffff;
+  color: #000000;
+  box-shadow: var(--shadow-retro);
+  cursor: pointer;
+  outline: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.1s, box-shadow 0.1s;
+  user-select: none;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+.nes-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: var(--shadow-retro-small);
+}
+
+.nes-btn.red {
+  background: var(--mario-red);
+  color: #ffffff;
+}
+.nes-btn.red:hover {
+  background: var(--mario-red-dark);
+}
+
+.nes-btn.green {
+  background: var(--mario-green);
+  color: #ffffff;
+}
+.nes-btn.green:hover {
+  background: var(--mario-green-dark);
+}
+
+.nes-btn.yellow {
+  background: var(--mario-yellow);
+  color: #000000;
+}
+.nes-btn.yellow:hover {
+  background: var(--mario-yellow-dark);
+}
+
+.nes-btn.disabled {
+  background: #cccccc;
+  color: #666666;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none !important;
+}
+
+/* Form Inputs */
+.nes-field {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+}
+
+.nes-label {
+  font-family: var(--font-press-start);
+  font-size: 10px;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
+.nes-input, .nes-select {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  padding: 8px 12px;
+  border: var(--border-retro);
+  outline: none;
+  background: #ffffff;
+  width: 100%;
+}
+
+.nes-input:focus, .nes-select:focus {
+  border-color: var(--mario-blue);
+  background: #fbfbfb;
+}
+
+/* Custom Slider styling */
+.nes-slider-container {
+  margin: 1rem 0;
+}
+
+.nes-slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 8px;
+  background: #000000;
+  outline: none;
+  border-radius: 0;
+  margin: 10px 0;
+}
+
+.nes-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  background: var(--mario-red);
+  border: 3px solid #000000;
+  cursor: pointer;
+}
+
+.nes-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  background: var(--mario-red);
+  border: 3px solid #000000;
+  cursor: pointer;
+}
+
+/* Tabs System */
+.nes-tabs-header {
+  display: flex;
+  border-bottom: var(--border-retro);
+  margin-bottom: 1rem;
+  background: #e0d9c5;
+}
+
+.nes-tab {
+  font-family: var(--font-press-start);
+  font-size: 10px;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-right: var(--border-retro);
+  border-top: var(--border-retro);
+  margin-bottom: -3px;
+  background: #c5beaa;
+  transition: background 0.1s;
+  text-transform: uppercase;
+}
+
+.nes-tab:hover {
+  background: #d4ccb6;
+}
+
+.nes-tab.active {
+  background: var(--bg-card);
+  border-bottom: 3px solid var(--bg-card);
+  position: relative;
+  z-index: 1;
+}
+
+.nes-tab.active.dark {
+  background: var(--bg-dark);
+  border-bottom: 3px solid var(--bg-dark);
+  color: #ffffff;
+}
+
+/* Flash Animations for updates */
+@keyframes flash-green {
+  0% { background-color: rgba(56, 142, 60, 0.4); }
+  100% { background-color: transparent; }
+}
+
+@keyframes flash-red {
+  0% { background-color: rgba(211, 47, 47, 0.4); }
+  100% { background-color: transparent; }
+}
+
+.flash-up {
+  animation: flash-green 0.8s ease-out;
+}
+
+.flash-down {
+  animation: flash-red 0.8s ease-out;
+}
+
+/* Retro Grid Table */
+.retro-table-container {
+  overflow-x: auto;
+  border: var(--border-retro);
+}
+
+.retro-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-size: 16px;
+  text-align: left;
+}
+
+.retro-table th {
+  background: #000000;
+  color: #ffffff;
+  padding: 10px;
+  font-family: var(--font-press-start);
+  font-size: 9px;
+  text-transform: uppercase;
+  border-bottom: var(--border-retro);
+}
+
+.retro-table td {
+  padding: 10px;
+  border-bottom: 1px solid #cccccc;
+}
+
+.retro-table tr:last-child td {
+  border-bottom: none;
+}
+
+.retro-table tr:hover td {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* Typography styles */
+.text-green {
+  color: var(--mario-green);
+}
+.text-red {
+  color: var(--mario-red);
+}
+.text-yellow {
+  color: var(--mario-yellow);
+}
+.text-blue {
+  color: var(--mario-blue);
+}
+
+/* Custom utilities */
+.flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pixel-corners {
+  position: relative;
+}
+
+/* Marquee / Scrolling Ticker banner */
+.retro-ticker {
+  background: var(--mario-yellow);
+  border-bottom: var(--border-retro);
+  padding: 6px 0;
+  overflow: hidden;
+  position: relative;
+  white-space: nowrap;
+  font-family: var(--font-press-start);
+  font-size: 11px;
+}
+
+.retro-ticker-content {
+  display: inline-block;
+  padding-left: 100%;
+  animation: ticker 25s linear infinite;
+}
+
+@keyframes ticker {
+  0% { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-100%, 0, 0); }
+}

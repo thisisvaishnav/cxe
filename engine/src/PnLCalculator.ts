@@ -63,8 +63,8 @@ export class PnLCalculator {
 
       snapshots.push(snapshot);
 
-      // Write to Redis: "pnl:{userId}:{symbol}" → JSON string
-      pipeline.set(`pnl:${userId}:${symbol}`, JSON.stringify(snapshot));
+      // Write to Redis: "pnl:{userId}:{symbol}" → JSON string (with 5-minute TTL)
+      pipeline.set(`pnl:${userId}:${symbol}`, JSON.stringify(snapshot), { EX: 300 });
     }
 
     // Flush all Redis SET commands in one round-trip

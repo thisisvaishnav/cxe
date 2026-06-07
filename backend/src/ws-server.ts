@@ -106,6 +106,27 @@ export async function attachWebSocketServer(httpServer: Server): Promise<void> {
 
   console.log("[WS] Subscribed to Redis pub/sub channel: pnl-updates");
 
+  // Subscribe to the "price-updates" pub/sub channel published by PriceOracle
+  await redisSub.subscribe("price-updates", (message) => {
+    let tick: { symbol: string; price: number };
+    try {
+      tick = JSON.parse(message) as { symbol: string; price: number };
+    } catch {
+      console.warn("[WS] Bad price-updates message:", message);
+      return;
+    }
+
+    const payload = JSON.stringify({ type: "price_update", data: tick });
+
+    for (const ws of Array.from(wss.clients as Set<AuthenticatedSocket>)) {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(payload);
+      }
+    }
+  });
+
+  console.log("[WS] Subscribed to Redis pub/sub channel: price-updates");
+
   // 4. Handle new WebSocket connections
   wss.on("connection", (ws: AuthenticatedSocket, _req: IncomingMessage) => {
     ws.isAlive = true;
@@ -132,16 +153,17 @@ export async function attachWebSocketServer(httpServer: Server): Promise<void> {
 
         try {
           const decoded = jwt.verify(msg.token, env.jwtSecret) as {
-            userId: number;
+            userId: string | number;
           };
-          ws.userId = decoded.userId;
-          registerSocket(decoded.userId, ws);
+          const numericUserId = Number(decoded.userId);
+          ws.userId = numericUserId;
+          registerSocket(numericUserId, ws);
           send(ws, {
             type: "auth_ok",
-            userId: decoded.userId,
+            userId: numericUserId,
             message: "Authenticated — you will now receive PnL updates",
           });
-          console.log(`[WS] User ${decoded.userId} authenticated`);
+          console.log(`[WS] User ${numericUserId} authenticated`);
         } catch {
           send(ws, { type: "error", message: "Invalid or expired token" });
           ws.close(4001, "Unauthorized");

@@ -83,8 +83,93 @@ export class PaperEngine {
 
   // ─── Get resting orders for a symbol (for depth view) ────────────────────
 
-  getDepth(symbol: string): Order[] {
-    return this.orderBook.getOrdersForSymbol(symbol);
+  async getDepth(symbol: string): Promise<Order[]> {
+    const localOrders = this.orderBook.getOrdersForSymbol(symbol);
+
+    try {
+      const querySymbol = symbol.toUpperCase();
+      const res = await fetch(`https://api.binance.com/api/v3/depth?symbol=${querySymbol}&limit=50`);
+      
+      if (!res.ok) {
+        throw new Error(`Binance depth HTTP error: ${res.status} ${res.statusText}`);
+      }
+
+      const data = (await res.json()) as {
+        bids: [string, string][];
+        asks: [string, string][];
+      };
+
+      const binanceBids: Order[] = (data.bids || []).map(([priceStr, qtyStr], index) => ({
+        id: -10000 - index,
+        userId: -1,
+        market: symbol,
+        price: parseFloat(priceStr),
+        qty: parseFloat(qtyStr),
+        type: "LIMIT" as const,
+        side: "BUY" as const,
+        filledQty: 0,
+        status: "OPEN" as const,
+        createdAt: new Date(),
+      }));
+
+      const binanceAsks: Order[] = (data.asks || []).map(([priceStr, qtyStr], index) => ({
+        id: -20000 - index,
+        userId: -1,
+        market: symbol,
+        price: parseFloat(priceStr),
+        qty: parseFloat(qtyStr),
+        type: "LIMIT" as const,
+        side: "SELL" as const,
+        filledQty: 0,
+        status: "OPEN" as const,
+        createdAt: new Date(),
+      }));
+
+      return [...localOrders, ...binanceBids, ...binanceAsks];
+    } catch (err) {
+      console.warn(`[PaperEngine] Failed to fetch Binance depth for ${symbol}:`, err);
+      
+      // Fallback to generating realistic order book depth based on PriceOracle's current price
+      const currentPrice = this.oracle.getPrice(symbol) || 60000;
+      
+      const fallbackBids: Order[] = Array.from({ length: 50 }, (_, index) => {
+        const step = 0.5 + Math.random() * 0.5;
+        const price = currentPrice - 0.1 - index * step;
+        const qty = 0.01 + Math.random() * 1.5;
+        return {
+          id: -10000 - index,
+          userId: -1,
+          market: symbol,
+          price,
+          qty,
+          type: "LIMIT" as const,
+          side: "BUY" as const,
+          filledQty: 0,
+          status: "OPEN" as const,
+          createdAt: new Date(),
+        };
+      });
+
+      const fallbackAsks: Order[] = Array.from({ length: 50 }, (_, index) => {
+        const step = 0.5 + Math.random() * 0.5;
+        const price = currentPrice + 0.1 + index * step;
+        const qty = 0.01 + Math.random() * 1.5;
+        return {
+          id: -20000 - index,
+          userId: -1,
+          market: symbol,
+          price,
+          qty,
+          type: "LIMIT" as const,
+          side: "SELL" as const,
+          filledQty: 0,
+          status: "OPEN" as const,
+          createdAt: new Date(),
+        };
+      });
+
+      return [...localOrders, ...fallbackBids, ...fallbackAsks];
+    }
   }
 
   //TRIGGER 2: Fires on every Binance price tick
@@ -169,7 +254,7 @@ export class PaperEngine {
         data: { status: "FILLED", filledQty: order.qty },
       });
 
-      // 3. Push a fill event to the fills queue for downstream consumers
+      // 3. Push a fill event to the fills queue for downstream consumers (capped at 100 items)
       await this.redis.lPush(
         "fills-to-persist",
         JSON.stringify({
@@ -183,6 +268,7 @@ export class PaperEngine {
           filledAt: new Date().toISOString(),
         }),
       );
+      await this.redis.lTrim("fills-to-persist", 0, 99);
 
       // 4. Update the Position Tracker and log the update
       const posResult = this.positionTracker.addFill(
@@ -195,6 +281,12 @@ export class PaperEngine {
       console.log(
         `[PaperEngine] Position updated for User #${order.userId} (${order.market}): qty=${posResult.position?.qty ?? 0}, avgCost=${posResult.position?.avgCost ?? 0}, side=${posResult.position?.side ?? "NONE"}. Realized PnL: $${posResult.realizedPnL}`,
       );
+
+      // If the position was fully closed, delete the PnL cache key in Redis
+      if (posResult.position === null) {
+        await this.redis.del(`pnl:${order.userId}:${order.market}`);
+        console.log(`[PaperEngine] Deleted PnL cache key for User #${order.userId} (${order.market}) as position is closed.`);
+      }
     } catch (err) {
       console.error(
         `[PaperEngine] fillOrder failed for Order #${order.id}:`,

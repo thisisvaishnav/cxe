@@ -286,7 +286,7 @@ while (true) {
     // ── get_depth ─────────────────────────────────────────────────────────────
     } else if (commandType === "get_depth") {
       const symbol = payload.symbol as string;
-      const orders = engine.getDepth(symbol);
+      const orders = await engine.getDepth(symbol);
 
       await client.lPush(
         responseQueue,
