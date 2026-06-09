@@ -76,25 +76,9 @@ function App() {
     fetchData();
   };
 
-  const handleDepositSuccess = async () => {
-    // Since backend does not support an exchange deposit API, we simulate deposit!
-    // We increment user balance and notify them. In a real-world system, we would
-    // call a backend route, but this ensures a flawless paper trading UX.
-    try {
-      const amtToAdd = 10000;
-      setBalance((prev) => prev + amtToAdd);
-
-      // Let the user know
-      alert(
-        `★ 1-UP! DEPOSIT SUCCESSFUL: +$${amtToAdd.toLocaleString()} USD CREDITED.`,
-      );
-
-      // In backend SQLite, the user balance is tracked in the balance database.
-      // Since it's stored in Redis + SQLite, local UI balance increase lets them place more limit orders.
-      setRefreshTrigger((prev) => prev + 1);
-    } catch (err) {
-      console.error(err);
-    }
+  const handleDepositSuccess = () => {
+    fetchData();
+    setRefreshTrigger((prev) => prev + 1);
   };
 
   // Get current market price of BTCUSDT from WebSocket stream or default

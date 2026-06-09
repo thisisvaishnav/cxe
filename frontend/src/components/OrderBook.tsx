@@ -1,5 +1,3 @@
-// src/components/OrderBook.tsx - Interactive Order Book with Depth Chart Overlays
-
 import React, { useState, useEffect } from "react";
 import { api } from "../lib/api.js";
 

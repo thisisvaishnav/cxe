@@ -119,11 +119,27 @@ export const OrderForm: React.FC<OrderFormProps> = ({
   };
 
   const handleMockDeposit = async () => {
-    // We don't have a direct backend deposit endpoint, so let's call signup again or mock it.
-    // In our case, the backend doesn't support a direct POST /deposit.
-    // But wait! We can tell the user we are adding mock funds, or we can check if they want to run a script.
-    // Actually, let's just trigger onDepositSuccess which tells the parent component to trigger a balance refresh or show a notification.
-    onDepositSuccess();
+    setError(null);
+    setSuccessMsg(null);
+    setIsLoading(true);
+    try {
+      await api.deposit(10000);
+
+      // Trigger coin confetti explosion on successful deposit!
+      confetti({
+        particleCount: 50,
+        spread: 40,
+        origin: { y: 0.8 },
+        colors: ["#fbc02d", "#388e3c"],
+      });
+
+      setSuccessMsg("DEPOSIT SUCCESSFUL! +$10,000 USDC");
+      onDepositSuccess();
+    } catch (err: any) {
+      setError(err.message || "Failed to execute deposit.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Calculate order value

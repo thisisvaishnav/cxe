@@ -1,0 +1,178 @@
+name: Continuous Integration & Deployment
+
+on:
+  push:
+    branches:
+      - main
+      - frontend
+      - 'feature/**'
+  pull_request:
+    branches:
+      - main
+      - frontend
+
+jobs:
+  backend:
+    name: Backend CI
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Cache Bun Dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-backend-${{ hashFiles('backend/bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-backend-
+
+      - name: Install Dependencies
+        run: bun install
+        working-directory: backend
+
+      - name: Generate Prisma Client
+        run: bunx prisma generate
+        working-directory: backend
+
+      - name: Typecheck Backend
+        run: bun run typecheck
+        working-directory: backend
+
+  engine:
+    name: Engine CI
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Cache Bun Dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-engine-${{ hashFiles('engine/bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-engine-
+
+      - name: Install Dependencies
+        run: bun install
+        working-directory: engine
+
+      - name: Generate Prisma Client
+        run: bunx prisma generate
+        working-directory: engine
+
+      - name: Typecheck Engine
+        run: bun run typecheck
+        working-directory: engine
+
+      - name: Run Unit Tests
+        run: bun run test
+        working-directory: engine
+
+  frontend:
+    name: Frontend CI
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Cache Bun Dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-frontend-${{ hashFiles('frontend/bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-frontend-
+
+      - name: Install Dependencies
+        run: bun install
+        working-directory: frontend
+
+      - name: Run ESLint Linter
+        run: bun run lint
+        working-directory: frontend
+        # Note: Set to true because frontend currently has pre-existing lint errors. 
+        # Change this to false once those lint issues are resolved to make linting blocking.
+        continue-on-error: true
+
+      - name: Build Frontend
+        run: bun run build
+        working-directory: frontend
+
+  docker-build-push:
+    name: Build & Push Docker Images
+    runs-on: ubuntu-latest
+    needs: [backend, engine, frontend]
+    # Build & Push only on pushes/merges to main or frontend branches
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/frontend')
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Lowercase Repository Name
+        run: |
+          echo "REPO_LOWER=${GITHUB_REPOSITORY,,}" >> ${GITHUB_ENV}
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and Push Backend
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: backend/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ env.REPO_LOWER }}/backend:latest
+            ghcr.io/${{ env.REPO_LOWER }}/backend:${{ github.sha }}
+
+      - name: Build and Push Engine
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: engine/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ env.REPO_LOWER }}/engine:latest
+            ghcr.io/${{ env.REPO_LOWER }}/engine:${{ github.sha }}
+
+      - name: Build and Push Frontend
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: frontend/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ env.REPO_LOWER }}/frontend:latest
+            ghcr.io/${{ env.REPO_LOWER }}/frontend:${{ github.sha }}

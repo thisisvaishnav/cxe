@@ -6,6 +6,7 @@ import {
   getDepth,
   getOrder,
   getPositions,
+  depositFunds,
 } from "../controllers/exchange-controller.js";
 import { requireAuth } from "../utils/auth.js";
 import { asyncHandler } from "../utils/async-handler.js";
@@ -13,6 +14,7 @@ import { asyncHandler } from "../utils/async-handler.js";
 export const exchangeRouter = Router();
 
 exchangeRouter.post("/order", requireAuth, asyncHandler(createOrder));
+exchangeRouter.post("/deposit", requireAuth, asyncHandler(depositFunds));
 exchangeRouter.get("/depth/:symbol", requireAuth, asyncHandler(getDepth));
 exchangeRouter.get("/balance", requireAuth, asyncHandler(getBalance));
 exchangeRouter.get("/positions", requireAuth, asyncHandler(getPositions));
