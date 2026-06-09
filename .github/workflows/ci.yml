@@ -176,3 +176,57 @@ jobs:
           tags: |
             ghcr.io/${{ env.REPO_LOWER }}/frontend:latest
             ghcr.io/${{ env.REPO_LOWER }}/frontend:${{ github.sha }}
+
+  deploy:
+    name: Deploy to Server via SSH
+    runs-on: ubuntu-latest
+    needs: docker-build-push
+    # Deploy only on pushes/merges to main or frontend branches
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/frontend')
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Lowercase Repository Name
+        run: |
+          echo "REPO_LOWER=${GITHUB_REPOSITORY,,}" >> ${GITHUB_ENV}
+
+      - name: Copy docker-compose.yml to Server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SERVER_PORT || 22 }}
+          source: "docker-compose.yml"
+          target: "~/cxe-deploy/"
+
+      - name: Execute Remote Deployment Commands via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SERVER_PORT || 22 }}
+          script: |
+            mkdir -p ~/cxe-deploy
+            cd ~/cxe-deploy
+            
+            # Log in to GitHub Container Registry inside the server
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            
+            # Create/Update the .env file with secrets
+            echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" > .env
+            echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+            echo "REPO_LOWER=${{ env.REPO_LOWER }}" >> .env
+            
+            # Pull the latest Docker images from GHCR
+            # (Docker Compose reads REPO_LOWER from .env if customized, or you can write images directly)
+            docker compose pull
+            
+            # Restart the containers in daemon mode
+            docker compose up -d --remove-orphans
+            
+            # Clean up old unused images to save disk space
+            docker image prune -f

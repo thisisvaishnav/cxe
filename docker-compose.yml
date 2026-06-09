@@ -13,6 +13,7 @@ services:
 
   # Backend Express API service
   backend:
+    image: ghcr.io/${REPO_LOWER:-thisisvaishnav/cxe}/backend:latest
     build:
       context: .
       dockerfile: backend/Dockerfile
@@ -23,7 +24,6 @@ services:
       redis:
         condition: service_healthy
     environment:
-      # Automatically read from host environment or root .env file
       DATABASE_URL: ${DATABASE_URL}
       REDIS_URL: redis://redis:6379
       JWT_SECRET: ${JWT_SECRET:-super-secret-jwt-signing-key-change-in-production}
@@ -31,6 +31,7 @@ services:
 
   # Matching Engine worker service
   engine:
+    image: ghcr.io/${REPO_LOWER:-thisisvaishnav/cxe}/engine:latest
     build:
       context: .
       dockerfile: engine/Dockerfile
@@ -44,6 +45,7 @@ services:
 
   # Frontend React Web UI & Reverse Proxy
   frontend:
+    image: ghcr.io/${REPO_LOWER:-thisisvaishnav/cxe}/frontend:latest
     build:
       context: .
       dockerfile: frontend/Dockerfile
