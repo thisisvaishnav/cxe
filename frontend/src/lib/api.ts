@@ -184,4 +184,13 @@ export const api = {
     });
     return handleResponse<{ message: string }>(res);
   },
+
+  async deposit(amount: number): Promise<BalanceResponse> {
+    const res = await fetch("/deposit", {
+      method: "POST",
+      headers: getHeaders(),
+      body: JSON.stringify({ amount }),
+    });
+    return handleResponse<BalanceResponse>(res);
+  },
 };

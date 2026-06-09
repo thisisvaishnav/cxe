@@ -4,7 +4,8 @@ export type EngineCommandType =
   | "get_user_balance"
   | "get_order"
   | "cancel_order"
-  | "get_positions";
+  | "get_positions"
+  | "deposit";
 
 export interface EngineRequest {
   correlationId: string;

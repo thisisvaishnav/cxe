@@ -1,0 +1,54 @@
+services:
+  # Redis container for backend-to-engine pub/sub messaging queue
+  redis:
+    image: redis:alpine
+    container_name: cxe-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # Backend Express API service
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: cxe-backend
+    ports:
+      - "3000:3000"
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      # Automatically read from host environment or root .env file
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:-super-secret-jwt-signing-key-change-in-production}
+      PORT: 3000
+
+  # Matching Engine worker service
+  engine:
+    build:
+      context: .
+      dockerfile: engine/Dockerfile
+    container_name: cxe-engine
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: redis://redis:6379
+
+  # Frontend React Web UI & Reverse Proxy
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: cxe-frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend

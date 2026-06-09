@@ -12,6 +12,7 @@ export default defineConfig({
       '/depth': 'http://localhost:3000',
       '/balance': 'http://localhost:3000',
       '/positions': 'http://localhost:3000',
+      '/deposit': 'http://localhost:3000',
       '/ws': {
         target: 'ws://localhost:3000',
         ws: true,

@@ -118,9 +118,25 @@ while (true) {
       const price =
         payload.price != null ? Number(payload.price) : null;
 
-      // Balance check — only for LIMIT BUY (we know the cost upfront)
-      if (orderSide === "BUY" && orderType === "LIMIT") {
-        const totalCost = price! * qty;
+      // Balance check — for LIMIT BUY and MARKET BUY
+      if (orderSide === "BUY") {
+        let totalCost = 0;
+        if (orderType === "LIMIT") {
+          totalCost = price! * qty;
+        } else {
+          // MARKET order
+          const currentPrice = oracle.getPrice(symbol);
+          if (currentPrice === undefined) {
+            console.log(`Order rejected: No price oracle feed available for ${symbol} to execute MARKET order.`);
+            await client.lPush(
+              responseQueue,
+              JSON.stringify({ correlationId, ok: false, error: "NO_PRICE_AVAILABLE" })
+            );
+            continue;
+          }
+          totalCost = currentPrice * qty;
+        }
+
         const cachedBalanceStr = await client.hGet(
           "balances",
           userId.toString()
@@ -145,20 +161,22 @@ while (true) {
           continue;
         }
 
-        // Lock funds: deduct from Redis cache and persist to DB
-        const newBalance = userBalance - totalCost;
-        await client.hSet(
-          "balances",
-          userId.toString(),
-          newBalance.toString()
-        );
-        await prisma.balance.update({
-          where: { userId },
-          data: { usd: newBalance },
-        });
-        console.log(
-          `Locked $${totalCost} for User ${userId}. Remaining: $${newBalance}`
-        );
+        // Lock funds: deduct from Redis cache and persist to DB (only for LIMIT orders)
+        if (orderType === "LIMIT") {
+          const newBalance = userBalance - totalCost;
+          await client.hSet(
+            "balances",
+            userId.toString(),
+            newBalance.toString()
+          );
+          await prisma.balance.update({
+            where: { userId },
+            data: { usd: newBalance },
+          });
+          console.log(
+            `Locked $${totalCost} for User ${userId}. Remaining: $${newBalance}`
+          );
+        }
       }
 
       // Create the order record in the database
@@ -202,6 +220,33 @@ while (true) {
       await client.lPush(
         responseQueue,
         JSON.stringify({ correlationId, ok: true, data: { balance } })
+      );
+
+    // ── deposit ───────────────────────────────────────────────────────────────
+    } else if (commandType === "deposit") {
+      const userId = Number(payload.userId);
+      const amount = Number(payload.amount);
+
+      const cachedBalanceStr = await client.hGet("balances", userId.toString());
+      let balance = cachedBalanceStr ? Number(cachedBalanceStr) : null;
+      if (balance === null) {
+        const dbBalance = await prisma.balance.findUnique({
+          where: { userId }
+        });
+        balance = dbBalance ? dbBalance.usd : 0;
+      }
+      
+      const newBalance = balance + amount;
+      await client.hSet("balances", userId.toString(), newBalance.toString());
+      await prisma.balance.upsert({
+        where: { userId },
+        create: { userId, usd: newBalance },
+        update: { usd: newBalance },
+      });
+
+      await client.lPush(
+        responseQueue,
+        JSON.stringify({ correlationId, ok: true, data: { balance: newBalance } })
       );
 
     // ── get_positions ─────────────────────────────────────────────────────────

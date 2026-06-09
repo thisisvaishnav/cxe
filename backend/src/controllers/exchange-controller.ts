@@ -107,3 +107,22 @@ export async function cancelOrder(req: Request, res: Response): Promise<void> {
     error: engineResponse.error,
   });
 }
+
+export async function depositFunds(req: Request, res: Response): Promise<void> {
+  const userId = getUserId(req);
+  const { amount } = req.body;
+
+  if (typeof amount !== "number" || amount <= 0) {
+    res.status(400).json({ error: "amount must be a positive number" });
+    return;
+  }
+
+  const engineResponse = await sendToEngine("deposit", {
+    userId,
+    amount,
+  });
+
+  res.status(engineResponse.ok ? 200 : 400).json(engineResponse.ok ? engineResponse.data : {
+    error: engineResponse.error,
+  });
+}
