@@ -13,7 +13,7 @@ services:
 
   # Backend Express API service
   backend:
-    image: ghcr.io/${REPO_LOWER:-thisisvaishnav/cxe}/backend:latest
+    image: ${DOCKER_IMAGE_PREFIX:-thisisvaishnav}/cxe-backend:latest
     build:
       context: .
       dockerfile: backend/Dockerfile
@@ -31,7 +31,7 @@ services:
 
   # Matching Engine worker service
   engine:
-    image: ghcr.io/${REPO_LOWER:-thisisvaishnav/cxe}/engine:latest
+    image: ${DOCKER_IMAGE_PREFIX:-thisisvaishnav}/cxe-engine:latest
     build:
       context: .
       dockerfile: engine/Dockerfile
@@ -45,7 +45,7 @@ services:
 
   # Frontend React Web UI & Reverse Proxy
   frontend:
-    image: ghcr.io/${REPO_LOWER:-thisisvaishnav/cxe}/frontend:latest
+    image: ${DOCKER_IMAGE_PREFIX:-thisisvaishnav}/cxe-frontend:latest
     build:
       context: .
       dockerfile: frontend/Dockerfile
