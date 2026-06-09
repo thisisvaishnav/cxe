@@ -213,6 +213,9 @@ jobs:
             
             # Pull the latest Docker images from Docker Hub
             docker compose pull
+
+            # Run database migrations
+            docker compose run --rm --entrypoint "bunx prisma migrate deploy" backend
             
             # Restart the containers in daemon mode
             docker compose up -d --remove-orphans
