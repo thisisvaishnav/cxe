@@ -1,11 +1,19 @@
 import { createClient } from "redis";
 import { PrismaClient } from "./generated/prisma";
+import { PrismaPg } from "@prisma/adapter-pg";
+import pg from "pg";
 import { PriceOracle } from "./PriceOracle";
 import { PaperEngine } from "./PaperEngine";
 import { PnLCalculator } from "./PnLCalculator";
 
 // ─── Initialize clients ───────────────────────────────────────────────────────
-const prisma = new PrismaClient();
+const pool = new pg.Pool({
+  connectionString: process.env.DATABASE_URL,
+});
+const adapter = new PrismaPg(pool);
+const prisma = new PrismaClient({
+  adapter,
+});
 const client = await createClient({
   url: process.env.REDIS_URL || "redis://localhost:6379"
 })

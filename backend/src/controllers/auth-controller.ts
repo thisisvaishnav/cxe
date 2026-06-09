@@ -41,9 +41,16 @@ export async function signup(req: Request, res: Response): Promise<void> {
       username: user.username,
       balance: user.balance?.usd ?? 50000.0,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Signup error:", error);
-    res.status(409).json({ error: "username already exists" });
+    if (error && error.code === "P2002") {
+      res.status(409).json({ error: "username already exists" });
+      return;
+    }
+    res.status(500).json({
+      error: "Internal server error during signup",
+      details: error instanceof Error ? error.message : String(error),
+    });
   }
 }
 
