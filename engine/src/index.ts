@@ -1,5 +1,5 @@
 import { createClient } from "redis";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "./generated/prisma";
 import { PriceOracle } from "./PriceOracle";
 import { PaperEngine } from "./PaperEngine";
 import { PnLCalculator } from "./PnLCalculator";
@@ -141,8 +141,10 @@ while (true) {
           "balances",
           userId.toString()
         );
-        let userBalance = cachedBalanceStr ? Number(cachedBalanceStr) : null;
-        if (userBalance === null) {
+        let userBalance: number;
+        if (cachedBalanceStr) {
+          userBalance = Number(cachedBalanceStr);
+        } else {
           const dbBalance = await prisma.balance.findUnique({
             where: { userId }
           });
@@ -208,8 +210,10 @@ while (true) {
     } else if (commandType === "get_user_balance") {
       const userId = Number(payload.userId);
       const cachedBalanceStr = await client.hGet("balances", userId.toString());
-      let balance = cachedBalanceStr ? Number(cachedBalanceStr) : null;
-      if (balance === null) {
+      let balance: number;
+      if (cachedBalanceStr) {
+        balance = Number(cachedBalanceStr);
+      } else {
         const dbBalance = await prisma.balance.findUnique({
           where: { userId }
         });
@@ -228,8 +232,10 @@ while (true) {
       const amount = Number(payload.amount);
 
       const cachedBalanceStr = await client.hGet("balances", userId.toString());
-      let balance = cachedBalanceStr ? Number(cachedBalanceStr) : null;
-      if (balance === null) {
+      let balance: number;
+      if (cachedBalanceStr) {
+        balance = Number(cachedBalanceStr);
+      } else {
         const dbBalance = await prisma.balance.findUnique({
           where: { userId }
         });

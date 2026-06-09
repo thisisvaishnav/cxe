@@ -1,4 +1,4 @@
-import type { PrismaClient, Order } from "@prisma/client";
+import type { PrismaClient, Order } from "./generated/prisma";
 import type { createClient } from "redis";
 import { OrderBook } from "./OrderBook";
 import { PriceOracle } from "./PriceOracle";

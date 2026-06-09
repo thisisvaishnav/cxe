@@ -1,4 +1,4 @@
-import type { Order } from "@prisma/client";
+import type { Order } from "./generated/prisma";
 
 export class OrderBook {
   // Map of symbol (e.g., "BTCUSDT") to list of resting limit orders

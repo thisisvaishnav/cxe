@@ -1,5 +1,5 @@
 import { OrderBook } from "./OrderBook";
-import type { Order } from "@prisma/client";
+import type { Order } from "./generated/prisma";
 
 // Helper to create mock orders
 function createMockOrder(id: number, userId: number, market: string, price: number, qty: number): Order {
