@@ -7,9 +7,12 @@ import { PriceChart } from "./components/PriceChart.js";
 import { OrderBook } from "./components/OrderBook.js";
 import { OrderForm } from "./components/OrderForm.js";
 import { PositionsTable } from "./components/PositionsTable.js";
+import { PortfolioPage } from "./components/PortfolioPage.js";
+import { EarnPage } from "./components/EarnPage.js";
 import { api } from "./lib/api.js";
 import type { Position } from "./lib/api.js";
 import { useWebSocket } from "./hooks/useWebSocket.js";
+import type { Page } from "./components/Layout.js";
 
 function App() {
   const [token, setToken] = useState<string | null>(
@@ -21,6 +24,7 @@ function App() {
   const [balance, setBalance] = useState<number>(50000);
   const [positions, setPositions] = useState<Position[]>([]);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [activePage, setActivePage] = useState<Page>("trade");
 
   // Hook up WebSocket
   const { status: wsStatus, pnlUpdates, lastUpdate, prices } = useWebSocket(token);
@@ -68,6 +72,7 @@ function App() {
     setToken(null);
     setUsername(null);
     setPositions([]);
+    setActivePage("trade");
   };
 
   const handleOrderSuccess = () => {
@@ -95,48 +100,75 @@ function App() {
       style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}
     >
       {/* Top Header & Ticker */}
-      <Header username={username} onLogout={handleLogout} wsStatus={wsStatus} balance={balance} />
+      <Header
+        username={username}
+        onLogout={handleLogout}
+        wsStatus={wsStatus}
+        balance={balance}
+        activePage={activePage}
+        onNavigate={setActivePage}
+      />
 
-      {/* Main trading deck workspace grid */}
-      <main
-        style={{
-          flex: 1,
-          padding: "20px",
-          display: "grid",
-          gridTemplateColumns: "2.2fr 0.8fr 1fr",
-          gap: "20px",
-          background: "var(--bg-canvas)",
-        }}
-        className="trading-dashboard-layout"
-      >
-        {/* Real-time Candlestick Chart */}
-        <PriceChart currentPrice={currentPrice} symbol="BTCUSDT" />
+      {/* Page: Trade */}
+      {activePage === "trade" && (
+        <main
+          style={{
+            flex: 1,
+            padding: "20px",
+            display: "grid",
+            gridTemplateColumns: "2.2fr 0.8fr 1fr",
+            gap: "20px",
+            background: "var(--bg-canvas)",
+          }}
+          className="trading-dashboard-layout"
+        >
+          {/* Real-time Candlestick Chart */}
+          <PriceChart currentPrice={currentPrice} symbol="BTCUSDT" />
 
-        {/* Interactive Order Book Depth display */}
-        <OrderBook
-          symbol="BTCUSDT"
-          currentPrice={currentPrice}
-          refreshTrigger={refreshTrigger}
-        />
+          {/* Interactive Order Book Depth display */}
+          <OrderBook
+            symbol="BTCUSDT"
+            currentPrice={currentPrice}
+            refreshTrigger={refreshTrigger}
+          />
 
-        {/* Order Ticket Form */}
-        <OrderForm
-          balance={balance}
-          currentPrice={currentPrice}
-          onOrderSuccess={handleOrderSuccess}
-          onDepositSuccess={handleDepositSuccess}
-        />
+          {/* Order Ticket Form */}
+          <OrderForm
+            balance={balance}
+            currentPrice={currentPrice}
+            onOrderSuccess={handleOrderSuccess}
+            onDepositSuccess={handleDepositSuccess}
+          />
 
-        {/* Positions, Balances and Orders Tab Table */}
-        <div style={{ gridColumn: "span 3" }}>
-          <PositionsTable
+          {/* Positions, Balances and Orders Tab Table */}
+          <div style={{ gridColumn: "span 3" }}>
+            <PositionsTable
+              balance={balance}
+              positions={positions}
+              pnlUpdates={pnlUpdates}
+              onRefreshNeeded={handleOrderSuccess}
+            />
+          </div>
+        </main>
+      )}
+
+      {/* Page: Portfolio */}
+      {activePage === "portfolio" && (
+        <main style={{ flex: 1, background: "var(--bg-canvas)", overflowY: "auto" }}>
+          <PortfolioPage
             balance={balance}
             positions={positions}
             pnlUpdates={pnlUpdates}
-            onRefreshNeeded={handleOrderSuccess}
           />
-        </div>
-      </main>
+        </main>
+      )}
+
+      {/* Page: Earn */}
+      {activePage === "earn" && (
+        <main style={{ flex: 1, background: "var(--bg-canvas)", overflowY: "auto" }}>
+          <EarnPage balance={balance} onDepositSuccess={handleDepositSuccess} />
+        </main>
+      )}
 
       {/* Connection status footer bar */}
       <Footer wsStatus={wsStatus} lastUpdate={lastUpdate} />
