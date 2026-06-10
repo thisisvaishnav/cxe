@@ -1,0 +1,181 @@
+{
+  "communities": {
+    "0": [
+      "backend_dockerfile",
+      "backend_prisma",
+      "ci_backend",
+      "ci_docker_build_push",
+      "engine_dockerfile",
+      "frontend_dockerfile"
+    ],
+    "1": [
+      "backend_readme",
+      "bun_runtime",
+      "engine_readme"
+    ],
+    "2": [
+      "ci_deploy",
+      "docker_compose_yml",
+      "test_test_login"
+    ],
+    "3": [
+      "frontend_favicon",
+      "frontend_index",
+      "frontend_main"
+    ],
+    "4": [
+      "ci_engine",
+      "engine_prisma"
+    ],
+    "5": [
+      "ci_frontend",
+      "frontend_vite"
+    ],
+    "6": [
+      "hero_png",
+      "readme_cex_assignment"
+    ],
+    "7": [
+      "engine_overview"
+    ],
+    "8": [
+      "frontend_icons"
+    ],
+    "9": [
+      "frontend_react_svg"
+    ],
+    "10": [
+      "frontend_vite_svg"
+    ],
+    "11": [
+      "redis_broker"
+    ]
+  },
+  "cohesion": {
+    "0": 0.3333333333333333,
+    "1": 1.0,
+    "2": 0.6666666666666666,
+    "3": 0.6666666666666666,
+    "4": 1.0,
+    "5": 1.0,
+    "6": 1.0,
+    "7": 1.0,
+    "8": 1.0,
+    "9": 1.0,
+    "10": 1.0,
+    "11": 1.0
+  },
+  "gods": [
+    {
+      "id": "ci_docker_build_push",
+      "label": "Docker Build & Push Job",
+      "degree": 7
+    },
+    {
+      "id": "ci_deploy",
+      "label": "SSH Deployment Job",
+      "degree": 3
+    },
+    {
+      "id": "ci_backend",
+      "label": "Backend CI Job",
+      "degree": 2
+    },
+    {
+      "id": "ci_engine",
+      "label": "Engine CI Job",
+      "degree": 2
+    },
+    {
+      "id": "ci_frontend",
+      "label": "Frontend CI Job",
+      "degree": 2
+    },
+    {
+      "id": "backend_readme",
+      "label": "Backend README",
+      "degree": 2
+    },
+    {
+      "id": "engine_readme",
+      "label": "Engine README",
+      "degree": 2
+    },
+    {
+      "id": "frontend_index",
+      "label": "Frontend Index",
+      "degree": 2
+    },
+    {
+      "id": "readme_cex_assignment",
+      "label": "Mini Centralized Exchange (CEX) Assignment",
+      "degree": 1
+    },
+    {
+      "id": "docker_compose_yml",
+      "label": "Docker Compose Configuration",
+      "degree": 1
+    }
+  ],
+  "surprises": [
+    {
+      "source": "Hero Image",
+      "target": "Mini Centralized Exchange (CEX) Assignment",
+      "source_files": [
+        "frontend/src/assets/hero.png",
+        "README.md"
+      ],
+      "confidence": "INFERRED",
+      "relation": "conceptually_related_to",
+      "why": "inferred connection - not explicitly stated in source; crosses file types (doc \u2194 image); connects across different repos/directories"
+    },
+    {
+      "source": "Backend README",
+      "target": "Engine README",
+      "source_files": [
+        "backend/README.md",
+        "engine/README.md"
+      ],
+      "confidence": "INFERRED",
+      "relation": "semantically_similar_to",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; semantically similar concepts with no structural link"
+    },
+    {
+      "source": "Frontend CI Job",
+      "target": "Vite Build System",
+      "source_files": [
+        ".github/workflows/ci.yml",
+        "frontend/README.md"
+      ],
+      "confidence": "INFERRED",
+      "relation": "calls",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories"
+    },
+    {
+      "source": "SSH Deployment Job",
+      "target": "Docker Compose Configuration",
+      "source_files": [
+        ".github/workflows/ci.yml",
+        "docker-compose.yml"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "connects across different repos/directories"
+    },
+    {
+      "source": "Backend CI Job",
+      "target": "Prisma Client",
+      "source_files": [
+        ".github/workflows/ci.yml",
+        "backend/bun.lock"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "connects across different repos/directories"
+    }
+  ],
+  "tokens": {
+    "input": 17227,
+    "output": 1330
+  }
+}

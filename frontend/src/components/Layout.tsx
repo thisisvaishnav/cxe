@@ -3,14 +3,18 @@
 import React from "react";
 import { Bell, Globe, Settings, LogOut } from "lucide-react";
 
+export type Page = "trade" | "portfolio" | "earn";
+
 interface HeaderProps {
   username: string | null;
   onLogout: () => void;
   wsStatus: "disconnected" | "connecting" | "connected" | "error";
   balance: number;
+  activePage: Page;
+  onNavigate: (page: Page) => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ username, onLogout, wsStatus, balance }) => {
+export const Header: React.FC<HeaderProps> = ({ username, onLogout, wsStatus, balance, activePage, onNavigate }) => {
   return (
     <header className="pixel-corners" style={{ borderBottom: "3px solid #000000" }}>
       {/* Sign-in Bonus Banner */}
@@ -71,23 +75,42 @@ export const Header: React.FC<HeaderProps> = ({ username, onLogout, wsStatus, ba
           </span>
         </div>
 
-        {/* Navigation Items - Desktop */}
+        {/* Navigation Items - 3 Core Pages */}
         <nav 
           style={{ 
             display: "flex", 
-            gap: "20px", 
+            gap: "4px", 
             fontFamily: "var(--font-press-start)", 
             fontSize: "9px"
           }}
           className="nav-links"
         >
-          <a href="#" style={{ color: "var(--mario-yellow)", textDecoration: "none" }}>Trade</a>
-          <a href="#" style={{ color: "#ffffff", textDecoration: "none" }}>Portfolio</a>
-          <a href="#" style={{ color: "#ffffff", textDecoration: "none" }}>Earn</a>
-          <a href="#" style={{ color: "#ffffff", textDecoration: "none" }}>Vaults</a>
-          <a href="#" style={{ color: "#ffffff", textDecoration: "none" }}>Staking</a>
-          <a href="#" style={{ color: "#ffffff", textDecoration: "none" }}>Referrals</a>
-          <a href="#" style={{ color: "#ffffff", textDecoration: "none" }}>Leaderboard</a>
+          {(["trade", "portfolio", "earn"] as Page[]).map((page) => {
+            const isActive = activePage === page;
+            const labels: Record<Page, string> = { trade: "Trade", portfolio: "Portfolio", earn: "Earn" };
+            return (
+              <button
+                key={page}
+                id={`nav-${page}`}
+                onClick={() => onNavigate(page)}
+                style={{
+                  background: isActive ? "var(--mario-yellow)" : "transparent",
+                  color: isActive ? "#000000" : "#ffffff",
+                  border: isActive ? "2px solid #000" : "2px solid transparent",
+                  padding: "6px 14px",
+                  fontFamily: "var(--font-press-start)",
+                  fontSize: "9px",
+                  cursor: "pointer",
+                  boxShadow: isActive ? "2px 2px 0 #000" : "none",
+                  transition: "background 0.12s, color 0.12s",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.5px",
+                }}
+              >
+                {labels[page]}
+              </button>
+            );
+          })}
         </nav>
 
         {/* Wallet & Info */}

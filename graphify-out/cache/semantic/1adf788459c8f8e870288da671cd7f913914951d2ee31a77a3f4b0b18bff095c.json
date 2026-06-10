@@ -1,0 +1,1 @@
+{"nodes": [{"id": "backend_auth_controller", "label": "Auth Controller", "file_type": "code", "source_file": "backend/src/controllers/auth-controller.ts", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}], "edges": [], "hyperedges": []}
