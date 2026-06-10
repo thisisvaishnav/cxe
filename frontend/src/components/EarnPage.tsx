@@ -330,7 +330,7 @@ const PoolCard: React.FC<{ pool: Pool; balance: number }> = ({ pool, balance }) 
   );
 };
 
-export const EarnPage: React.FC<EarnPageProps> = ({ balance, onDepositSuccess }) => {
+export const EarnPage: React.FC<EarnPageProps> = ({ balance }) => {
   const [filter, setFilter] = useState<"ALL" | "LOW" | "MEDIUM" | "HIGH">("ALL");
   const [sortBy, setSortBy] = useState<"apy" | "tvl">("apy");
 

@@ -1,7 +1,6 @@
 // src/components/PortfolioPage.tsx - Portfolio overview page
 
-import React, { useState, useEffect } from "react";
-import { api } from "../lib/api.js";
+import React from "react";
 import type { Position } from "../lib/api.js";
 import type { PnLSnapshot } from "../hooks/useWebSocket.js";
 import { TrendingUp, TrendingDown, Wallet, BarChart2, PieChart, Activity } from "lucide-react";
@@ -81,8 +80,6 @@ const DonutChart: React.FC<{ slices: { pct: number; color: string; label: string
 };
 
 export const PortfolioPage: React.FC<PortfolioPageProps> = ({ balance, positions, pnlUpdates }) => {
-  const [tab, setTab] = useState<"overview" | "history">("overview");
-
   // Compute total unrealised PnL
   const totalUnrPnL = positions.reduce((acc, pos) => {
     const ws = pnlUpdates[pos.symbol];
