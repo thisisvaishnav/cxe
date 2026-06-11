@@ -7,6 +7,55 @@ datasource db {
   provider = "postgresql"
 }
 
+model User {
+  id       Int      @id @default(autoincrement())
+  username String   @unique
+  password String
+  balance  Balance?
+  fills    Fill[]
+  orders   Order[]
+}
+
+model Order {
+  id        Int         @id @default(autoincrement())
+  userId    Int
+  market    String
+  price     Float?
+  qty       Float
+  type      OrderType
+  side      OrderSide
+  filledQty Float       @default(0)
+  status    OrderStatus @default(OPEN)
+  createdAt DateTime    @default(now())
+  user      User        @relation(fields: [userId], references: [id])
+}
+
+model Fill {
+  id              Int       @id @default(autoincrement())
+  qty             Float
+  side            OrderSide
+  type            OrderType
+  userId          Int
+  price           Float?
+  asset           String
+  originalOrderId Int
+  createdAt       DateTime  @default(now())
+  user            User      @relation(fields: [userId], references: [id])
+}
+
+model Stock {
+  id     Int    @id @default(autoincrement())
+  name   String
+  symbol String @unique
+}
+
+model Balance {
+  id     Int   @id @default(autoincrement())
+  userId Int   @unique
+  usd    Float @default(0)
+  user   User  @relation(fields: [userId], references: [id])
+}
+
 enum OrderStatus {
   OPEN
   PARTIALLY_FILLED
@@ -22,59 +71,4 @@ enum OrderType {
 enum OrderSide {
   BUY
   SELL
-}
-
-model User {
-  id       Int    @id @default(autoincrement())
-  username String @unique
-  password String
-
-  orders  Order[]
-  fills   Fill[]
-  balance Balance?
-}
-
-model Order {
-  id        Int         @id @default(autoincrement())
-  userId    Int
-  market    String
-  price     Float?
-  qty       Float
-  type      OrderType
-  side      OrderSide
-  filledQty Float       @default(0)
-  status    OrderStatus @default(OPEN)
-
-  user User @relation(fields: [userId], references: [id])
-
-  createdAt DateTime @default(now())
-}
-
-model Fill {
-  id              Int       @id @default(autoincrement())
-  qty             Float
-  side            OrderSide
-  type            OrderType
-  userId          Int
-  price           Float?
-  asset           String
-  originalOrderId Int
-
-  user User @relation(fields: [userId], references: [id])
-
-  createdAt DateTime @default(now())
-}
-
-model Stock {
-  id     Int    @id @default(autoincrement())
-  name   String
-  symbol String @unique
-}
-
-model Balance {
-  id     Int   @id @default(autoincrement())
-  userId Int   @unique
-  usd    Float @default(0)
-
-  user User @relation(fields: [userId], references: [id])
 }
