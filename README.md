@@ -329,7 +329,6 @@ Market orders should match with the best available opposite side prices until fi
   ]
 }
 ```
-
 Bids must be sorted highest price first.
 
 Asks must be sorted lowest price first.
