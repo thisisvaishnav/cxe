@@ -1,6 +1,6 @@
 // src/components/PriceChart.tsx - Real-time Candlestick Chart using TradingView's lightweight-charts
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { createChart, CandlestickSeries } from "lightweight-charts";
 import type { IChartApi, ISeriesApi, UTCTimestamp } from "lightweight-charts";
 
@@ -16,6 +16,49 @@ interface CandleData {
   low: number;
   close: number;
 }
+
+// Generate realistic mock history based on starting price (fallback utility)
+const generateMockHistory = (
+  startPrice: number,
+  timeframe: string,
+  count = 100,
+): CandleData[] => {
+  const data: CandleData[] = [];
+
+  let interval = 60;
+  let priceStep = 10;
+  let randomMultiplier = 8;
+
+  if (timeframe === "5m") {
+    interval = 300;
+    priceStep = 15;
+    randomMultiplier = 12;
+  } else if (timeframe === "1h") {
+    interval = 3600;
+    priceStep = 50;
+    randomMultiplier = 35;
+  } else if (timeframe === "1d") {
+    interval = 86400;
+    priceStep = 200;
+    randomMultiplier = 150;
+  }
+
+  let price = startPrice - count * (priceStep * 0.1);
+  const now = Math.floor(Date.now() / 1000);
+
+  for (let i = count; i > 0; i--) {
+    const time = (now - i * interval) as UTCTimestamp;
+    const change = (Math.random() - 0.49) * priceStep;
+    const open = price;
+    const close = price + change;
+    const high = Math.max(open, close) + Math.random() * randomMultiplier;
+    const low = Math.min(open, close) - Math.random() * randomMultiplier;
+
+    data.push({ time, open, high, low, close });
+    price = close;
+  }
+  return data;
+};
 
 export const PriceChart: React.FC<PriceChartProps> = ({
   currentPrice,
@@ -37,48 +80,69 @@ export const PriceChart: React.FC<PriceChartProps> = ({
   }
   const currentCandleRef = useRef<CurrentCandle | null>(null);
 
-  // Generate realistic mock history based on starting price
-  const generateMockHistory = (
-    startPrice: number,
-    timeframe: string,
-    count = 100,
-  ): CandleData[] => {
-    const data: CandleData[] = [];
+  // Fetch real historical candlestick data from Binance API
+  const fetchHistory = useCallback(async (timeframe: string) => {
+    if (!seriesRef.current) return;
+    const series = seriesRef.current;
 
-    let interval = 60;
-    let priceStep = 10;
-    let randomMultiplier = 8;
+    // Normalize symbol (e.g. BTCUSDT)
+    const querySymbol = symbol.toUpperCase().includes("USDT")
+      ? symbol.toUpperCase()
+      : `${symbol.toUpperCase()}USDT`;
 
-    if (timeframe === "5m") {
-      interval = 300;
-      priceStep = 15;
-      randomMultiplier = 12;
-    } else if (timeframe === "1h") {
-      interval = 3600;
-      priceStep = 50;
-      randomMultiplier = 35;
-    } else if (timeframe === "1d") {
-      interval = 86400;
-      priceStep = 200;
-      randomMultiplier = 150;
+    try {
+      const response = await fetch(
+        `https://api.binance.com/api/v3/klines?symbol=${querySymbol}&interval=${timeframe}&limit=100`
+      );
+      if (!response.ok) {
+        throw new Error(`Binance API response error: ${response.status}`);
+      }
+      const rawData = await response.json();
+      if (!Array.isArray(rawData)) {
+        throw new Error("Invalid Binance API response format");
+      }
+
+      const formattedData = rawData.map((item: unknown) => {
+        const kline = item as (string | number)[];
+        return {
+          time: Math.floor(Number(kline[0]) / 1000) as UTCTimestamp,
+          open: parseFloat(String(kline[1])),
+          high: parseFloat(String(kline[2])),
+          low: parseFloat(String(kline[3])),
+          close: parseFloat(String(kline[4])),
+        };
+      });
+
+      series.setData(formattedData);
+
+      // Set the last candle reference so subsequent WS updates extend or modify it
+      if (formattedData.length > 0) {
+        const lastCandle = formattedData[formattedData.length - 1];
+        currentCandleRef.current = {
+          time: lastCandle.time,
+          open: lastCandle.open,
+          high: lastCandle.high,
+          low: lastCandle.low,
+          close: lastCandle.close,
+        };
+      }
+    } catch (error) {
+      console.error("Failed to fetch real history from Binance, falling back to mock history:", error);
+      const startVal = currentPrice || 60000;
+      const mockData = generateMockHistory(startVal, timeframe, 100);
+      series.setData(mockData);
+      if (mockData.length > 0) {
+        const lastMock = mockData[mockData.length - 1];
+        currentCandleRef.current = {
+          time: lastMock.time,
+          open: lastMock.open,
+          high: lastMock.high,
+          low: lastMock.low,
+          close: lastMock.close,
+        };
+      }
     }
-
-    let price = startPrice - count * (priceStep * 0.1);
-    const now = Math.floor(Date.now() / 1000);
-
-    for (let i = count; i > 0; i--) {
-      const time = (now - i * interval) as UTCTimestamp;
-      const change = (Math.random() - 0.49) * priceStep;
-      const open = price;
-      const close = price + change;
-      const high = Math.max(open, close) + Math.random() * randomMultiplier;
-      const low = Math.min(open, close) - Math.random() * randomMultiplier;
-
-      data.push({ time, open, high, low, close });
-      price = close;
-    }
-    return data;
-  };
+  }, [symbol, currentPrice]);
 
   // 1. Initialize Chart
   useEffect(() => {
@@ -124,10 +188,8 @@ export const PriceChart: React.FC<PriceChartProps> = ({
 
     seriesRef.current = series;
 
-    // Set initial data
-    const startVal = currentPrice || 60000;
-    const initialData = generateMockHistory(startVal, activeTimeframe, 80);
-    series.setData(initialData);
+    // Set initial data using real-time API fetch
+    fetchHistory(activeTimeframe);
 
     // Make chart responsive in both width and height using ResizeObserver
     const resizeObserver = new ResizeObserver((entries) => {
@@ -155,14 +217,10 @@ export const PriceChart: React.FC<PriceChartProps> = ({
       isMounted.current = true;
       return;
     }
-    if (!seriesRef.current) return;
-    const startVal = currentPrice || 60000;
-    const initialData = generateMockHistory(startVal, activeTimeframe, 80);
-    seriesRef.current.setData(initialData);
+    fetchHistory(activeTimeframe);
     lastPriceRef.current = null;
     currentCandleRef.current = null;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTimeframe]);
+  }, [activeTimeframe, fetchHistory]);
 
   // 2. Stream Live Ticks to Chart
   useEffect(() => {

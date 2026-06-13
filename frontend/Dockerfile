@@ -1,4 +1,4 @@
-# --- Build Stage ---
+# Build Stage
 FROM oven/bun:1-alpine as builder
 
 WORKDIR /app
@@ -15,7 +15,7 @@ COPY frontend/ .
 # Build project (generates bundle in /app/dist)
 RUN bun run build
 
-# --- Serve Stage ---
+# Serve Stage
 FROM nginx:alpine
 
 # Copy production build files to Nginx's public folder
