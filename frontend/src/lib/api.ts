@@ -146,6 +146,7 @@ export const api = {
     const res = await fetch(`/depth/${symbol}`, {
       method: "GET",
       headers: getHeaders(),
+      signal: AbortSignal.timeout(5000),
     });
     return handleResponse<DepthResponse>(res);
   },

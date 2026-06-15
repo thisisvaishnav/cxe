@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { api } from "../lib/api.js";
 
 interface OrderBookProps {
@@ -21,12 +21,15 @@ export const OrderBook: React.FC<OrderBookProps> = ({
   const [activeTab, setActiveTab] = useState<"book" | "trades">("book");
   const [bids, setBids] = useState<OrderBookEntry[]>([]);
   const [asks, setAsks] = useState<OrderBookEntry[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [hasFetched, setHasFetched] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const isFetchingRef = useRef(false);
 
   const fetchOrderBook = async () => {
-    setIsLoading(true);
-    setError(null);
+    // Prevent concurrent fetches from piling up
+    if (isFetchingRef.current) return;
+    isFetchingRef.current = true;
+
     try {
       const depthData = await api.getDepth(symbol);
 
@@ -78,16 +81,23 @@ export const OrderBook: React.FC<OrderBookProps> = ({
       // Keep standard sizes (up to 8 levels for vertical spacing)
       setAsks(aggregatedAsks.slice(0, 8).reverse()); // Reverse asks so highest is at the top of the UI
       setBids(aggregatedBids.slice(0, 8));
+      setError(null);
     } catch (err: any) {
       console.error(err);
-      setError("Failed to load depth book");
+      // Only show error if we haven't fetched successfully before
+      if (!hasFetched) {
+        setError("Failed to load depth book");
+      }
     } finally {
-      setIsLoading(false);
+      setHasFetched(true);
+      isFetchingRef.current = false;
     }
   };
 
   // Poll for order book updates
   useEffect(() => {
+    setHasFetched(false);
+    setError(null);
     fetchOrderBook();
     const interval = setInterval(() => {
       fetchOrderBook();
@@ -163,7 +173,7 @@ export const OrderBook: React.FC<OrderBookProps> = ({
             <span style={{ textAlign: "right" }}>TOTAL (BTC)</span>
           </div>
 
-          {isLoading && bids.length === 0 && (
+          {!hasFetched && !error && (
             <div
               style={{
                 padding: "40px 0",
