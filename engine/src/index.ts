@@ -68,6 +68,26 @@ async function hydratePositionsFromFills() {
 
 await hydratePositionsFromFills();
 
+async function hydrateLimitOrders() {
+  console.log("Hydrating open limit orders from Postgres → OrderBook...");
+  try {
+    const openOrders = await prisma.order.findMany({
+      where: {
+        status: "OPEN",
+        type: "LIMIT",
+      },
+    });
+    for (const order of openOrders) {
+      await engine.processOrder(order);
+    }
+    console.log(`Loaded ${openOrders.length} open limit orders into matching engine.`);
+  } catch (error) {
+    console.error("Failed to hydrate open limit orders:", error);
+  }
+}
+
+await hydrateLimitOrders();
+
 // ─── Boot PnLCalculator ───────────────────────────────────────────────────────
 // Shares the same PositionTracker instance that PaperEngine uses.
 // On every tick it recomputes unrealized PnL, writes to Redis, and publishes
