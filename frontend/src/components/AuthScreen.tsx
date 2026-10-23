@@ -278,12 +278,68 @@ const clerkRetroAppearance = {
     rootBox: {
       width: "100%",
     },
+    cardBox: {
+      backgroundColor: "transparent",
+      boxShadow: "none",
+      border: "none",
+      borderRadius: "0px",
+      overflow: "visible",
+      padding: "0",
+      margin: "0",
+      width: "100%",
+    },
     card: {
       backgroundColor: "transparent",
       boxShadow: "none",
       border: "none",
+      borderRadius: "0px",
+      overflow: "visible",
       padding: "0",
+      margin: "0",
       width: "100%",
+    },
+    socialButtonsRoot: {
+      overflow: "visible",
+      width: "100%",
+      display: "flex",
+      flexDirection: "column",
+      gap: "12px",
+    },
+    lastAuthenticationStrategyBadge: {
+      backgroundColor: "#FFD43B",
+      color: "#000000",
+      border: "1px solid #000000",
+      boxShadow: "1px 1px 0px #000000",
+      fontFamily: "'Share Tech Mono', monospace",
+      fontSize: "10px",
+      fontWeight: "bold",
+      letterSpacing: "0.5px",
+      borderRadius: "0px",
+      padding: "2px 7px",
+      textTransform: "uppercase" as const,
+      position: "absolute" as const,
+      top: "50%",
+      right: "12px",
+      transform: "translateY(-50%)",
+      zIndex: 10,
+    },
+    socialButtonsBlockButtonBadge: {
+      backgroundColor: "#FFD43B",
+      color: "#000000",
+      border: "1px solid #000000",
+      boxShadow: "1px 1px 0px #000000",
+      fontFamily: "'Share Tech Mono', monospace",
+      fontSize: "10px",
+      fontWeight: "bold",
+      letterSpacing: "0.5px",
+      borderRadius: "0px",
+      padding: "2px 7px",
+      textTransform: "uppercase" as const,
+      position: "absolute" as const,
+      top: "50%",
+      right: "12px",
+      transform: "translateY(-50%)",
+      zIndex: 10,
     },
     header: {
       display: "none",
@@ -1178,12 +1234,12 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
         /* The Main Auth Card: Clean 2px pixel frame, square corners, hard offset shadow */
         .auth-card {
           width: 100%;
-          max-width: 440px;
+          max-width: 450px;
           background: #ffffff !important;
           border: 2px solid #000000 !important;
           border-radius: 0px !important;
           box-shadow: 4px 4px 0px #000000 !important;
-          padding: 32px 28px 24px !important;
+          padding: 32px 30px 24px !important;
           position: relative;
           margin: auto;
           box-sizing: border-box !important;
@@ -1277,12 +1333,26 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
           box-sizing: border-box !important;
         }
 
+        .cl-rootBox,
+        .cl-cardBox,
         .cl-card {
           background-color: transparent !important;
+          background: transparent !important;
           box-shadow: none !important;
           border: none !important;
           padding: 0 !important;
+          margin: 0 !important;
           border-radius: 0px !important;
+          overflow: visible !important;
+        }
+
+        .cl-main,
+        .cl-form {
+          background: transparent !important;
+          box-shadow: none !important;
+          border: none !important;
+          overflow: visible !important;
+          width: 100% !important;
         }
 
         .cl-header {
@@ -1290,6 +1360,16 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
         }
 
         /* OAuth Social Buttons: Crisp 2px black border, square corners, hard shadow */
+        .cl-socialButtonsRoot {
+          width: 100% !important;
+          display: flex !important;
+          flex-direction: column !important;
+          gap: 12px !important;
+          margin-top: 8px !important;
+          margin-bottom: 4px !important;
+          overflow: visible !important;
+        }
+
         .cl-socialButtonsBlockButton {
           border: 2px solid #000000 !important;
           border-radius: 0px !important;
@@ -1297,10 +1377,14 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
           font-family: var(--font-mono) !important;
           font-size: 13px !important;
           font-weight: 600 !important;
-          height: 44px !important;
+          height: 48px !important;
           background-color: #ffffff !important;
           color: #111111 !important;
           position: relative !important;
+          overflow: visible !important;
+          width: 100% !important;
+          padding: 0 16px !important;
+          box-sizing: border-box !important;
           transition: transform 0.1s ease, box-shadow 0.1s ease !important;
         }
         .cl-socialButtonsBlockButton:hover {
@@ -1313,23 +1397,41 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
           box-shadow: 1px 1px 0px #000000 !important;
         }
 
-        /* Last Used Badge: Aligned cleanly to button's upper right edge without floating awkwardly */
+        /* Last Used Badge: Pinned cleanly inside the right edge of the button so it is never cut off */
         .cl-badge,
-        .cl-socialButtonsBlockButtonBadge {
+        .cl-socialButtonsBlockButtonBadge,
+        .cl-lastAuthenticationStrategyBadge,
+        .cl-buttonBadge,
+        [class*="lastAuthenticationStrategyBadge"],
+        [class*="socialButtonsBlockButtonBadge"],
+        [data-localization-key="lastAuthenticationStrategy"] {
           position: absolute !important;
-          top: -8px !important;
-          right: 6px !important;
+          top: 50% !important;
+          right: 12px !important;
+          bottom: auto !important;
+          left: auto !important;
+          transform: translateY(-50%) !important;
           background-color: #FFD43B !important;
+          background: #FFD43B !important;
           color: #000000 !important;
           border: 1px solid #000000 !important;
           box-shadow: 1px 1px 0px #000000 !important;
           font-family: var(--font-mono) !important;
-          font-size: 9px !important;
+          font-size: 10px !important;
           font-weight: bold !important;
           letter-spacing: 0.5px !important;
           border-radius: 0px !important;
-          padding: 1px 6px !important;
-          z-index: 2 !important;
+          padding: 2px 7px !important;
+          z-index: 10 !important;
+          text-transform: uppercase !important;
+          display: inline-flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          line-height: normal !important;
+          white-space: nowrap !important;
+          visibility: visible !important;
+          opacity: 1 !important;
+          box-sizing: border-box !important;
         }
 
         .cl-dividerLine {
@@ -1359,6 +1461,10 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
           text-transform: uppercase !important;
           margin-bottom: 6px !important;
           display: block !important;
+          width: 100% !important;
+          text-align: left !important;
+          padding-left: 2px !important;
+          box-sizing: border-box !important;
         }
 
         .cl-formFieldInputGroup {
@@ -1386,8 +1492,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
           padding: 0 14px !important;
           color: #111111 !important;
           background-color: #ffffff !important;
-          display: flex !important;
-          align-items: center !important;
+          display: block !important;
         }
 
         .cl-formFieldInput:focus,
