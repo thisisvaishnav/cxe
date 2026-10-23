@@ -420,9 +420,9 @@
     "semantic_hash": ""
   },
   "frontend/src/components/AuthScreen.tsx": {
-    "mtime": 1792777427.264717,
-    "seen": 1792777454.8898351,
-    "ast_hash": "7bddff8c724d2ac160665a1c69d0cffb",
+    "mtime": 1792778621.0266094,
+    "seen": 1792778630.5119581,
+    "ast_hash": "def64ba6cca44672382bd4c568cb779f",
     "semantic_hash": ""
   },
   "frontend/src/components/Layout.tsx": {

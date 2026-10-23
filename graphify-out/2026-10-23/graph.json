@@ -20287,7 +20287,7 @@
       "file_type": "code",
       "norm_label": "authscreen()",
       "source_file": "frontend/src/components/AuthScreen.tsx",
-      "source_location": "L457"
+      "source_location": "L463"
     },
     {
       "id": "frontend_src_components_authscreen_floatingcoin",
@@ -63209,7 +63209,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "frontend/src/components/AuthScreen.tsx",
-      "source_location": "L582",
+      "source_location": "L588",
       "weight": 1.0
     },
     {
@@ -63221,7 +63221,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "frontend/src/components/AuthScreen.tsx",
-      "source_location": "L594",
+      "source_location": "L600",
       "weight": 1.0
     },
     {
@@ -63233,7 +63233,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "frontend/src/components/AuthScreen.tsx",
-      "source_location": "L617",
+      "source_location": "L623",
       "weight": 1.0
     },
     {
@@ -63245,7 +63245,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "frontend/src/components/AuthScreen.tsx",
-      "source_location": "L728",
+      "source_location": "L734",
       "weight": 1.0
     },
     {
@@ -99100,7 +99100,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "frontend/src/components/AuthScreen.tsx",
-      "source_location": "L457",
+      "source_location": "L463",
       "weight": 1.0
     },
     {
@@ -106172,5 +106172,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "8f01bb35b1b0770cf225611a5725b58d9ad6e930"
+  "built_at_commit": "8e9cd3db64ff7b8a5b9c57d1ce63425c8b7dd446"
 }

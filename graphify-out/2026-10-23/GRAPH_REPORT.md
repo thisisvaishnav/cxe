@@ -1,7 +1,7 @@
 # Graph Report - cxe  (2026-10-23)
 
 ## Corpus Check
-- 94 files · ~120,666 words
+- 94 files · ~120,691 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 23 file(s) not represented in the graph (top: (none) 9, .example 3, .lock 3)
 
@@ -11,7 +11,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `8f01bb35`
+- Built from commit: `8e9cd3db`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -169,9 +169,9 @@
 4. `r()` - 28 edges
 5. `r()` - 28 edges
 6. `interpretNode()` - 28 edges
-7. `interpretNode()` - 25 edges
-8. `slice()` - 25 edges
-9. `toString()` - 25 edges
+7. `slice()` - 25 edges
+8. `toString()` - 25 edges
+9. `interpretNode()` - 25 edges
 10. `write()` - 25 edges
 
 ## Surprising Connections (you probably didn't know these)
@@ -606,7 +606,7 @@ Nodes (3): Favicon, Frontend Index, Frontend Main Entry
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `@prisma/client-runtime-utils` connect `runtime/index-browser.js` to `runtime/client.d.ts`, `runtime/client.js`, `wasm-compiler-edge.js`, `prisma/package.json`, `index-browser.d.ts`?**
-  _High betweenness centrality (0.412) - this node is a cross-community bridge._
+  _High betweenness centrality (0.375) - this node is a cross-community bridge._
 - **Are the 28 inferred relationships involving `t()` (e.g. with `k()` and `q()`) actually correct?**
   _`t()` has 28 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `AuthScreenProps`, `clerkRetroAppearance`, `AggregateBalance` to the rest of the system?**
@@ -614,7 +614,7 @@ _Questions this graph is uniquely positioned to answer:_
 - **Should `index.d.ts` be split into smaller, more focused modules?**
   _Cohesion score 0.003766478342749529 - nodes in this community are weakly interconnected._
 - **Why does `decodeBase64AsWasm()` connect `index.js` to `client.ts`?**
-  _High betweenness centrality (0.296) - this node is a cross-community bridge._
+  _High betweenness centrality (0.291) - this node is a cross-community bridge._
 - **Are the 12 inferred relationships involving `e()` (e.g. with `#a()` and `$c()`) actually correct?**
   _`e()` has 12 INFERRED edges - model-reasoned connections that need verification._
 - **Should `runtime/client.d.ts` be split into smaller, more focused modules?**
