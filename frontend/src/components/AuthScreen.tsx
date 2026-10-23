@@ -1,6 +1,10 @@
-// src/components/AuthScreen.tsx - Enhanced Retro Super Mario themed Sign In / Sign Up screen
-// Features: Parallax scrolling, animated Mario, coin counter, power-up password meter,
-//           floating question blocks, star particles, and confetti effects
+// src/components/AuthScreen.tsx - Retro Game Menu × Clean Authentication
+// Designed following the Figma UI/UX principles and design critique:
+// 1. Unified Game Dialog aesthetic with square corners, crisp 2px borders, 4px hard shadows.
+// 2. Clear CTA hierarchy: PRESS START (page title), Sign in to CXE (form title), Continue (primary action).
+// 3. Single secondary sign-up text link (no duplicated prompts).
+// 4. Disciplined palette: Charcoal (#242329) & White (#FFFFFF) form, Pixel Yellow (#FFD43B) accents, Orange-Red (#F05B43) warnings.
+// 5. Clean, readable typography; removed progress line and decorative clutter.
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { SignIn, SignUp } from "@clerk/react";
@@ -159,8 +163,8 @@ const FloatingCoin: React.FC<{ x: number; y: number; id: number }> = ({
       left: x,
       top: y,
       fontFamily: "var(--font-press-start)",
-      fontSize: "16px",
-      color: "var(--mario-yellow)",
+      fontSize: "13px",
+      color: "#FFD43B",
       textShadow: "2px 2px 0px #000",
       zIndex: 100,
       pointerEvents: "none",
@@ -183,14 +187,14 @@ const PowerUpMeter: React.FC<{ password: string }> = ({ password }) => {
   };
 
   const strength = getStrength(password);
-  const labels = ["", "MUSHROOM", "FIRE FLOWER", "STAR", "STAR", "INVINCIBLE!"];
+  const labels = ["", "MUSHROOM", "FIRE FLOWER", "STAR", "SUPER STAR", "INVINCIBLE!"];
   const colors = [
     "#333",
-    "var(--mario-red)",
-    "var(--mario-orange)",
-    "var(--mario-yellow)",
-    "var(--mario-green)",
-    "#FFD700",
+    "#F05B43",
+    "#FF9800",
+    "#FFD43B",
+    "#4CAF50",
+    "#FFD43B",
   ];
 
   if (!password) return null;
@@ -210,22 +214,21 @@ const PowerUpMeter: React.FC<{ password: string }> = ({ password }) => {
             key={level}
             style={{
               flex: 1,
-              background: strength >= level ? colors[level] : "#ddd",
+              background: strength >= level ? colors[level] : "#E0E0E0",
               border: "1px solid #000",
-              transition: "background 0.3s ease",
-              boxShadow:
-                strength >= level ? `0 0 6px ${colors[level]}` : "none",
+              transition: "background 0.2s ease",
             }}
           />
         ))}
       </div>
       <div
         style={{
-          fontFamily: "var(--font-press-start)",
-          fontSize: "7px",
+          fontFamily: "var(--font-mono)",
+          fontSize: "10px",
+          fontWeight: "bold",
           color: colors[strength],
           textAlign: "right",
-          textShadow: strength >= 4 ? "0 0 8px currentColor" : "none",
+          letterSpacing: "0.5px",
         }}
       >
         {labels[strength]}
@@ -234,7 +237,7 @@ const PowerUpMeter: React.FC<{ password: string }> = ({ password }) => {
   );
 };
 
-/* ─── Star Particle ─── */
+/* ─── Star Particle (Lightweight & Hardware-Accelerated) ─── */
 const StarParticle: React.FC<{
   delay: number;
   left: string;
@@ -246,20 +249,223 @@ const StarParticle: React.FC<{
       position: "absolute",
       left,
       top: "-20px",
-      fontSize: "16px",
+      fontSize: "14px",
       animationDelay: `${delay}s`,
       animationDuration: `${duration}s`,
       opacity: 0,
       zIndex: 1,
+      pointerEvents: "none",
     }}
   >
     ★
   </div>
 );
 
+/* ─── Clerk Retro Appearance Configuration ─── */
+const clerkRetroAppearance = {
+  variables: {
+    colorPrimary: "#242329",
+    colorText: "#111111",
+    colorTextSecondary: "#555555",
+    colorBackground: "#ffffff",
+    colorInputBackground: "#ffffff",
+    colorInputText: "#111111",
+    borderRadius: "0px",
+    fontFamily: "'Share Tech Mono', monospace",
+    fontSize: "14px",
+  },
+  elements: {
+    rootBox: {
+      width: "100%",
+    },
+    card: {
+      backgroundColor: "transparent",
+      boxShadow: "none",
+      border: "none",
+      padding: "0",
+      width: "100%",
+    },
+    header: {
+      display: "none",
+    },
+    headerTitle: {
+      display: "none",
+    },
+    headerSubtitle: {
+      display: "none",
+    },
+    socialButtonsBlockButton: {
+      border: "2px solid #000000",
+      borderRadius: "0px",
+      boxShadow: "2px 2px 0px #000000",
+      backgroundColor: "#ffffff",
+      fontFamily: "'Share Tech Mono', monospace",
+      fontSize: "13px",
+      fontWeight: "600",
+      color: "#111111",
+      height: "44px",
+      transition: "transform 0.1s ease, box-shadow 0.1s ease",
+      "&:hover": {
+        backgroundColor: "#f9f9f9",
+        transform: "translate(-1px, -1px)",
+        boxShadow: "3px 3px 0px #000000",
+      },
+      "&:active": {
+        transform: "translate(1px, 1px)",
+        boxShadow: "1px 1px 0px #000000",
+      },
+    },
+    socialButtonsBlockButtonText: {
+      fontFamily: "'Share Tech Mono', monospace",
+      fontSize: "13px",
+      color: "#111111",
+    },
+    dividerRow: {
+      margin: "14px 0",
+    },
+    dividerLine: {
+      backgroundColor: "#000000",
+      height: "2px",
+    },
+    dividerText: {
+      fontFamily: "'Press Start 2P', monospace",
+      fontSize: "8px",
+      color: "#555555",
+      textTransform: "uppercase" as const,
+      letterSpacing: "1px",
+    },
+    formFieldRow: {
+      width: "100%",
+      marginBottom: "12px",
+    },
+    formField: {
+      width: "100%",
+    },
+    formFieldInputGroup: {
+      width: "100%",
+      position: "relative" as const,
+    },
+    formFieldLabel: {
+      fontFamily: "'Share Tech Mono', monospace",
+      fontSize: "11px",
+      fontWeight: "bold",
+      color: "#242329",
+      marginBottom: "6px",
+      letterSpacing: "0.5px",
+      textTransform: "uppercase" as const,
+    },
+    formFieldInput: {
+      border: "2px solid #000000",
+      borderRadius: "0px",
+      boxShadow: "inset 1px 1px 0px rgba(0,0,0,0.06)",
+      fontFamily: "'Share Tech Mono', monospace",
+      fontSize: "15px",
+      height: "46px",
+      minHeight: "46px",
+      lineHeight: "normal",
+      padding: "0 14px",
+      boxSizing: "border-box" as const,
+      width: "100%",
+      color: "#111111",
+      backgroundColor: "#ffffff",
+      "&:focus": {
+        borderColor: "#000000",
+        boxShadow: "0 0 0 2px #FFD43B",
+      },
+    },
+    formButtonPrimary: {
+      backgroundColor: "#242329",
+      border: "2px solid #000000",
+      borderRadius: "0px",
+      boxShadow: "3px 3px 0px #000000",
+      fontFamily: "'Press Start 2P', monospace",
+      fontSize: "11px",
+      color: "#ffffff",
+      height: "46px",
+      padding: "12px 16px",
+      textTransform: "uppercase" as const,
+      letterSpacing: "1px",
+      transition: "all 0.1s ease",
+      "&:hover": {
+        backgroundColor: "#151419",
+        transform: "translate(-1px, -1px)",
+        boxShadow: "4px 4px 0px #000000",
+      },
+      "&:active": {
+        transform: "translate(2px, 2px)",
+        boxShadow: "1px 1px 0px #000000",
+      },
+    },
+    footerAction: {
+      marginTop: "14px",
+      fontFamily: "'Share Tech Mono', monospace",
+      fontSize: "12px",
+      color: "#555555",
+      textAlign: "center" as const,
+    },
+    footerActionText: {
+      fontFamily: "'Share Tech Mono', monospace",
+      fontSize: "12px",
+      color: "#555555",
+    },
+    footerActionLink: {
+      color: "#242329",
+      fontFamily: "'Share Tech Mono', monospace",
+      fontWeight: "bold",
+      textDecoration: "underline",
+      "&:hover": {
+        color: "#F05B43",
+      },
+    },
+    footer: {
+      background: "transparent",
+      border: "none",
+      padding: "4px 0 0",
+    },
+    identityPreview: {
+      border: "2px solid #000000",
+      borderRadius: "0px",
+      boxShadow: "2px 2px 0px #000000",
+      padding: "8px 12px",
+    },
+    identityPreviewText: {
+      fontFamily: "'Share Tech Mono', monospace",
+      color: "#111111",
+    },
+    formFieldErrorText: {
+      fontFamily: "'Share Tech Mono', monospace",
+      color: "#F05B43",
+      fontSize: "11px",
+      marginTop: "4px",
+    },
+    alert: {
+      border: "2px solid #F05B43",
+      borderRadius: "0px",
+      fontFamily: "'Share Tech Mono', monospace",
+      backgroundColor: "#ffebee",
+      boxShadow: "2px 2px 0px #000000",
+    },
+    alertText: {
+      fontFamily: "'Share Tech Mono', monospace",
+      color: "#F05B43",
+      fontSize: "12px",
+    },
+  },
+};
+
 /* ─── Main Auth Screen ─── */
-export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, hasClerk = false }) => {
-  const [isSignUp, setIsSignUp] = useState(false);
+export const AuthScreen: React.FC<AuthScreenProps> = ({
+  onAuthSuccess,
+  hasClerk = false,
+}) => {
+  // Sync state with location hash (#sign-up or #sign-in)
+  const [isSignUp, setIsSignUp] = useState<boolean>(() => {
+    if (typeof window !== "undefined") {
+      return window.location.hash === "#sign-up";
+    }
+    return false;
+  });
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -273,17 +479,25 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, hasClerk 
   const coinIdRef = useRef(0);
   const formRef = useRef<HTMLDivElement>(null);
 
+  // Listen to hash changes for deep linking and Clerk view changes
+  useEffect(() => {
+    const handleHashChange = () => {
+      setIsSignUp(window.location.hash === "#sign-up");
+    };
+    window.addEventListener("hashchange", handleHashChange);
+    return () => window.removeEventListener("hashchange", handleHashChange);
+  }, []);
+
   // Coin pop effect on keystroke
   const spawnCoin = useCallback(() => {
     const id = coinIdRef.current++;
     const x = Math.random() * 200 + 40;
-    const y = Math.random() * 100 + 50;
+    const y = Math.random() * 80 + 30;
     setFloatingCoins((prev) => [...prev, { x, y, id }]);
     setCoinCount((c) => c + 1);
-    // Remove after animation
     setTimeout(() => {
       setFloatingCoins((prev) => prev.filter((c) => c.id !== id));
-    }, 1000);
+    }, 900);
   }, []);
 
   // Mario runs when typing
@@ -325,25 +539,25 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, hasClerk 
   };
 
   const handleToggleMode = () => {
-    setIsSignUp(!isSignUp);
+    const nextSignUp = !isSignUp;
+    setIsSignUp(nextSignUp);
+    window.location.hash = nextSignUp ? "#sign-up" : "#sign-in";
     setError(null);
-    // Spawn a burst of coins on toggle
-    for (let i = 0; i < 5; i++) {
-      setTimeout(() => spawnCoin(), i * 80);
+    for (let i = 0; i < 4; i++) {
+      setTimeout(() => spawnCoin(), i * 70);
     }
   };
 
   return (
     <div className="auth-screen-root">
-      {/* ═══ Parallax Sky Background ═══ */}
+      {/* ════ Parallax Sky Background (Hardware-accelerated) ════ */}
       <div className="parallax-sky">
-        {/* Clouds Layer */}
+        {/* Clouds */}
         <div className="cloud cloud-1" />
         <div className="cloud cloud-2" />
         <div className="cloud cloud-3" />
-        <div className="cloud cloud-4" />
 
-        {/* Hills Layer */}
+        {/* Hills */}
         <div className="hill hill-1" />
         <div className="hill hill-2" />
         <div className="hill hill-3" />
@@ -364,20 +578,16 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, hasClerk 
           <div className="ground-dirt" />
         </div>
 
-        {/* Star Particles */}
-        <StarParticle delay={0} left="10%" duration={4} />
-        <StarParticle delay={1.5} left="30%" duration={3.5} />
-        <StarParticle delay={0.8} left="50%" duration={5} />
-        <StarParticle delay={2.2} left="70%" duration={3} />
-        <StarParticle delay={3} left="85%" duration={4.5} />
-        <StarParticle delay={0.3} left="15%" duration={3.8} />
-        <StarParticle delay={1.8} left="60%" duration={4.2} />
-        <StarParticle delay={2.8} left="40%" duration={3.2} />
+        {/* Lightweight Star Particles */}
+        <StarParticle delay={0} left="12%" duration={4} />
+        <StarParticle delay={1.4} left="38%" duration={3.6} />
+        <StarParticle delay={2.5} left="68%" duration={4.2} />
+        <StarParticle delay={0.7} left="88%" duration={3.8} />
       </div>
 
-      {/* ═══ Main Content (2-Panel Layout) ═══ */}
+      {/* ════ Main Content Layout (Responsive 2-Panel) ════ */}
       <div className="auth-content-wrapper">
-        {/* ── Left Panel: Game Art ── */}
+        {/* ── Left Panel: Game Art & Brand Story ── */}
         <div className="auth-art-panel">
           {/* Floating Coins */}
           {floatingCoins.map((coin) => (
@@ -387,7 +597,9 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, hasClerk 
           {/* Coin Counter HUD */}
           <div className="coin-hud">
             <span className="coin-icon">●</span>
-            <span className="coin-label">× {String(coinCount).padStart(3, "0")}</span>
+            <span className="coin-label">
+              × {String(coinCount).padStart(3, "0")}
+            </span>
           </div>
 
           {/* Comic Speech Bubble */}
@@ -405,13 +617,12 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, hasClerk 
             <PixelMario running={marioRunning} />
           </div>
 
-          {/* Comic Block Grid */}
+          {/* Retro Block Grid */}
           <div className="art-grid">
-            {/* Box 1: SUPER MARIO LOGO BLOCK */}
+            {/* Box 1: SUPERCOIN LOGO */}
             <div className="art-box art-box-red">
               <h1 className="art-title">SUPERCOIN</h1>
               <p className="art-subtitle">PRESS START</p>
-              <div className="art-box-shimmer" />
             </div>
 
             {/* Box 2: QUESTION BLOCK */}
@@ -427,7 +638,6 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, hasClerk 
             <div className="art-box art-box-green">
               <div className="oneup-text">1-UP!</div>
               <div className="oneup-sub">ONLINE TRADING</div>
-              <div className="art-box-pulse" />
             </div>
 
             {/* Box 4: SPINNING COIN */}
@@ -443,30 +653,22 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, hasClerk 
           </div>
         </div>
 
-        {/* ── Right Panel: Auth Form ── */}
+        {/* ── Right Panel: Form Card ── */}
         <div className="auth-form-panel">
           <div
             ref={formRef}
-            className={`nes-container auth-card ${shakeForm ? "shake-animation" : ""}`}
+            className={`auth-card ${shakeForm ? "shake-animation" : ""}`}
           >
-            {/* Card Coin Badges */}
-            <div className="card-badge card-badge-left">$</div>
-            <div className="card-badge card-badge-right">?</div>
+            {/* Card Coin Badges (Anchored cleanly with room, no clipping) */}
+            <div className="card-badge card-badge-left" title="Coins">$</div>
+            <div className="card-badge card-badge-right" title="Mystery Block">?</div>
 
-            {/* Animated Title */}
+            {/* Unified Clear Hierarchy: Page Title & Form Title */}
             <div className="auth-card-header">
-              <h2 className="auth-card-title">
-                {isSignUp ? "CREATE ACCOUNT" : "PRESS START"}
-              </h2>
+              <h2 className="auth-card-title">PRESS START</h2>
               <p className="auth-card-subtitle">
-                {isSignUp
-                  ? "Sign up to start your adventure"
-                  : "Sign in and continue your adventure"}
+                {isSignUp ? "Create your CXE Account" : "Sign in to CXE"}
               </p>
-              {/* Decorative underline */}
-              <div className="title-underline">
-                <div className="title-underline-fill" />
-              </div>
             </div>
 
             {/* Error Message */}
@@ -476,58 +678,25 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, hasClerk 
 
             {/* Clerk Authentication Layer or Fallback Form */}
             {hasClerk ? (
-              <div
-                className="clerk-auth-container"
-                style={{
-                  margin: "12px 0",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  width: "100%",
-                  maxHeight: "65vh",
-                  overflowY: "auto",
-                }}
-              >
+              <div className="clerk-auth-container">
                 {isSignUp ? (
                   <SignUp
                     routing="hash"
                     signInUrl="#sign-in"
                     fallbackRedirectUrl="/"
-                    appearance={{
-                      elements: {
-                        rootBox: { width: "100%" },
-                        card: {
-                          backgroundColor: "#ffffff",
-                          boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-                          border: "2px solid #000000",
-                          borderRadius: "4px",
-                          width: "100%",
-                        },
-                      },
-                    }}
+                    appearance={clerkRetroAppearance}
                   />
                 ) : (
                   <SignIn
                     routing="hash"
                     signUpUrl="#sign-up"
                     fallbackRedirectUrl="/"
-                    appearance={{
-                      elements: {
-                        rootBox: { width: "100%" },
-                        card: {
-                          backgroundColor: "#ffffff",
-                          boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-                          border: "2px solid #000000",
-                          borderRadius: "4px",
-                          width: "100%",
-                        },
-                      },
-                    }}
+                    appearance={clerkRetroAppearance}
                   />
                 )}
               </div>
             ) : (
-              <form onSubmit={handleSubmit}>
+              <form onSubmit={handleSubmit} className="legacy-auth-form">
                 <div className="nes-field">
                   <label className="nes-label">EMAIL / USERNAME</label>
                   <input
@@ -543,7 +712,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, hasClerk 
                   />
                 </div>
 
-                <div className="nes-field" style={{ marginBottom: "8px" }}>
+                <div className="nes-field" style={{ marginBottom: "14px" }}>
                   <label className="nes-label">PASSWORD</label>
                   <input
                     type="password"
@@ -561,62 +730,59 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, hasClerk 
 
                 <button
                   type="submit"
-                  className="nes-btn red auth-submit-btn"
+                  className="auth-submit-btn"
                   disabled={isLoading}
                 >
                   <span className="btn-content">
                     {isLoading ? (
-                      <>
-                        <span className="loading-dots">LOADING</span>
-                      </>
+                      <span className="loading-dots">LOADING</span>
                     ) : isSignUp ? (
-                      "1-UP! SIGN UP"
+                      "CONTINUE"
                     ) : (
-                      "1-UP! SIGN IN"
+                      "CONTINUE"
                     )}
                   </span>
                 </button>
+
+                {/* Legacy Mode Toggle - only shown when Clerk is not handling it */}
+                <div className="auth-toggle">
+                  <span className="auth-toggle-text">
+                    {isSignUp ? "Already a player? " : "New player? "}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleToggleMode}
+                    className="auth-toggle-btn"
+                  >
+                    {isSignUp ? "Sign In" : "Create Account"}
+                  </button>
+                </div>
               </form>
             )}
-
-            {/* Toggle Sign In / Sign Up */}
-            <div className="auth-toggle">
-              <span className="auth-toggle-text">
-                {isSignUp ? "Already a player? " : "New player? "}
-              </span>
-              <button onClick={handleToggleMode} className="auth-toggle-btn">
-                {isSignUp ? "SIGN IN" : "CREATE ACCOUNT"}
-              </button>
-            </div>
-
-            {/* Fun footer with animated blocks */}
-            <div className="auth-card-footer">
-              <div className="footer-block" />
-              <div className="footer-block" />
-              <div className="footer-block" />
-              <div className="footer-block" />
-              <div className="footer-block" />
-            </div>
           </div>
         </div>
       </div>
 
-      {/* ═══ All CSS Animations & Styles ═══ */}
+      {/* ════ Styles (Game Menu × Clean Authentication) ════ */}
       <style>{`
         /* ── Root Layout ── */
         .auth-screen-root {
           position: relative;
-          width: 100vw;
-          height: 100vh;
-          overflow: hidden;
+          width: 100%;
+          min-height: 100vh;
+          overflow-x: hidden;
+          overflow-y: auto;
+          display: flex;
+          background-color: #5c94fc;
         }
 
         /* ── Parallax Sky ── */
         .parallax-sky {
-          position: absolute;
+          position: fixed;
           inset: 0;
-          background: linear-gradient(180deg, #5c94fc 0%, #87CEEB 40%, #B0E0E6 70%, #98D8A0 100%);
+          background: linear-gradient(180deg, #5c94fc 0%, #87CEEB 45%, #B0E0E6 75%, #98D8A0 100%);
           z-index: 0;
+          pointer-events: none;
         }
 
         /* Clouds */
@@ -625,6 +791,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, hasClerk 
           background: #ffffff;
           border-radius: 20px;
           opacity: 0.9;
+          will-change: transform;
         }
         .cloud::before, .cloud::after {
           content: '';
@@ -636,7 +803,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, hasClerk 
         .cloud-1 {
           width: 120px; height: 40px;
           top: 8%; left: -120px;
-          animation: cloud-drift 20s linear infinite;
+          animation: cloud-drift 22s linear infinite;
         }
         .cloud-1::before { width: 50px; height: 50px; top: -25px; left: 20px; }
         .cloud-1::after { width: 35px; height: 35px; top: -15px; left: 60px; }
@@ -644,8 +811,8 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, hasClerk 
         .cloud-2 {
           width: 160px; height: 45px;
           top: 14%; left: -160px;
-          animation: cloud-drift 28s linear infinite;
-          animation-delay: -8s;
+          animation: cloud-drift 30s linear infinite;
+          animation-delay: -10s;
         }
         .cloud-2::before { width: 60px; height: 55px; top: -30px; left: 30px; }
         .cloud-2::after { width: 45px; height: 40px; top: -18px; left: 80px; }
@@ -653,24 +820,15 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, hasClerk 
         .cloud-3 {
           width: 100px; height: 35px;
           top: 22%; left: -100px;
-          animation: cloud-drift 24s linear infinite;
-          animation-delay: -14s;
+          animation: cloud-drift 26s linear infinite;
+          animation-delay: -16s;
         }
         .cloud-3::before { width: 40px; height: 40px; top: -20px; left: 15px; }
         .cloud-3::after { width: 30px; height: 30px; top: -12px; left: 50px; }
 
-        .cloud-4 {
-          width: 140px; height: 42px;
-          top: 6%; left: -140px;
-          animation: cloud-drift 32s linear infinite;
-          animation-delay: -20s;
-        }
-        .cloud-4::before { width: 55px; height: 50px; top: -28px; left: 25px; }
-        .cloud-4::after { width: 40px; height: 38px; top: -16px; left: 70px; }
-
         @keyframes cloud-drift {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(calc(100vw + 200px)); }
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(calc(100vw + 200px), 0, 0); }
         }
 
         /* Hills */
@@ -702,8 +860,8 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, hasClerk 
           bottom: 80px;
           z-index: 2;
         }
-        .pipe-1 { left: 25%; }
-        .pipe-2 { right: 20%; }
+        .pipe-1 { left: 22%; }
+        .pipe-2 { right: 18%; }
 
         .pipe-top {
           width: 50px;
@@ -732,7 +890,6 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, hasClerk 
         }
         .ground-blocks {
           height: 40px;
-          background: repeating-x;
           background: #C8A26A;
           border-top: 4px solid #8B6914;
           background-image:
@@ -756,17 +913,18 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, hasClerk 
           background: #A0522D;
         }
 
-        /* Star Particles */
+        /* Lightweight Stars */
         .star-particle {
-          color: var(--mario-yellow);
+          color: #FFD43B;
           animation: star-fall linear infinite;
-          text-shadow: 0 0 6px rgba(251, 192, 45, 0.6);
+          text-shadow: 0 0 4px rgba(251, 192, 45, 0.7);
+          will-change: transform;
         }
         @keyframes star-fall {
-          0% { transform: translateY(0) rotate(0deg); opacity: 0; }
-          10% { opacity: 1; }
-          90% { opacity: 0.8; }
-          100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+          0% { transform: translate3d(0, 0, 0); opacity: 0; }
+          15% { opacity: 0.9; }
+          85% { opacity: 0.9; }
+          100% { transform: translate3d(0, 100vh, 0); opacity: 0; }
         }
 
         /* ── Content Wrapper ── */
@@ -775,49 +933,41 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, hasClerk 
           z-index: 10;
           display: flex;
           width: 100%;
-          height: 100%;
+          min-height: 100vh;
         }
 
-        /* ── Left Art Panel ── */
+        /* ── Left Art Panel (Zero blur lag, solid high-contrast dark theme) ── */
         .auth-art-panel {
-          flex: 1;
-          background: rgba(0, 0, 0, 0.85);
-          backdrop-filter: blur(10px);
-          border-right: 4px solid #000;
+          flex: 1.1;
+          background: rgba(10, 10, 20, 0.9);
+          border-right: 3px solid #000000;
           display: flex;
           flex-direction: column;
           position: relative;
-          padding: 30px;
+          padding: 36px 32px;
           color: #ffffff;
-          overflow: hidden;
         }
 
         /* Coin HUD */
         .coin-hud {
           position: absolute;
-          top: 15px;
-          right: 20px;
+          top: 18px;
+          right: 24px;
           display: flex;
           align-items: center;
-          gap: 6px;
+          gap: 8px;
           font-family: var(--font-press-start);
-          font-size: 14px;
-          color: var(--mario-yellow);
-          text-shadow: 2px 2px 0px #000;
+          font-size: 13px;
+          color: #FFD43B;
+          text-shadow: 2px 2px 0px #000000;
           z-index: 20;
-          animation: coin-hud-glow 2s ease-in-out infinite;
         }
         .coin-icon {
-          font-size: 18px;
-          animation: spin-y 1.5s linear infinite;
-          display: inline-block;
+          font-size: 16px;
+          color: #FFD43B;
         }
         .coin-label {
           letter-spacing: 2px;
-        }
-        @keyframes coin-hud-glow {
-          0%, 100% { filter: brightness(1); }
-          50% { filter: brightness(1.3); }
         }
 
         /* Speech Bubble */
@@ -825,44 +975,39 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, hasClerk 
           background: #ffffff;
           color: #000000;
           border: 3px solid #000000;
-          padding: 15px;
+          padding: 14px 16px;
           border-radius: 0px;
-          box-shadow: 4px 4px 0px rgba(255,255,255,0.2);
+          box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.4);
           font-family: var(--font-press-start);
-          font-size: 11px;
+          font-size: 10px;
           line-height: 1.6;
-          max-width: 280px;
+          max-width: 320px;
           position: relative;
-          margin-bottom: 15px;
+          margin-bottom: 20px;
           z-index: 10;
-          animation: bubble-bounce 3s ease-in-out infinite;
         }
         .speech-arrow-outer {
           position: absolute;
           bottom: -15px;
-          left: 40px;
+          left: 36px;
           width: 0; height: 0;
           border-left: 10px solid transparent;
           border-right: 10px solid transparent;
-          border-top: 15px solid #000;
+          border-top: 15px solid #000000;
         }
         .speech-arrow-inner {
           position: absolute;
           bottom: -11px;
-          left: 41px;
+          left: 37px;
           width: 0; height: 0;
           border-left: 9px solid transparent;
           border-right: 9px solid transparent;
           border-top: 13px solid #ffffff;
         }
-        @keyframes bubble-bounce {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-5px); }
-        }
 
         /* Mario Character */
         .mario-character {
-          margin: 10px 0 10px 50px;
+          margin: 6px 0 16px 40px;
           z-index: 10;
         }
         .mario-idle {
@@ -873,22 +1018,22 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, hasClerk 
         }
         @keyframes mario-breathe {
           0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-3px); }
+          50% { transform: translateY(-2px); }
         }
         @keyframes mario-run {
-          0% { transform: translateX(0) scaleX(1); }
-          50% { transform: translateX(4px) scaleX(0.95); }
-          100% { transform: translateX(0) scaleX(1); }
+          0% { transform: translateX(0); }
+          50% { transform: translateX(3px); }
+          100% { transform: translateX(0); }
         }
 
         /* Floating Coin Pop */
         .floating-coin-pop {
-          animation: coin-pop 0.8s ease-out forwards;
+          animation: coin-pop 0.9s ease-out forwards;
         }
         @keyframes coin-pop {
-          0% { transform: translateY(0) scale(1); opacity: 1; }
-          50% { transform: translateY(-40px) scale(1.3); opacity: 0.8; }
-          100% { transform: translateY(-70px) scale(0.5); opacity: 0; }
+          0% { transform: translate3d(0, 0, 0) scale(1); opacity: 1; }
+          60% { transform: translate3d(0, -35px, 0) scale(1.2); opacity: 0.9; }
+          100% { transform: translate3d(0, -60px, 0) scale(0.6); opacity: 0; }
         }
 
         /* Art Grid */
@@ -897,8 +1042,8 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, hasClerk 
           display: grid;
           grid-template-columns: 1fr 1fr;
           grid-template-rows: 1fr 1fr;
-          gap: 15px;
-          min-height: 0;
+          gap: 16px;
+          min-height: 240px;
         }
 
         .art-box {
@@ -907,14 +1052,14 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, hasClerk 
           flex-direction: column;
           justify-content: center;
           align-items: center;
-          padding: 10px;
+          padding: 12px;
           position: relative;
-          overflow: hidden;
-          transition: transform 0.2s, box-shadow 0.2s;
+          box-shadow: 4px 4px 0px #000000;
+          transition: transform 0.15s ease;
         }
         .art-box:hover {
-          transform: scale(1.03);
-          box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+          transform: translate(-2px, -2px);
+          box-shadow: 6px 6px 0px #000000;
         }
 
         .art-box-red { background: var(--mario-red); }
@@ -924,14 +1069,14 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, hasClerk 
 
         .art-title {
           font-family: var(--font-press-start) !important;
-          font-size: 24px !important;
-          color: var(--mario-yellow) !important;
+          font-size: 22px !important;
+          color: #FFD43B !important;
           text-align: center;
-          text-shadow: 3px 3px 0px #000;
+          text-shadow: 3px 3px 0px #000000;
           text-transform: uppercase;
         }
         .art-subtitle {
-          font-size: 12px;
+          font-size: 11px;
           margin-top: 10px;
           color: #ffffff;
           font-family: var(--font-press-start);
@@ -942,143 +1087,433 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, hasClerk 
           50% { opacity: 0; }
         }
 
-        /* Shimmer effect on red box */
-        .art-box-shimmer {
-          position: absolute;
-          top: -50%;
-          left: -50%;
-          width: 200%;
-          height: 200%;
-          background: linear-gradient(
-            45deg,
-            transparent 40%,
-            rgba(255,255,255,0.1) 50%,
-            transparent 60%
-          );
-          animation: shimmer 3s linear infinite;
-        }
-        @keyframes shimmer {
-          0% { transform: translateX(-100%) translateY(-100%); }
-          100% { transform: translateX(100%) translateY(100%); }
-        }
-
-        /* Question Block Animation */
+        /* Question Block */
         .question-block-animated {
-          animation: qblock-bounce 2s ease-in-out infinite;
+          animation: qblock-bounce 2.5s ease-in-out infinite;
         }
         @keyframes qblock-bounce {
-          0%, 85%, 100% { transform: translateY(0); }
-          90% { transform: translateY(-8px); }
-          95% { transform: translateY(0); }
+          0%, 88%, 100% { transform: translateY(0); }
+          94% { transform: translateY(-6px); }
         }
 
         .question-mark {
           font-family: var(--font-press-start);
-          font-size: 72px;
+          font-size: 64px;
           color: #ffffff;
           font-weight: bold;
-          text-shadow: 4px 4px 0px #000;
-          animation: q-pulse 1.5s ease-in-out infinite;
-        }
-        @keyframes q-pulse {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.08); }
+          text-shadow: 4px 4px 0px #000000;
         }
 
         .screw {
           position: absolute;
           width: 6px;
           height: 6px;
-          background: #000;
+          background: #000000;
         }
-        .screw-tl { top: 10px; left: 10px; }
-        .screw-tr { top: 10px; right: 10px; }
-        .screw-bl { bottom: 10px; left: 10px; }
-        .screw-br { bottom: 10px; right: 10px; }
+        .screw-tl { top: 8px; left: 8px; }
+        .screw-tr { top: 8px; right: 8px; }
+        .screw-bl { bottom: 8px; left: 8px; }
+        .screw-br { bottom: 8px; right: 8px; }
 
         /* 1-UP box */
         .oneup-text {
           font-size: 20px;
           font-family: var(--font-press-start);
           color: #ffffff;
-          text-shadow: 2px 2px 0px #000;
+          text-shadow: 2px 2px 0px #000000;
         }
         .oneup-sub {
-          font-size: 12px;
+          font-size: 11px;
           margin-top: 10px;
-          color: var(--mario-yellow);
+          color: #FFD43B;
           font-family: var(--font-press-start);
-        }
-        .art-box-pulse {
-          position: absolute;
-          inset: 0;
-          border: 3px solid rgba(255,255,255,0.4);
-          animation: box-pulse 2s ease-in-out infinite;
-        }
-        @keyframes box-pulse {
-          0%, 100% { opacity: 0; transform: scale(1); }
-          50% { opacity: 1; transform: scale(0.95); }
         }
 
         /* Spinning coin */
         .spinning-coin {
           width: 50px;
           height: 50px;
-          background: var(--mario-yellow);
-          border: 3px solid #000;
+          background: #FFD43B;
+          border: 3px solid #000000;
           border-radius: 50%;
-          box-shadow: 3px 3px 0px #000;
+          box-shadow: 3px 3px 0px #000000;
           display: flex;
           justify-content: center;
           align-items: center;
           font-size: 24px;
           font-family: var(--font-press-start);
-          color: #000;
+          color: #000000;
           font-weight: bold;
-          animation: spin-y 2s linear infinite;
-        }
-        @keyframes spin-y {
-          0% { transform: rotateY(0deg); }
-          100% { transform: rotateY(360deg); }
         }
 
         .art-footer {
-          margin-top: 15px;
+          margin-top: 24px;
           display: flex;
           justify-content: space-between;
-          font-size: 12px;
-          opacity: 0.8;
+          font-size: 11px;
+          opacity: 0.85;
           font-family: var(--font-press-start);
         }
 
-        /* ── Right Auth Panel ── */
+        /* ── Right Panel: Form Area (Centered with margin:auto, zero scroll clipping) ── */
         .auth-form-panel {
           flex: 1;
           display: flex;
-          justify-content: center;
+          flex-direction: column;
           align-items: center;
-          padding: 40px;
-          background: rgba(92, 148, 252, 0.15);
-          backdrop-filter: blur(8px);
+          justify-content: flex-start;
+          padding: 36px 20px;
+          min-height: 100%;
+          box-sizing: border-box;
+          overflow-y: auto;
+          overflow-x: hidden;
         }
 
+        /* The Main Auth Card: Clean 2px pixel frame, square corners, hard offset shadow */
         .auth-card {
           width: 100%;
-          max-width: 480px;
+          max-width: 440px;
           background: #ffffff !important;
-          padding: 30px 24px !important;
-          animation: card-entrance 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-          max-height: 90vh;
-          overflow-y: auto;
+          border: 2px solid #000000 !important;
+          border-radius: 0px !important;
+          box-shadow: 4px 4px 0px #000000 !important;
+          padding: 32px 28px 24px !important;
+          position: relative;
+          margin: auto;
+          box-sizing: border-box !important;
         }
-        @keyframes card-entrance {
-          0% { transform: translateY(30px) scale(0.95); opacity: 0; }
-          100% { transform: translateY(0) scale(1); opacity: 1; }
+
+        /* Card badges: Anchored cleanly with space, no clipping */
+        .card-badge {
+          position: absolute;
+          top: -14px;
+          background: #FFD43B;
+          border: 2px solid #000000;
+          box-shadow: 2px 2px 0px #000000;
+          width: 28px;
+          height: 28px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          font-weight: bold;
+          font-size: 11px;
+          font-family: var(--font-press-start);
+          transition: transform 0.15s ease;
+          user-select: none;
+        }
+        .card-badge:hover {
+          transform: translateY(-2px);
+        }
+        .card-badge-left {
+          left: 18px;
+          border-radius: 50%;
+        }
+        .card-badge-right {
+          right: 18px;
+          border-radius: 0px;
+        }
+
+        /* Unified Card Header: Clear Hierarchy */
+        .auth-card-header {
+          text-align: center;
+          margin-bottom: 18px;
+        }
+        .auth-card-title {
+          font-size: 18px !important;
+          letter-spacing: 1px;
+          margin-bottom: 6px;
+          color: #000000;
+          font-family: var(--font-press-start);
+        }
+        .auth-card-subtitle {
+          font-size: 12px;
+          color: #555555;
+          text-transform: uppercase;
+          font-family: var(--font-mono);
+          letter-spacing: 0.5px;
+        }
+
+        /* Error Banner */
+        .auth-error {
+          border: 2px solid #F05B43;
+          background: #ffebee;
+          color: #F05B43;
+          padding: 10px 12px;
+          font-family: var(--font-mono);
+          font-size: 12px;
+          font-weight: bold;
+          line-height: 1.4;
+          margin-bottom: 16px;
+          box-shadow: 2px 2px 0px #000000;
+        }
+
+        /* Clerk Auth Container & Full-Width Enforcements */
+        .clerk-auth-container {
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+
+        /* Direct Clerk Element Target Overrides for complete theme unity */
+        .cl-rootBox,
+        .cl-cardBox,
+        .cl-card,
+        .cl-main,
+        .cl-form,
+        .cl-formFieldRow,
+        .cl-formField,
+        .cl-formFieldInputGroup,
+        .cl-internal-17uj465,
+        .cl-internal-ht35d7 {
+          width: 100% !important;
+          max-width: 100% !important;
+          box-sizing: border-box !important;
+        }
+
+        .cl-card {
+          background-color: transparent !important;
+          box-shadow: none !important;
+          border: none !important;
+          padding: 0 !important;
+          border-radius: 0px !important;
+        }
+
+        .cl-header {
+          display: none !important;
+        }
+
+        /* OAuth Social Buttons: Crisp 2px black border, square corners, hard shadow */
+        .cl-socialButtonsBlockButton {
+          border: 2px solid #000000 !important;
+          border-radius: 0px !important;
+          box-shadow: 2px 2px 0px #000000 !important;
+          font-family: var(--font-mono) !important;
+          font-size: 13px !important;
+          font-weight: 600 !important;
+          height: 44px !important;
+          background-color: #ffffff !important;
+          color: #111111 !important;
+          position: relative !important;
+          transition: transform 0.1s ease, box-shadow 0.1s ease !important;
+        }
+        .cl-socialButtonsBlockButton:hover {
+          background-color: #f9f9f9 !important;
+          transform: translate(-1px, -1px) !important;
+          box-shadow: 3px 3px 0px #000000 !important;
+        }
+        .cl-socialButtonsBlockButton:active {
+          transform: translate(1px, 1px) !important;
+          box-shadow: 1px 1px 0px #000000 !important;
+        }
+
+        /* Last Used Badge: Aligned cleanly to button's upper right edge without floating awkwardly */
+        .cl-badge,
+        .cl-socialButtonsBlockButtonBadge {
+          position: absolute !important;
+          top: -8px !important;
+          right: 6px !important;
+          background-color: #FFD43B !important;
+          color: #000000 !important;
+          border: 1px solid #000000 !important;
+          box-shadow: 1px 1px 0px #000000 !important;
+          font-family: var(--font-mono) !important;
+          font-size: 9px !important;
+          font-weight: bold !important;
+          letter-spacing: 0.5px !important;
+          border-radius: 0px !important;
+          padding: 1px 6px !important;
+          z-index: 2 !important;
+        }
+
+        .cl-dividerLine {
+          background-color: #000000 !important;
+          height: 2px !important;
+        }
+        .cl-dividerText {
+          font-family: var(--font-press-start) !important;
+          font-size: 8px !important;
+          color: #555555 !important;
+        }
+
+        .cl-formFieldRow {
+          display: flex !important;
+          flex-direction: column !important;
+          width: 100% !important;
+          margin-bottom: 12px !important;
+        }
+
+        .cl-formFieldLabel,
+        .nes-field .nes-label {
+          font-family: var(--font-mono) !important;
+          font-size: 11px !important;
+          font-weight: bold !important;
+          line-height: 1.4 !important;
+          color: #242329 !important;
+          text-transform: uppercase !important;
+          margin-bottom: 6px !important;
+          display: block !important;
+        }
+
+        .cl-formFieldInputGroup {
+          position: relative !important;
+          display: flex !important;
+          align-items: center !important;
+          width: 100% !important;
+        }
+
+        /* Inputs: Full width, square corners, solid contrast, visible focus */
+        .cl-formFieldInput,
+        .cl-input,
+        .nes-field .nes-input,
+        .nes-input {
+          height: 46px !important;
+          min-height: 46px !important;
+          width: 100% !important;
+          box-sizing: border-box !important;
+          border: 2px solid #000000 !important;
+          border-radius: 0px !important;
+          box-shadow: inset 1px 1px 0px rgba(0, 0, 0, 0.08) !important;
+          font-family: var(--font-mono) !important;
+          font-size: 15px !important;
+          line-height: normal !important;
+          padding: 0 14px !important;
+          color: #111111 !important;
+          background-color: #ffffff !important;
+          display: flex !important;
+          align-items: center !important;
+        }
+
+        .cl-formFieldInput:focus,
+        .cl-input:focus,
+        .nes-field .nes-input:focus,
+        .nes-input:focus {
+          border-color: #000000 !important;
+          box-shadow: 0 0 0 2px #FFD43B !important;
+          outline: none !important;
+        }
+
+        /* Password specific styling to accommodate eye icon without text overlap */
+        .cl-formFieldInput__password {
+          padding-right: 46px !important;
+        }
+
+        .cl-formFieldInputShowPasswordButton {
+          position: absolute !important;
+          right: 8px !important;
+          top: 50% !important;
+          transform: translateY(-50%) !important;
+          height: 32px !important;
+          width: 32px !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          border: none !important;
+          background: transparent !important;
+          color: #242329 !important;
+          cursor: pointer !important;
+          padding: 0 !important;
+        }
+        .cl-formFieldInputShowPasswordButton:hover {
+          color: #F05B43 !important;
+        }
+
+        /* Primary Button: Solid Charcoal fill, crisp 2px border, hard shadow */
+        .cl-formButtonPrimary,
+        .auth-submit-btn {
+          background-color: #242329 !important;
+          border: 2px solid #000000 !important;
+          border-radius: 0px !important;
+          box-shadow: 3px 3px 0px #000000 !important;
+          font-family: var(--font-press-start) !important;
+          font-size: 11px !important;
+          color: #ffffff !important;
+          text-transform: uppercase !important;
+          height: 46px !important;
+          padding: 12px 16px !important;
+          cursor: pointer !important;
+          transition: all 0.1s ease !important;
+          width: 100% !important;
+          margin-top: 6px;
+        }
+        .cl-formButtonPrimary:hover,
+        .auth-submit-btn:hover:not(:disabled) {
+          background-color: #151419 !important;
+          transform: translate(-1px, -1px) !important;
+          box-shadow: 4px 4px 0px #000000 !important;
+        }
+        .cl-formButtonPrimary:active,
+        .auth-submit-btn:active:not(:disabled) {
+          transform: translate(2px, 2px) !important;
+          box-shadow: 1px 1px 0px #000000 !important;
+        }
+
+        /* Single Secondary Sign-Up / Sign-In Link */
+        .cl-footerAction {
+          margin-top: 14px !important;
+          text-align: center !important;
+        }
+        .cl-footerActionText {
+          font-family: var(--font-mono) !important;
+          font-size: 12px !important;
+          color: #555555 !important;
+        }
+        .cl-footerActionLink {
+          color: #242329 !important;
+          font-family: var(--font-mono) !important;
+          font-size: 12px !important;
+          font-weight: bold !important;
+          text-decoration: underline !important;
+        }
+        .cl-footerActionLink:hover {
+          color: #F05B43 !important;
+        }
+        .cl-footer {
+          background: transparent !important;
+          border: none !important;
+          padding: 4px 0 0 !important;
+        }
+
+        /* Compact Clerk development badge */
+        .cl-internal-b3fm6y,
+        .cl-developmentBadge {
+          opacity: 0.75 !important;
+          transform: scale(0.85) !important;
+        }
+
+        /* Legacy Form Elements */
+        .legacy-auth-form {
+          width: 100%;
+        }
+
+        .auth-toggle {
+          margin-top: 16px;
+          text-align: center;
+          font-size: 12px;
+          font-family: var(--font-mono);
+        }
+        .auth-toggle-text {
+          color: #555555;
+        }
+        .auth-toggle-btn {
+          background: none;
+          border: none;
+          color: #242329;
+          font-family: var(--font-mono);
+          font-weight: bold;
+          font-size: 12px;
+          text-decoration: underline;
+          cursor: pointer;
+          padding: 0;
+          margin-left: 4px;
+        }
+        .auth-toggle-btn:hover {
+          color: #F05B43;
         }
 
         /* Shake animation on error */
         .shake-animation {
-          animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both !important;
+          animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both !important;
         }
         @keyframes shake {
           10%, 90% { transform: translateX(-1px); }
@@ -1087,197 +1522,16 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, hasClerk 
           40%, 60% { transform: translateX(4px); }
         }
 
-        /* Card badges */
-        .card-badge {
-          position: absolute;
-          top: -18px;
-          background: var(--mario-yellow);
-          border: 3px solid #000;
-          box-shadow: 2px 2px 0px #000;
-          width: 36px;
-          height: 36px;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          font-weight: bold;
-          font-size: 14px;
-          font-family: var(--font-press-start);
-          transition: transform 0.3s;
-        }
-        .card-badge:hover {
-          transform: translateY(-5px) rotate(10deg);
-        }
-        .card-badge-left {
-          left: 20px;
-          border-radius: 50%;
-        }
-        .card-badge-right {
-          right: 20px;
-        }
-
-        /* Auth header */
-        .auth-card-header {
-          text-align: center;
-          margin-bottom: 20px;
-        }
-        .auth-card-title {
-          font-size: 18px !important;
-          letter-spacing: 1px;
-          margin-bottom: 8px;
-          color: #000;
-        }
-        .auth-card-subtitle {
-          font-size: 12px;
-          color: #666;
-          text-transform: uppercase;
-        }
-        .title-underline {
-          margin-top: 12px;
-          height: 4px;
-          background: #eee;
-          border: 1px solid #ddd;
-          overflow: hidden;
-        }
-        .title-underline-fill {
-          width: 30%;
-          height: 100%;
-          background: linear-gradient(90deg, var(--mario-red), var(--mario-yellow), var(--mario-green));
-          animation: underline-slide 3s ease-in-out infinite alternate;
-        }
-        @keyframes underline-slide {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(230%); }
-        }
-
-        /* Error */
-        .auth-error {
-          border: 3px solid var(--mario-red);
-          background: #ffebee;
-          color: var(--mario-red);
-          padding: 10px;
-          font-family: var(--font-press-start);
-          font-size: 9px;
-          line-height: 1.4;
-          margin-bottom: 20px;
-          box-shadow: 2px 2px 0px #000;
-          animation: error-flash 0.3s ease-in-out 3;
-        }
-        @keyframes error-flash {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.5; }
-        }
-
-        /* Submit Button */
-        .auth-submit-btn {
-          width: 100%;
-          padding: 14px !important;
-          font-size: 14px !important;
-          position: relative;
-          overflow: hidden;
-          transition: all 0.2s;
-        }
-        .auth-submit-btn::after {
-          content: '';
-          position: absolute;
-          top: -50%;
-          left: -50%;
-          width: 200%;
-          height: 200%;
-          background: linear-gradient(
-            45deg,
-            transparent 40%,
-            rgba(255,255,255,0.15) 50%,
-            transparent 60%
-          );
-          animation: btn-shimmer 2.5s linear infinite;
-        }
-        @keyframes btn-shimmer {
-          0% { transform: translateX(-100%) translateY(-100%); }
-          100% { transform: translateX(100%) translateY(100%); }
-        }
-        .auth-submit-btn:hover:not(:disabled) {
-          transform: translateY(-2px);
-          box-shadow: 6px 6px 0px #000 !important;
-        }
-
-        .btn-content {
-          position: relative;
-          z-index: 1;
-        }
-
-        /* Loading dots animation */
-        .loading-dots::after {
-          content: '';
-          animation: loading-dots 1.5s steps(4) infinite;
-        }
-        @keyframes loading-dots {
-          0% { content: ''; }
-          25% { content: '.'; }
-          50% { content: '..'; }
-          75% { content: '...'; }
-        }
-
-        /* Toggle section */
-        .auth-toggle {
-          margin-top: 20px;
-          text-align: center;
-          font-size: 12px;
-        }
-        .auth-toggle-text {
-          color: #666;
-        }
-        .auth-toggle-btn {
-          background: none;
-          border: none;
-          color: var(--mario-red);
-          font-family: var(--font-press-start);
-          font-size: 10px;
-          text-decoration: underline;
-          cursor: pointer;
-          padding: 0;
-          transition: color 0.2s, transform 0.2s;
-        }
-        .auth-toggle-btn:hover {
-          color: var(--mario-red-dark);
-          transform: scale(1.05);
-        }
-
-        /* Footer blocks (decorative) */
-        .auth-card-footer {
-          display: flex;
-          gap: 4px;
-          justify-content: center;
-          margin-top: 16px;
-        }
-        .footer-block {
-          width: 12px;
-          height: 12px;
-          background: var(--mario-yellow);
-          border: 2px solid #000;
-          animation: footer-block-dance 1s ease-in-out infinite;
-        }
-        .footer-block:nth-child(1) { animation-delay: 0s; }
-        .footer-block:nth-child(2) { animation-delay: 0.1s; }
-        .footer-block:nth-child(3) { animation-delay: 0.2s; }
-        .footer-block:nth-child(4) { animation-delay: 0.3s; }
-        .footer-block:nth-child(5) { animation-delay: 0.4s; }
-        @keyframes footer-block-dance {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-4px); }
-        }
-
-        /* ── Responsive ── */
+        /* ── Responsive Viewports (Figma Principle: Flexibility & Breathing Room) ── */
         @media (max-width: 900px) {
           .auth-content-wrapper {
             flex-direction: column;
           }
           .auth-art-panel {
             flex: none;
-            height: auto;
-            min-height: 200px;
-            max-height: 35vh;
+            padding: 16px 20px;
             border-right: none;
-            border-bottom: 4px solid #000;
+            border-bottom: 2px solid #000000;
           }
           .art-grid {
             display: none;
@@ -1285,13 +1539,29 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, hasClerk 
           .mario-character {
             display: none;
           }
-          .auth-form-panel {
-            flex: 1;
-            padding: 20px;
-          }
           .speech-bubble {
+            margin-bottom: 0;
             font-size: 9px;
-            max-width: 240px;
+            max-width: 100%;
+          }
+          .speech-arrow-outer, .speech-arrow-inner {
+            display: none;
+          }
+          .art-footer {
+            display: none;
+          }
+          .coin-hud {
+            position: static;
+            justify-content: flex-end;
+            margin-bottom: 6px;
+          }
+          .auth-form-panel {
+            padding: 24px 16px;
+          }
+          .auth-card {
+            max-width: 440px;
+            padding: 26px 18px 20px !important;
+            margin: 16px auto;
           }
         }
       `}</style>
