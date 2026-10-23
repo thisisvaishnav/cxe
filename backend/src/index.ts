@@ -5,6 +5,7 @@ import express, {
   type Request,
   type Response,
 } from "express";
+import { clerkMiddleware } from "@clerk/express";
 import { appRouter } from "./routes/index.js";
 import { env } from "./utils/env.js";
 import {
@@ -20,7 +21,14 @@ void listenForEngineResponses();
 const app = express();
 
 app.use(cors());
+
+// Webhooks require raw body for signature verification
+app.use(
+  "/api/v1/auth/clerk-webhook",
+  express.raw({ type: "application/json" })
+);
 app.use(express.json());
+app.use(clerkMiddleware());
 
 app.get("/health", async (_req, res) => {
   await pingRedis();
@@ -47,5 +55,3 @@ httpServer.listen(env.port, () => {
   console.log(`WebSocket endpoint: ws://localhost:${env.port}/ws`);
   console.log(`Response queue: ${env.responseQueue}`);
 });
-
-// tested

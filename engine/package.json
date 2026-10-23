@@ -5,8 +5,9 @@
   "private": true,
   "scripts": {
     "dev": "bun run src/index.ts",
+    "start": "npx tsx src/index.ts",
     "typecheck": "tsc",
-    "test": "bun run src/OrderBook.test.ts && bun run src/PositionTracker.test.ts"
+    "test": "npx tsx src/OrderBook.test.ts && npx tsx src/PositionTracker.test.ts"
   },
   "devDependencies": {
     "@types/bun": "latest"
@@ -16,11 +17,11 @@
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",
-    "@prisma/client": "^7.8.0",
+    "@prisma/client": "^7.10.1",
     "@types/pg": "^8.20.0",
     "dotenv": "^17.4.2",
     "pg": "^8.21.0",
-    "prisma": "^7.8.0",
+    "prisma": "^7.10.1",
     "redis": "^5.12.1",
     "zod": "^4.4.3"
   }

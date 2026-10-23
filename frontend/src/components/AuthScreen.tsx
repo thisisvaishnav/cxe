@@ -3,10 +3,12 @@
 //           floating question blocks, star particles, and confetti effects
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
+import { SignIn, SignUp } from "@clerk/react";
 import { api } from "../lib/api.js";
 
 interface AuthScreenProps {
-  onAuthSuccess: (token: string, username: string, userId: number) => void;
+  onAuthSuccess: (token: string, username: string, userId: string | number) => void;
+  hasClerk?: boolean;
 }
 
 /* ─── Pixel Mario Sprite (CSS-drawn) ─── */
@@ -256,7 +258,7 @@ const StarParticle: React.FC<{
 );
 
 /* ─── Main Auth Screen ─── */
-export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess }) => {
+export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess, hasClerk = false }) => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -472,57 +474,110 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess }) => {
               <div className="auth-error">★ ERROR: {error.toUpperCase()}</div>
             )}
 
-            {/* Form */}
-            <form onSubmit={handleSubmit}>
-              <div className="nes-field">
-                <label className="nes-label">EMAIL / USERNAME</label>
-                <input
-                  type="text"
-                  className="nes-input"
-                  placeholder="mario@mushroom.kingdom"
-                  value={username}
-                  onChange={(e) => {
-                    setUsername(e.target.value);
-                    spawnCoin();
-                  }}
-                  disabled={isLoading}
-                />
-              </div>
-
-              <div className="nes-field" style={{ marginBottom: "8px" }}>
-                <label className="nes-label">PASSWORD</label>
-                <input
-                  type="password"
-                  className="nes-input"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => {
-                    setPassword(e.target.value);
-                    spawnCoin();
-                  }}
-                  disabled={isLoading}
-                />
-                <PowerUpMeter password={password} />
-              </div>
-
-              <button
-                type="submit"
-                className="nes-btn red auth-submit-btn"
-                disabled={isLoading}
+            {/* Clerk Authentication Layer or Fallback Form */}
+            {hasClerk ? (
+              <div
+                className="clerk-auth-container"
+                style={{
+                  margin: "12px 0",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  width: "100%",
+                  maxHeight: "65vh",
+                  overflowY: "auto",
+                }}
               >
-                <span className="btn-content">
-                  {isLoading ? (
-                    <>
-                      <span className="loading-dots">LOADING</span>
-                    </>
-                  ) : isSignUp ? (
-                    "1-UP! SIGN UP"
-                  ) : (
-                    "1-UP! SIGN IN"
-                  )}
-                </span>
-              </button>
-            </form>
+                {isSignUp ? (
+                  <SignUp
+                    routing="hash"
+                    signInUrl="#sign-in"
+                    fallbackRedirectUrl="/"
+                    appearance={{
+                      elements: {
+                        rootBox: { width: "100%" },
+                        card: {
+                          backgroundColor: "#ffffff",
+                          boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                          border: "2px solid #000000",
+                          borderRadius: "4px",
+                          width: "100%",
+                        },
+                      },
+                    }}
+                  />
+                ) : (
+                  <SignIn
+                    routing="hash"
+                    signUpUrl="#sign-up"
+                    fallbackRedirectUrl="/"
+                    appearance={{
+                      elements: {
+                        rootBox: { width: "100%" },
+                        card: {
+                          backgroundColor: "#ffffff",
+                          boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                          border: "2px solid #000000",
+                          borderRadius: "4px",
+                          width: "100%",
+                        },
+                      },
+                    }}
+                  />
+                )}
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit}>
+                <div className="nes-field">
+                  <label className="nes-label">EMAIL / USERNAME</label>
+                  <input
+                    type="text"
+                    className="nes-input"
+                    placeholder="mario@mushroom.kingdom"
+                    value={username}
+                    onChange={(e) => {
+                      setUsername(e.target.value);
+                      spawnCoin();
+                    }}
+                    disabled={isLoading}
+                  />
+                </div>
+
+                <div className="nes-field" style={{ marginBottom: "8px" }}>
+                  <label className="nes-label">PASSWORD</label>
+                  <input
+                    type="password"
+                    className="nes-input"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      spawnCoin();
+                    }}
+                    disabled={isLoading}
+                  />
+                  <PowerUpMeter password={password} />
+                </div>
+
+                <button
+                  type="submit"
+                  className="nes-btn red auth-submit-btn"
+                  disabled={isLoading}
+                >
+                  <span className="btn-content">
+                    {isLoading ? (
+                      <>
+                        <span className="loading-dots">LOADING</span>
+                      </>
+                    ) : isSignUp ? (
+                      "1-UP! SIGN UP"
+                    ) : (
+                      "1-UP! SIGN IN"
+                    )}
+                  </span>
+                </button>
+              </form>
+            )}
 
             {/* Toggle Sign In / Sign Up */}
             <div className="auth-toggle">
@@ -1009,10 +1064,12 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess }) => {
 
         .auth-card {
           width: 100%;
-          max-width: 450px;
+          max-width: 480px;
           background: #ffffff !important;
-          padding: 40px 30px !important;
+          padding: 30px 24px !important;
           animation: card-entrance 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+          max-height: 90vh;
+          overflow-y: auto;
         }
         @keyframes card-entrance {
           0% { transform: translateY(30px) scale(0.95); opacity: 0; }
@@ -1061,7 +1118,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess }) => {
         /* Auth header */
         .auth-card-header {
           text-align: center;
-          margin-bottom: 25px;
+          margin-bottom: 20px;
         }
         .auth-card-title {
           font-size: 18px !important;
@@ -1162,7 +1219,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess }) => {
 
         /* Toggle section */
         .auth-toggle {
-          margin-top: 25px;
+          margin-top: 20px;
           text-align: center;
           font-size: 12px;
         }
@@ -1190,7 +1247,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthSuccess }) => {
           display: flex;
           gap: 4px;
           justify-content: center;
-          margin-top: 20px;
+          margin-top: 16px;
         }
         .footer-block {
           width: 12px;

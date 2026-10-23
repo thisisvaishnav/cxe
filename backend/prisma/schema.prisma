@@ -8,17 +8,18 @@ datasource db {
 }
 
 model User {
-  id       Int      @id @default(autoincrement())
-  username String   @unique
-  password String
-  balance  Balance?
-  fills    Fill[]
-  orders   Order[]
+  id        String   @id // Clerk user ID (e.g. user_...)
+  email     String?  @unique
+  username  String?  @unique
+  createdAt DateTime @default(now())
+  balance   Balance?
+  fills     Fill[]
+  orders    Order[]
 }
 
 model Order {
   id        Int         @id @default(autoincrement())
-  userId    Int
+  userId    String
   market    String
   price     Float?
   qty       Float
@@ -35,7 +36,7 @@ model Fill {
   qty             Float
   side            OrderSide
   type            OrderType
-  userId          Int
+  userId          String
   price           Float?
   asset           String
   originalOrderId Int
@@ -50,10 +51,10 @@ model Stock {
 }
 
 model Balance {
-  id     Int   @id @default(autoincrement())
-  userId Int   @unique
-  usd    Float @default(0)
-  user   User  @relation(fields: [userId], references: [id])
+  id     Int    @id @default(autoincrement())
+  userId String @unique
+  usd    Float  @default(0)
+  user   User   @relation(fields: [userId], references: [id])
 }
 
 enum OrderStatus {

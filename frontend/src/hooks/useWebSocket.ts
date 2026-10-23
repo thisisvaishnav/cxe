@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 
 export interface PnLSnapshot {
-  userId: number;
+  userId: string;
   symbol: string;
   currentPrice: number;
   avgCost: number;
@@ -43,13 +43,15 @@ export function useWebSocket(token: string | null) {
 
     setStatus("connecting");
 
-    // Establish WebSocket connection (relative to current host or absolute fallback)
+    // Establish WebSocket connection (relative to current host, environment variable, or fallback)
     const host = window.location.host;
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const wsUrl =
+    const defaultWsUrl =
       host.includes("localhost") || host.includes("127.0.0.1")
         ? `ws://localhost:3000/ws`
         : `${protocol}//${host}/ws`;
+
+    const wsUrl = import.meta.env.VITE_WS_URL || defaultWsUrl;
 
     console.log(`[WS] Connecting to ${wsUrl}...`);
     const ws = new WebSocket(wsUrl);
@@ -61,20 +63,19 @@ export function useWebSocket(token: string | null) {
         JSON.stringify({
           type: "auth",
           token: activeToken,
-        }),
+        })
       );
     };
 
     ws.onmessage = (event) => {
       try {
         const message = JSON.parse(event.data);
-        console.log("[WS] Message received:", message);
 
         if (message.type === "auth_ok") {
+          console.log("[WS] Authentication confirmed:", message);
           setStatus("connected");
-          console.log("[WS] Handshake successful, ready for PnL updates");
         } else if (message.type === "pnl_update") {
-          const snapshot = message.data as PnLSnapshot;
+          const snapshot: PnLSnapshot = message.data;
           setPnlUpdates((prev) => ({
             ...prev,
             [snapshot.symbol]: snapshot,
@@ -88,13 +89,12 @@ export function useWebSocket(token: string | null) {
           }));
           setLastUpdate(new Date().toLocaleTimeString());
         } else if (message.type === "error") {
-          console.error("[WS] Server error message:", message.message);
+          console.error("[WS] Server error:", message.message);
           if (
             message.message.includes("token") ||
             message.message.includes("Unauthorized")
           ) {
             setStatus("error");
-            ws.close();
           }
         }
       } catch (err) {
@@ -103,21 +103,19 @@ export function useWebSocket(token: string | null) {
     };
 
     ws.onerror = (err) => {
-      console.error("[WS] Connection error:", err);
+      console.error("[WS] Socket error:", err);
       setStatus("error");
     };
 
     ws.onclose = (event) => {
-      console.log(
-        `[WS] Connection closed: Code=${event.code}, Reason=${event.reason}`,
-      );
-      setStatus((prev) => (prev === "error" ? "error" : "disconnected"));
+      console.log(`[WS] Closed (code: ${event.code})`);
+      setStatus("disconnected");
       wsRef.current = null;
 
       // Retry with backoff if token is still valid
       if (tokenRef.current) {
-        console.log("[WS] Reconnecting in 3 seconds...");
         reconnectTimeoutRef.current = window.setTimeout(() => {
+          console.log("[WS] Attempting reconnect...");
           connect();
         }, 3000);
       }
@@ -148,5 +146,10 @@ export function useWebSocket(token: string | null) {
     };
   }, [token, connect, disconnect]);
 
-  return { status, pnlUpdates, lastUpdate, reconnect: connect, prices };
+  return {
+    status,
+    pnlUpdates,
+    prices,
+    lastUpdate,
+  };
 }

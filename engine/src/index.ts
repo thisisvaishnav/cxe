@@ -1,15 +1,14 @@
-import { createClient } from "redis";
 import { PrismaClient } from "./generated/prisma";
 import { PrismaPg } from "@prisma/adapter-pg";
+import { createClient } from "redis";
+import "dotenv/config";
 import pg from "pg";
 import { PriceOracle } from "./PriceOracle";
 import { PaperEngine } from "./PaperEngine";
-import { PnLCalculator } from "./PnLCalculator";
 
-// ─── Initialize clients ───────────────────────────────────────────────────────
-const pool = new pg.Pool({
-  connectionString: process.env.DATABASE_URL,
-});
+// ─── Database and Redis Connection ───────────────────────────────────────────
+const connectionString = process.env.DATABASE_URL;
+const pool = new pg.Pool({ connectionString });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({
   adapter,
@@ -28,7 +27,7 @@ async function hydrateBalancesToRedis() {
     for (const record of dbBalances) {
       await client.hSet(
         "balances",
-        record.userId.toString(),
+        record.userId,
         record.usd.toString()
       );
     }
@@ -60,7 +59,7 @@ async function hydratePositionsFromFills() {
         record.price ?? 0
       );
     }
-    console.log(`Cached positions from ${dbFills.length} replayed fills.`);
+    console.log(`Hydrated positions from ${dbFills.length} fills.`);
   } catch (error) {
     console.error("Failed to hydrate positions:", error);
   }
@@ -68,69 +67,68 @@ async function hydratePositionsFromFills() {
 
 await hydratePositionsFromFills();
 
-async function hydrateLimitOrders() {
-  console.log("Hydrating open limit orders from Postgres → OrderBook...");
+// Hydrate order book from DB on startup
+async function hydrateOrderBook() {
+  console.log("Hydrating OrderBook from Postgres...");
   try {
     const openOrders = await prisma.order.findMany({
-      where: {
-        status: "OPEN",
-        type: "LIMIT",
-      },
+      where: { status: "OPEN" },
+      orderBy: { createdAt: "asc" },
     });
     for (const order of openOrders) {
-      await engine.processOrder(order);
+      if (order.type === "LIMIT") {
+        engine.processOrder(order);
+      }
     }
-    console.log(`Loaded ${openOrders.length} open limit orders into matching engine.`);
+    console.log(`Hydrated ${openOrders.length} OPEN orders into OrderBook.`);
   } catch (error) {
-    console.error("Failed to hydrate open limit orders:", error);
+    console.error("Failed to hydrate OrderBook:", error);
   }
 }
 
-await hydrateLimitOrders();
+await hydrateOrderBook();
 
-// ─── Boot PnLCalculator ───────────────────────────────────────────────────────
-// Shares the same PositionTracker instance that PaperEngine uses.
-// On every tick it recomputes unrealized PnL, writes to Redis, and publishes
-// to the "pnl-updates" pub/sub channel for the WebSocket server to consume.
-const pnlCalculator = new PnLCalculator(
-  client,
-  oracle,
-  engine.getPositionTracker(),
+// ─── Background task: persist fills from Redis queue to DB ───────────────────
+async function runFillPersistenceWorker() {
+  const fillPersistenceClient = client.duplicate();
+  await fillPersistenceClient.connect();
+
+  console.log("Started Fill Persistence Worker, listening on fills-to-persist...");
+
+  while (true) {
+    try {
+      const fillJob = await fillPersistenceClient.brPop("fills-to-persist", 0);
+      if (fillJob) {
+        const fillData = JSON.parse(fillJob.element);
+        console.log("[fill-persistence-worker] Received fill event:", fillData);
+      }
+    } catch (err) {
+      console.error("[fill-persistence-worker] Error in loop:", err);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
+  }
+}
+
+runFillPersistenceWorker().catch((err) =>
+  console.error("Fill Persistence Worker failed to start:", err)
 );
 
-oracle.on("tick", (symbol: string, price: number) => {
-  console.log(`[tick] ${symbol} → $${price}`);
-});
+console.log("CXE Matching Engine listening on backend-to-engine-broker...");
 
-oracle.connect("BTCUSDT");
-
-// ─── Graceful shutdown ────────────────────────────────────────────────────────
-function shutdown() {
-  console.log("Shutting down...");
-  process.exit(0);
-}
-process.on("SIGINT", shutdown);
-process.on("SIGTERM", shutdown);
-
-console.log("Engine started — listening for messages...");
-
-// ─── Main processing loop ─────────────────────────────────────────────────────
 while (true) {
-  const response = await client.brPop("backend-to-engine-broker", 1);
-  if (!response) continue;
-
-  let correlationId = "";
-  let responseQueue = "";
-
   try {
-    const message = JSON.parse(response.element);
+    const orderJob = await client.brPop("backend-to-engine-broker", 1);
+    if (!orderJob) continue;
 
-    // FIX #1: Backend wraps data in "payload", not "data"
-    const { type: commandType, payload } = message;
-    correlationId = message.correlationId;
-    responseQueue = message.responseQueue;
+    const data = JSON.parse(orderJob.element);
+    console.log("Received data from broker:", data);
 
-    // ── create_order ──────────────────────────────────────────────────────────
+    const { correlationId, responseQueue, type, payload } = data;
+
+    // FIX #1: Support both top-level `type` and nested `payload.type` for command routing
+    const commandType = type ?? payload?.type;
+
+    // ── create_order ─────────────────────────────────────────────────────────
     if (commandType === "create_order") {
       // FIX #2: Normalize lowercase ("limit"/"buy") → Prisma uppercase enums
       const orderType = (payload.type as string).toUpperCase() as
@@ -139,9 +137,8 @@ while (true) {
       const orderSide = (payload.side as string).toUpperCase() as
         | "BUY"
         | "SELL";
-      const userId = Number(payload.userId);
+      const userId = String(payload.userId);
       const symbol = payload.symbol as string;
-      // FIX #3: field is "qty" not "quantity"
       const qty = Number(payload.qty);
       const price =
         payload.price != null ? Number(payload.price) : null;
@@ -167,7 +164,7 @@ while (true) {
 
         const cachedBalanceStr = await client.hGet(
           "balances",
-          userId.toString()
+          userId
         );
         let userBalance: number;
         if (cachedBalanceStr) {
@@ -177,7 +174,7 @@ while (true) {
             where: { userId }
           });
           userBalance = dbBalance ? dbBalance.usd : 0;
-          await client.hSet("balances", userId.toString(), userBalance.toString());
+          await client.hSet("balances", userId, userBalance.toString());
         }
 
         if (userBalance < totalCost) {
@@ -196,7 +193,7 @@ while (true) {
           const newBalance = userBalance - totalCost;
           await client.hSet(
             "balances",
-            userId.toString(),
+            userId,
             newBalance.toString()
           );
           await prisma.balance.update({
@@ -234,10 +231,10 @@ while (true) {
         })
       );
 
-    // ── get_user_balance ──────────────────────────────────────────────────────
+    // ── get_user_balance ─────────────────────────────────────────────────────
     } else if (commandType === "get_user_balance") {
-      const userId = Number(payload.userId);
-      const cachedBalanceStr = await client.hGet("balances", userId.toString());
+      const userId = String(payload.userId);
+      const cachedBalanceStr = await client.hGet("balances", userId);
       let balance: number;
       if (cachedBalanceStr) {
         balance = Number(cachedBalanceStr);
@@ -246,7 +243,7 @@ while (true) {
           where: { userId }
         });
         balance = dbBalance ? dbBalance.usd : 0;
-        await client.hSet("balances", userId.toString(), balance.toString());
+        await client.hSet("balances", userId, balance.toString());
       }
 
       await client.lPush(
@@ -254,12 +251,12 @@ while (true) {
         JSON.stringify({ correlationId, ok: true, data: { balance } })
       );
 
-    // ── deposit ───────────────────────────────────────────────────────────────
+    // ── deposit ──────────────────────────────────────────────────────────────
     } else if (commandType === "deposit") {
-      const userId = Number(payload.userId);
+      const userId = String(payload.userId);
       const amount = Number(payload.amount);
 
-      const cachedBalanceStr = await client.hGet("balances", userId.toString());
+      const cachedBalanceStr = await client.hGet("balances", userId);
       let balance: number;
       if (cachedBalanceStr) {
         balance = Number(cachedBalanceStr);
@@ -271,7 +268,7 @@ while (true) {
       }
       
       const newBalance = balance + amount;
-      await client.hSet("balances", userId.toString(), newBalance.toString());
+      await client.hSet("balances", userId, newBalance.toString());
       await prisma.balance.upsert({
         where: { userId },
         create: { userId, usd: newBalance },
@@ -283,9 +280,9 @@ while (true) {
         JSON.stringify({ correlationId, ok: true, data: { balance: newBalance } })
       );
 
-    // ── get_positions ─────────────────────────────────────────────────────────
+    // ── get_positions ────────────────────────────────────────────────────────
     } else if (commandType === "get_positions") {
-      const userId = Number(payload.userId);
+      const userId = String(payload.userId);
       const positions = engine.getPositions(userId);
 
       await client.lPush(
@@ -293,9 +290,9 @@ while (true) {
         JSON.stringify({ correlationId, ok: true, data: { positions } })
       );
 
-    // ── get_order ─────────────────────────────────────────────────────────────
+    // ── get_order ────────────────────────────────────────────────────────────
     } else if (commandType === "get_order") {
-      const userId = Number(payload.userId);
+      const userId = String(payload.userId);
       const orderId = Number(payload.orderId);
 
       const order = await prisma.order.findFirst({
@@ -311,9 +308,9 @@ while (true) {
         )
       );
 
-    // ── cancel_order ──────────────────────────────────────────────────────────
+    // ── cancel_order ─────────────────────────────────────────────────────────
     } else if (commandType === "cancel_order") {
-      const userId = Number(payload.userId);
+      const userId = String(payload.userId);
       const orderId = Number(payload.orderId);
 
       // Find the order first to ensure it exists and is OPEN
@@ -347,14 +344,14 @@ while (true) {
         const refundAmount = order.price! * order.qty;
         const cachedBalanceStr = await client.hGet(
           "balances",
-          userId.toString()
+          userId
         );
         const userBalance = cachedBalanceStr ? Number(cachedBalanceStr) : 0;
         const newBalance = userBalance + refundAmount;
 
         await client.hSet(
           "balances",
-          userId.toString(),
+          userId,
           newBalance.toString()
         );
         await prisma.balance.update({
@@ -376,7 +373,7 @@ while (true) {
         })
       );
 
-    // ── get_depth ─────────────────────────────────────────────────────────────
+    // ── get_depth ────────────────────────────────────────────────────────────
     } else if (commandType === "get_depth") {
       const symbol = payload.symbol as string;
       const orders = await engine.getDepth(symbol);
@@ -386,25 +383,16 @@ while (true) {
         JSON.stringify({ correlationId, ok: true, data: { orders } })
       );
 
-    // ── unknown command ───────────────────────────────────────────────────────
+    // ── unknown command ──────────────────────────────────────────────────────
     } else {
+      console.warn("Unknown command received:", commandType);
       await client.lPush(
         responseQueue,
-        JSON.stringify({
-          correlationId,
-          ok: false,
-          error: `UNKNOWN_COMMAND: ${commandType}`,
-        })
+        JSON.stringify({ correlationId, ok: false, error: "UNKNOWN_COMMAND" })
       );
     }
-  } catch (error) {
-    console.error("Error processing message:", error);
-    // Always send a response so the backend doesn't hang waiting
-    if (responseQueue && correlationId) {
-      await client.lPush(
-        responseQueue,
-        JSON.stringify({ correlationId, ok: false, error: "INTERNAL_ENGINE_ERROR" })
-      ).catch(() => {});
-    }
+  } catch (err) {
+    console.error("Error in engine loop:", err);
+    await new Promise((resolve) => setTimeout(resolve, 500));
   }
 }
