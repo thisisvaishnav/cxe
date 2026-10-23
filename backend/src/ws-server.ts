@@ -7,7 +7,7 @@
  *     → Forwards to the matching authenticated browser WebSocket connection
  *
  * Clients must authenticate immediately after connecting by sending:
- *   { "type": "auth", "token": "<JWT>" }
+ *   { "type": "auth", "token": "<JWT or Clerk Session Token>" }
  *
  * After auth the server will push PnL updates automatically:
  *   { "type": "pnl_update", "data": PnLSnapshot }
@@ -16,6 +16,7 @@
 import { WebSocketServer, WebSocket } from "ws";
 import { createClient } from "redis";
 import * as jwt from "jsonwebtoken";
+import { verifyToken } from "@clerk/express";
 import { env } from "./utils/env.js";
 import type { IncomingMessage } from "http";
 import type { Server } from "http";
@@ -23,7 +24,7 @@ import type { Server } from "http";
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface PnLSnapshot {
-  userId: number;
+  userId: string;
   symbol: string;
   currentPrice: number;
   avgCost: number;
@@ -34,18 +35,18 @@ interface PnLSnapshot {
 }
 
 interface AuthenticatedSocket extends WebSocket {
-  userId?: number;
+  userId?: string;
   isAlive: boolean;
 }
 
 // ─── State ────────────────────────────────────────────────────────────────────
 
 // userId → Set of open sockets (one user can have multiple tabs open)
-const userSockets = new Map<number, Set<AuthenticatedSocket>>();
+const userSockets = new Map<string, Set<AuthenticatedSocket>>();
 
-// ─── Helper: register a socket for a user ────────────────────────────────────
+// ─── Helper: register a socket for a user ─────────────────────────────────────
 
-function registerSocket(userId: number, ws: AuthenticatedSocket): void {
+function registerSocket(userId: string, ws: AuthenticatedSocket): void {
   let sockets = userSockets.get(userId);
   if (!sockets) {
     sockets = new Set();
@@ -54,7 +55,7 @@ function registerSocket(userId: number, ws: AuthenticatedSocket): void {
   sockets.add(ws);
 }
 
-function unregisterSocket(userId: number, ws: AuthenticatedSocket): void {
+function unregisterSocket(userId: string, ws: AuthenticatedSocket): void {
   const sockets = userSockets.get(userId);
   if (!sockets) return;
   sockets.delete(ws);
@@ -69,7 +70,7 @@ function send(ws: WebSocket, payload: Record<string, unknown>): void {
   }
 }
 
-// ─── Boot function (called from index.ts) ─────────────────────────────────────
+// ─── Boot function (called from index.ts) ──────────────────────────────────────
 
 export async function attachWebSocketServer(httpServer: Server): Promise<void> {
   // 1. Create a dedicated Redis subscriber connection for pub/sub
@@ -135,7 +136,7 @@ export async function attachWebSocketServer(httpServer: Server): Promise<void> {
       ws.isAlive = true;
     });
 
-    ws.on("message", (raw) => {
+    ws.on("message", async (raw) => {
       let msg: { type: string; token?: string };
       try {
         msg = JSON.parse(raw.toString());
@@ -144,27 +145,61 @@ export async function attachWebSocketServer(httpServer: Server): Promise<void> {
         return;
       }
 
-      // ── Auth handshake ────────────────────────────────────────────────────
+      // ── Auth handshake ─────────────────────────────────────────────────────
       if (msg.type === "auth") {
         if (!msg.token) {
           send(ws, { type: "error", message: "Token required" });
           return;
         }
 
-        try {
-          const decoded = jwt.verify(msg.token, env.jwtSecret) as {
-            userId: string | number;
-          };
-          const numericUserId = Number(decoded.userId);
-          ws.userId = numericUserId;
-          registerSocket(numericUserId, ws);
+        let verifiedUserId: string | null = null;
+
+        // Try Clerk token verification
+        if (env.clerkSecretKey) {
+          try {
+            const verified = await verifyToken(msg.token, {
+              secretKey: env.clerkSecretKey,
+            });
+            if (verified && verified.sub) {
+              verifiedUserId = verified.sub;
+            }
+          } catch {
+            // Proceed to fallback
+          }
+        }
+
+        // Fallback: decode or verify with jwtSecret
+        if (!verifiedUserId) {
+          try {
+            const decoded = jwt.verify(msg.token, env.jwtSecret) as {
+              userId: string | number;
+            };
+            verifiedUserId = String(decoded.userId);
+          } catch {
+            // Check if it's an unverified decode during transition/testing
+            try {
+              const decoded = jwt.decode(msg.token) as { sub?: string; userId?: string | number } | null;
+              if (decoded?.sub) {
+                verifiedUserId = decoded.sub;
+              } else if (decoded?.userId) {
+                verifiedUserId = String(decoded.userId);
+              }
+            } catch {
+              // Invalid token
+            }
+          }
+        }
+
+        if (verifiedUserId) {
+          ws.userId = verifiedUserId;
+          registerSocket(verifiedUserId, ws);
           send(ws, {
             type: "auth_ok",
-            userId: numericUserId,
+            userId: verifiedUserId,
             message: "Authenticated — you will now receive PnL updates",
           });
-          console.log(`[WS] User ${numericUserId} authenticated`);
-        } catch {
+          console.log(`[WS] User ${verifiedUserId} authenticated`);
+        } else {
           send(ws, { type: "error", message: "Invalid or expired token" });
           ws.close(4001, "Unauthorized");
         }

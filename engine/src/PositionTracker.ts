@@ -12,12 +12,12 @@ export interface PositionUpdateResult {
 
 export class PositionTracker {
   // Map<userId, Map<symbol, Position>>
-  private positions = new Map<number, Map<string, Position>>();
+  private positions = new Map<string, Map<string, Position>>();
 
   /**
    * Get all active positions for a user.
    */
-  getPositions(userId: number): Position[] {
+  getPositions(userId: string): Position[] {
     const userPositions = this.positions.get(userId);
     if (!userPositions) return [];
     return Array.from(userPositions.values()).filter((pos) => pos.qty !== 0);
@@ -27,8 +27,8 @@ export class PositionTracker {
    * Get all userIds that currently hold a non-zero position for this symbol.
    * Used by PnLCalculator to find who needs a PnL update on each tick.
    */
-  getUsersForSymbol(symbol: string): number[] {
-    const result: number[] = [];
+  getUsersForSymbol(symbol: string): string[] {
+    const result: string[] = [];
     for (const [userId, userPositions] of this.positions.entries()) {
       const pos = userPositions.get(symbol);
       if (pos && pos.qty !== 0) {
@@ -41,7 +41,7 @@ export class PositionTracker {
   /**
    * Get the position for a user and symbol.
    */
-  getPosition(userId: number, symbol: string): Position | null {
+  getPosition(userId: string, symbol: string): Position | null {
     const userPositions = this.positions.get(userId);
     if (!userPositions) return null;
     const pos = userPositions.get(symbol);
@@ -57,7 +57,7 @@ export class PositionTracker {
    * - Position reversal (crossing zero to the opposite side).
    */
   addFill(
-    userId: number,
+    userId: string,
     symbol: string,
     side: "BUY" | "SELL",
     qty: number,
@@ -92,7 +92,7 @@ export class PositionTracker {
       }
       userPositions.set(symbol, newPos);
     } else if (currentPos.side === "LONG") {
-      // ─── Case 2: Currently LONG ─────────────────────────────────────────────
+      // ─── Case 2: Currently LONG ────────────────────────────────────────────
       const oldQty = currentPos.qty;
       const oldAvgCost = currentPos.avgCost;
 

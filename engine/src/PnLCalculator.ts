@@ -5,7 +5,7 @@ import type { PositionTracker } from "./PositionTracker";
 type RedisClient = ReturnType<typeof createClient>;
 
 export interface PnLSnapshot {
-  userId: number;
+  userId: string;
   symbol: string;
   currentPrice: number;
   avgCost: number;
@@ -31,7 +31,7 @@ export class PnLCalculator {
     console.log("[PnLCalculator] Initialised — listening for price ticks.");
   }
 
-  // ─── Core tick handler ─────────────────────────────────────────────────────
+  // ─── Core tick handler ──────────────────────────────────────────────────────
 
   private async onTick(symbol: string, price: number): Promise<void> {
     // Ask the PositionTracker for every user that holds this symbol
@@ -81,10 +81,10 @@ export class PnLCalculator {
     );
   }
 
-  // ─── On-demand snapshot (used by REST /pnl endpoint) ──────────────────────
+  // ─── On-demand snapshot (used by REST /pnl endpoint) ────────────────────────
 
   async getSnapshot(
-    userId: number,
+    userId: string,
     symbol: string,
   ): Promise<PnLSnapshot | null> {
     const raw = await this.redis.get(`pnl:${userId}:${symbol}`);

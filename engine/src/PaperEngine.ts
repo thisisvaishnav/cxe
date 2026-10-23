@@ -30,7 +30,7 @@ export class PaperEngine {
     return this.positionTracker;
   }
 
-  getPositions(userId: number): Position[] {
+  getPositions(userId: string): Position[] {
     return this.positionTracker.getPositions(userId);
   }
 
@@ -59,10 +59,9 @@ export class PaperEngine {
           (order.side === "SELL" && currentPrice >= order.price!));
 
       if (canFillNow) {
-        // Fill at the limit price (not worse than what they asked)
         await this.fillOrder(order, order.price!);
       } else {
-        // Rest in the order book and wait for the next tick
+        // Rest in the OrderBook until price crosses
         this.orderBook.addLimitOrder(order);
         console.log(
           `[PaperEngine] Resting LIMIT ${order.side} ${order.qty} ${order.market} @ $${order.price} (Order #${order.id})`,
@@ -71,27 +70,32 @@ export class PaperEngine {
     }
   }
 
-  // ─── Cancel a resting order (removes from in-memory book) ────────────────
+  // ─── TRIGGER 2: Called from the PriceOracle tick event ───────────────────
 
-  cancelOrder(orderId: number): boolean {
-    const removed = this.orderBook.removeLimitOrder(orderId);
-    if (removed) {
-      console.log(`[PaperEngine] Cancelled Order #${orderId} from OrderBook`);
+  private async onTick(symbol: string, price: number): Promise<void> {
+    const resting = this.orderBook.getOrdersForSymbol(symbol);
+
+    for (const order of resting) {
+      const shouldFill =
+        (order.side === "BUY" && price <= order.price!) ||
+        (order.side === "SELL" && price >= order.price!);
+
+      if (shouldFill) {
+        this.orderBook.removeLimitOrder(order.id);
+        await this.fillOrder(order, order.price!);
+      }
     }
-    return removed !== null;
   }
 
-  // ─── Get resting orders for a symbol (for depth view) ────────────────────
+  // ─── Read-only helpers ───────────────────────────────────────────────────
 
   async getDepth(symbol: string): Promise<Order[]> {
     const localOrders = this.orderBook.getOrdersForSymbol(symbol);
 
     try {
-      const querySymbol = symbol.toUpperCase();
-      const res = await fetch(`https://api.binance.com/api/v3/depth?symbol=${querySymbol}&limit=50`);
-      
+      const res = await fetch(`https://api.binance.com/api/v3/depth?symbol=${symbol}&limit=50`);
       if (!res.ok) {
-        throw new Error(`Binance depth HTTP error: ${res.status} ${res.statusText}`);
+        throw new Error(`Binance depth returned status: ${res.status}`);
       }
 
       const data = (await res.json()) as {
@@ -101,7 +105,7 @@ export class PaperEngine {
 
       const binanceBids: Order[] = (data.bids || []).map(([priceStr, qtyStr], index) => ({
         id: -10000 - index,
-        userId: -1,
+        userId: "system",
         market: symbol,
         price: parseFloat(priceStr),
         qty: parseFloat(qtyStr),
@@ -114,7 +118,7 @@ export class PaperEngine {
 
       const binanceAsks: Order[] = (data.asks || []).map(([priceStr, qtyStr], index) => ({
         id: -20000 - index,
-        userId: -1,
+        userId: "system",
         market: symbol,
         price: parseFloat(priceStr),
         qty: parseFloat(qtyStr),
@@ -138,7 +142,7 @@ export class PaperEngine {
         const qty = 0.01 + Math.random() * 1.5;
         return {
           id: -10000 - index,
-          userId: -1,
+          userId: "system",
           market: symbol,
           price,
           qty,
@@ -156,7 +160,7 @@ export class PaperEngine {
         const qty = 0.01 + Math.random() * 1.5;
         return {
           id: -20000 - index,
-          userId: -1,
+          userId: "system",
           market: symbol,
           price,
           qty,
@@ -172,28 +176,11 @@ export class PaperEngine {
     }
   }
 
-  //TRIGGER 2: Fires on every Binance price tick
-
-  private async onTick(symbol: string, price: number): Promise<void> {
-    const restingOrders = this.orderBook.getOrdersForSymbol(symbol);
-    if (restingOrders.length === 0) return;
-
-    for (const order of restingOrders) {
-      const shouldFill =
-        (order.side === "BUY" && price <= order.price!) ||
-        (order.side === "SELL" && price >= order.price!);
-
-      if (shouldFill) {
-        // Remove from book FIRST to prevent double-fills on rapid ticks
-        this.orderBook.removeLimitOrder(order.id);
-        // Fill at the limit price (not the tick price)
-        //
-        await this.fillOrder(order, order.price!);
-      }
-    }
+  cancelOrder(orderId: number): Order | null {
+    return this.orderBook.removeLimitOrder(orderId);
   }
 
-  //Shared fill logic
+  // ─── Fill execution ──────────────────────────────────────────────────────
 
   private async fillOrder(order: Order, fillPrice: number): Promise<void> {
     console.log(
@@ -201,18 +188,10 @@ export class PaperEngine {
     );
 
     try {
-      // here we update the user that order ahve been filled but do not dedect the balance
-      // here how we goan do it
-      // calculate the transaction value / cost of order
-      // Fetch the user's current balance from Redis
-      //Determine the new balance based on side and type
-      // Update the balance in Redis
-      //Update the balance in the PostgreSQL database
-      //
       const totalCost = order.qty * fillPrice;
       const currentBalance = await this.redis.hGet(
         "balances",
-        order.userId.toString(),
+        order.userId,
       );
       let usdBalance = Number(currentBalance ?? 0);
       if (order.side === "BUY") {
@@ -225,7 +204,7 @@ export class PaperEngine {
 
       await this.redis.hSet(
         "balances",
-        order.userId.toString(),
+        order.userId,
         usdBalance.toString(),
       );
       // 5. Update the balance in the PostgreSQL database

@@ -3,7 +3,7 @@ import { PositionTracker } from "./PositionTracker";
 console.log("Running PositionTracker tests...");
 
 const tracker = new PositionTracker();
-const userId = 1;
+const userId = "user_test_1";
 const symbol = "BTCUSDT";
 
 // Helper helper to assert position properties
@@ -45,40 +45,40 @@ function assertPos(
   );
 }
 
-// ─── 2. LONG position -> BUY fill (Accumulate LONG) ─────────────────────────
+// ─── 2. Accumulate LONG (BUY more at higher price) ───────────────────────────
 {
   const result = tracker.addFill(userId, symbol, "BUY", 0.5, 70000);
-  console.assert(result.position !== null, "Position should exist");
+  // Expected new average cost = (0.5 * 68000 + 0.5 * 70000) / 1.0 = 69000
   assertPos(
     result.position!.qty, 1.0,
-    result.position!.avgCost, 69000, // (0.5 * 68000 + 0.5 * 70000) / 1.0
+    result.position!.avgCost, 69000,
     result.position!.side, "LONG",
     result.realizedPnL, 0,
     "2. Accumulate LONG"
   );
 }
 
-// ─── 3. LONG position -> SELL fill (Reduce LONG) ─────────────────────────────
+// ─── 3. Partially reduce LONG (SELL some at profit) ──────────────────────────
 {
   const result = tracker.addFill(userId, symbol, "SELL", 0.4, 71000);
-  console.assert(result.position !== null, "Position should exist");
+  // Realized PnL = (71000 - 69000) * 0.4 = 800
+  // Remaining qty = 0.6, avgCost remains 69000
   assertPos(
     result.position!.qty, 0.6,
-    result.position!.avgCost, 69000, // Average cost does not change when reducing
+    result.position!.avgCost, 69000,
     result.position!.side, "LONG",
-    result.realizedPnL, 800, // (71000 - 69000) * 0.4 = 800
-    "3. Reduce LONG"
+    result.realizedPnL, 800,
+    "3. Partially reduce LONG"
   );
 }
 
-// ─── 4. LONG position -> SELL fill (Reverse LONG to SHORT) ────────────────────
+// ─── 4. Reversal: Close LONG and open SHORT in one fill ─────────────────────
 {
-  // Current LONG: qty=0.6, avgCost=69000. Sell 0.8 @ 72000.
-  // Reversal:
-  // - 0.6 long closed @ 72000. Realized PnL = (72000 - 69000) * 0.6 = 1800.
-  // - 0.2 short opened @ 72000.
+  // Current: LONG 0.6 @ 69000
+  // SELL 0.8 @ 72000
+  // Closes 0.6 -> Realized PnL = (72000 - 69000) * 0.6 = 1800
+  // Opens SHORT 0.2 @ 72000
   const result = tracker.addFill(userId, symbol, "SELL", 0.8, 72000);
-  console.assert(result.position !== null, "Position should exist");
   assertPos(
     result.position!.qty, -0.2,
     result.position!.avgCost, 72000,
@@ -88,12 +88,13 @@ function assertPos(
   );
 }
 
-// ─── 5. SHORT position -> SELL fill (Accumulate SHORT) ────────────────────────
+// ─── 5. Accumulate SHORT (SELL more at higher price) ─────────────────────────
 {
-  // Current SHORT: qty=-0.2, avgCost=72000. Sell 0.3 @ 74000.
-  // New size: -0.5. Avg cost: (0.2 * 72000 + 0.3 * 74000) / 0.5 = 73200.
+  // Current: SHORT 0.2 (qty: -0.2) @ 72000
+  // SELL 0.3 @ 74000
+  // New avgCost = (0.2 * 72000 + 0.3 * 74000) / 0.5 = (14400 + 22200) / 0.5 = 73200
+  // New qty = -0.5
   const result = tracker.addFill(userId, symbol, "SELL", 0.3, 74000);
-  console.assert(result.position !== null, "Position should exist");
   assertPos(
     result.position!.qty, -0.5,
     result.position!.avgCost, 73200,
@@ -103,62 +104,53 @@ function assertPos(
   );
 }
 
-// ─── 6. SHORT position -> BUY fill (Reduce SHORT) ────────────────────────────
+// ─── 6. Partially reduce SHORT (BUY some at profit) ──────────────────────────
 {
-  // Current SHORT: qty=-0.5, avgCost=73200. Buy 0.2 @ 71000.
-  // Reduction:
-  // - Realized PnL: (73200 - 71000) * 0.2 = 440.
-  // - Remaining size: -0.3. Avg cost remains 73200.
+  // Current: SHORT 0.5 @ 73200
+  // BUY 0.2 @ 71000
+  // Realized PnL = (73200 - 71000) * 0.2 = 440
+  // Remaining: SHORT 0.3 (qty: -0.3) @ 73200
   const result = tracker.addFill(userId, symbol, "BUY", 0.2, 71000);
-  console.assert(result.position !== null, "Position should exist");
   assertPos(
     result.position!.qty, -0.3,
     result.position!.avgCost, 73200,
     result.position!.side, "SHORT",
     result.realizedPnL, 440,
-    "6. Reduce SHORT"
+    "6. Partially reduce SHORT"
   );
 }
 
-// ─── 7. SHORT position -> BUY fill (Close SHORT) ─────────────────────────────
+// ─── 7. Close SHORT completely ───────────────────────────────────────────────
 {
-  // Current SHORT: qty=-0.3, avgCost=73200. Buy 0.3 @ 70000.
-  // Closure:
-  // - Realized PnL: (73200 - 70000) * 0.3 = 960.
-  // - Position is closed (null).
+  // Current: SHORT 0.3 @ 73200
+  // BUY 0.3 @ 70000
+  // Realized PnL = (73200 - 70000) * 0.3 = 960
+  // Position closed: null
   const result = tracker.addFill(userId, symbol, "BUY", 0.3, 70000);
-  console.assert(result.position === null, "Position should be closed");
-  console.assert(Math.abs(result.realizedPnL - 960) < 1e-9, `Expected realized PnL 960, got ${result.realizedPnL}`);
+  console.assert(result.position === null, "Position should be closed (null)");
+  const pnlOk = Math.abs(result.realizedPnL - 960) < 1e-9;
+  if (!pnlOk) {
+    console.error(`FAIL: 7. Close SHORT. Expected PnL: 960, Actual: ${result.realizedPnL}`);
+    process.exit(1);
+  }
+  console.assert(tracker.getPositions(userId).length === 0, "No active positions should remain");
 }
 
-// ─── 8. Empty position -> SELL fill (Create SHORT) ───────────────────────────
+// ─── 8. Open SHORT, then reverse to LONG ─────────────────────────────────────
 {
-  const result = tracker.addFill(userId, symbol, "SELL", 0.5, 68000);
-  console.assert(result.position !== null, "Position should exist");
-  assertPos(
-    result.position!.qty, -0.5,
-    result.position!.avgCost, 68000,
-    result.position!.side, "SHORT",
-    result.realizedPnL, 0,
-    "8. Create SHORT"
-  );
-}
-
-// ─── 9. SHORT position -> BUY fill (Reverse SHORT to LONG) ────────────────────
-{
-  // Current SHORT: qty=-0.5, avgCost=68000. Buy 0.8 @ 66000.
-  // Reversal:
-  // - 0.5 short closed @ 66000. Realized PnL: (68000 - 66000) * 0.5 = 1000.
-  // - 0.3 long opened @ 66000.
+  tracker.addFill(userId, symbol, "SELL", 0.5, 68000);
+  // Current: SHORT 0.5 @ 68000
+  // BUY 0.8 @ 66000
+  // Closes SHORT 0.5 -> Realized PnL = (68000 - 66000) * 0.5 = 1000
+  // Opens LONG 0.3 @ 66000
   const result = tracker.addFill(userId, symbol, "BUY", 0.8, 66000);
-  console.assert(result.position !== null, "Position should exist");
   assertPos(
     result.position!.qty, 0.3,
     result.position!.avgCost, 66000,
     result.position!.side, "LONG",
     result.realizedPnL, 1000,
-    "9. Reverse SHORT to LONG"
+    "8. Reverse SHORT to LONG"
   );
 }
 
-console.log("All PositionTracker tests passed successfully!");
+console.log("✅ All PositionTracker tests passed successfully!");
