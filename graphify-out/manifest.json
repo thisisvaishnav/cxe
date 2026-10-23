@@ -211,8 +211,8 @@
   },
   "backend/prisma/migrations/20260507204427_init/migration.sql": {
     "mtime": 1792752502.0217423,
-    "seen": 1792777454.889811,
-    "ast_hash": "",
+    "seen": 1792780063.599927,
+    "ast_hash": "7e91303becb209bc459971f1700480ef",
     "semantic_hash": ""
   },
   "backend/src/controllers/auth-controller.ts": {
@@ -420,9 +420,9 @@
     "semantic_hash": ""
   },
   "frontend/src/components/AuthScreen.tsx": {
-    "mtime": 1792779971.968907,
-    "seen": 1792779975.5438132,
-    "ast_hash": "def64ba6cca44672382bd4c568cb779f",
+    "mtime": 1792780039.21267,
+    "seen": 1792780063.5999548,
+    "ast_hash": "8bbc3e2c45ce4ab6c007babec52cdbf0",
     "semantic_hash": ""
   },
   "frontend/src/components/Layout.tsx": {
