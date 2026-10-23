@@ -422,6 +422,12 @@ const clerkRetroAppearance = {
       border: "none",
       padding: "4px 0 0",
     },
+    footerItem: {
+      display: "none",
+    },
+    footerPages: {
+      display: "none",
+    },
     identityPreview: {
       border: "2px solid #000000",
       borderRadius: "0px",
@@ -1474,11 +1480,22 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
           padding: 4px 0 0 !important;
         }
 
-        /* Compact Clerk development badge */
+        /* Completely hide Clerk branding and development badges */
+        .cl-footerItem,
+        .cl-footerPages,
+        .cl-footerAction + div,
+        [data-clerk-dev-mode-overlay],
+        [data-clerk-dev-mode-notice],
+        .cl-internal-r93pb5,
+        .cl-internal-95w9vp,
         .cl-internal-b3fm6y,
-        .cl-developmentBadge {
-          opacity: 0.75 !important;
-          transform: scale(0.85) !important;
+        .cl-internal-57atez,
+        .cl-internal-19cgafa,
+        .cl-developmentBadge,
+        a[aria-label="Clerk logo"],
+        a[href*="clerk.com"],
+        .cl-internal-8nb9tw {
+          display: none !important;
         }
 
         /* Legacy Form Elements */
