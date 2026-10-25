@@ -4,15 +4,9 @@ import dotenv from "dotenv";
 dotenv.config({ path: ".env.local" });
 dotenv.config();
 
-function readRequiredEnv(name: string): string {
-  const value = process.env[name];
-  if (!value) throw new Error(`Missing required env variable: ${name}`);
-  return value;
-}
-
 export const env = {
   port: Number(process.env.PORT ?? "3000"),
-  redisUrl: readRequiredEnv("REDIS_URL"),
+  redisUrl: process.env.REDIS_URL ?? "",
   jwtSecret: process.env.JWT_SECRET ?? process.env.CLERK_SECRET_KEY ?? "cxe_secret_fallback",
   clerkPublishableKey:
     process.env.CLERK_PUBLISHABLE_KEY ??

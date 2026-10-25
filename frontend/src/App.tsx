@@ -14,6 +14,7 @@ import { api } from "./lib/api.js";
 import type { Position } from "./lib/api.js";
 import { useWebSocket } from "./hooks/useWebSocket.js";
 import type { Page } from "./components/Layout.js";
+import Landing01Demo from "./components/demo.js";
 
 /* ─── App with Clerk Authentication ─── */
 function AppWithClerk() {
@@ -25,6 +26,7 @@ function AppWithClerk() {
   const [positions, setPositions] = useState<Position[]>([]);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [activePage, setActivePage] = useState<Page>("trade");
+  const [unauthView, setUnauthView] = useState<"landing" | "auth">("landing");
 
   // Keep Clerk token and user identity synchronized
   useEffect(() => {
@@ -151,13 +153,27 @@ function AppWithClerk() {
     );
   }
 
-  // Not signed in -> show retro Mario AuthScreen with Clerk layer
+  // Not signed in -> show modern Landing01Demo or retro Mario AuthScreen
   if (!isSignedIn) {
+    if (unauthView === "landing") {
+      return <Landing01Demo onGetStarted={() => setUnauthView("auth")} />;
+    }
     return (
-      <AuthScreen
-        onAuthSuccess={(_newToken, _newUsername, _userId) => {}}
-        hasClerk={true}
-      />
+      <div className="relative">
+        <div style={{ position: "fixed", top: "16px", left: "16px", zIndex: 9999 }}>
+          <button
+            onClick={() => setUnauthView("landing")}
+            className="nes-btn nes-btn-yellow"
+            style={{ fontSize: "10px", padding: "6px 12px" }}
+          >
+            ← BACK TO SHOWCASE
+          </button>
+        </div>
+        <AuthScreen
+          onAuthSuccess={(_newToken, _newUsername, _userId) => {}}
+          hasClerk={true}
+        />
+      </div>
     );
   }
 
@@ -233,6 +249,20 @@ function AppWithClerk() {
         </main>
       )}
 
+      {/* Page: Landing / Showcase */}
+      {activePage === "landing" && (
+        <main style={{ flex: 1, background: "#101010", overflowY: "auto" }}>
+          <Landing01Demo onGetStarted={() => setActivePage("trade")} />
+        </main>
+      )}
+
+      {/* Page: Landing / Showcase */}
+      {activePage === "landing" && (
+        <main style={{ flex: 1, background: "#101010", overflowY: "auto" }}>
+          <Landing01Demo onGetStarted={() => setActivePage("trade")} />
+        </main>
+      )}
+
       {/* Page: Earn */}
       {activePage === "earn" && (
         <main style={{ flex: 1, background: "var(--bg-canvas)", overflowY: "auto" }}>
@@ -282,6 +312,7 @@ function AppLegacy() {
   const [positions, setPositions] = useState<Position[]>([]);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [activePage, setActivePage] = useState<Page>("trade");
+  const [unauthView, setUnauthView] = useState<"landing" | "auth">("landing");
 
   const { status: wsStatus, pnlUpdates, lastUpdate, prices } = useWebSocket(token);
 
@@ -341,7 +372,23 @@ function AppLegacy() {
   const currentPrice = prices["BTCUSDT"] ?? (btcUpdate ? btcUpdate.currentPrice : null);
 
   if (!token) {
-    return <AuthScreen onAuthSuccess={handleAuthSuccess} hasClerk={false} />;
+    if (unauthView === "landing") {
+      return <Landing01Demo onGetStarted={() => setUnauthView("auth")} />;
+    }
+    return (
+      <div className="relative">
+        <div style={{ position: "fixed", top: "16px", left: "16px", zIndex: 9999 }}>
+          <button
+            onClick={() => setUnauthView("landing")}
+            className="nes-btn nes-btn-yellow"
+            style={{ fontSize: "10px", padding: "6px 12px" }}
+          >
+            ← BACK TO SHOWCASE
+          </button>
+        </div>
+        <AuthScreen onAuthSuccess={handleAuthSuccess} hasClerk={false} />
+      </div>
+    );
   }
 
   return (

@@ -212,7 +212,7 @@
   "backend/prisma/migrations/20260507204427_init/migration.sql": {
     "mtime": 1792752502.0217423,
     "seen": 1792780063.599927,
-    "ast_hash": "7e91303becb209bc459971f1700480ef",
+    "ast_hash": "",
     "semantic_hash": ""
   },
   "backend/src/controllers/auth-controller.ts": {

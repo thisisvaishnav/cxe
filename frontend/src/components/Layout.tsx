@@ -3,7 +3,7 @@
 import React from "react";
 import { Bell, Globe, Settings, LogOut } from "lucide-react";
 
-export type Page = "trade" | "portfolio" | "earn";
+export type Page = "trade" | "portfolio" | "earn" | "landing";
 
 interface HeaderProps {
   username: string | null;
@@ -43,10 +43,10 @@ export const Header: React.FC<HeaderProps> = ({ username, onLogout, wsStatus, ba
           display: "flex", 
           justifyContent: "space-between", 
           alignItems: "center",
-          color: "#ffffff"
+          flexWrap: "wrap",
+          gap: "10px"
         }}
       >
-        {/* Logo */}
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           <div 
             style={{ 
@@ -75,7 +75,7 @@ export const Header: React.FC<HeaderProps> = ({ username, onLogout, wsStatus, ba
           </span>
         </div>
 
-        {/* Navigation Items - 3 Core Pages */}
+        {/* Navigation Items */}
         <nav 
           style={{ 
             display: "flex", 
@@ -85,9 +85,9 @@ export const Header: React.FC<HeaderProps> = ({ username, onLogout, wsStatus, ba
           }}
           className="nav-links"
         >
-          {(["trade", "portfolio", "earn"] as Page[]).map((page) => {
+          {(["trade", "portfolio", "earn", "landing"] as Page[]).map((page) => {
             const isActive = activePage === page;
-            const labels: Record<Page, string> = { trade: "Trade", portfolio: "Portfolio", earn: "Earn" };
+            const labels: Record<Page, string> = { trade: "Trade", portfolio: "Portfolio", earn: "Earn", landing: "Showcase" };
             return (
               <button
                 key={page}
@@ -113,150 +113,112 @@ export const Header: React.FC<HeaderProps> = ({ username, onLogout, wsStatus, ba
           })}
         </nav>
 
-        {/* Wallet & Info */}
+        {/* User stats & logout */}
         <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
           {username && (
             <div 
               style={{ 
-                background: "var(--mario-green)", 
-                border: "2px solid #000000", 
-                padding: "var(--header-box-padding, 6px 12px)", 
-                fontSize: "var(--header-box-font-size, 12px)", 
-                fontFamily: "var(--font-press-start)", 
-                color: "#ffffff",
-                boxShadow: "2px 2px 0px #000000",
+                background: "var(--bg-canvas)", 
+                border: "2px solid #000000",
+                padding: "var(--header-box-padding, 6px 12px)",
+                fontFamily: "var(--font-press-start)",
+                fontSize: "var(--header-box-font-size, 12px)",
                 display: "flex",
-                alignItems: "center",
-                gap: "8px"
+                gap: "8px",
+                boxShadow: "2px 2px 0px #000000"
               }}
             >
-              <div 
-                style={{ 
-                  width: "8px", 
-                  height: "8px", 
-                  borderRadius: "50%", 
-                  background: wsStatus === "connected" ? "var(--mario-yellow)" : "#ffffff",
-                  animation: wsStatus === "connecting" ? "pulse 1s infinite" : "none"
-                }}
-              />
-              {username.toUpperCase()}
+              <span style={{ color: "var(--mario-green)" }}>COINS:</span>
+              <span>${balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
             </div>
           )}
 
-          {username && (
-            <div 
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <span 
               style={{ 
-                background: "var(--mario-yellow)", 
-                border: "2px solid #000000", 
-                padding: "var(--header-box-padding, 6px 12px)", 
-                fontSize: "var(--header-box-font-size, 12px)", 
                 fontFamily: "var(--font-press-start)", 
-                color: "#000000",
-                boxShadow: "2px 2px 0px #000000",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px"
+                fontSize: "10px", 
+                color: "#ffffff",
+                background: "#000000",
+                padding: "6px 10px",
+                border: "1px solid #ffffff"
               }}
             >
-              🪙 ${balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD
-            </div>
-          )}
+              {username || "TRADER"}
+            </span>
 
-          <button 
-            className="nes-btn" 
-            onClick={onLogout}
-            style={{ 
-              padding: "4px 8px", 
-              boxShadow: "2px 2px 0px #000000", 
-              border: "2px solid #000000",
-              fontSize: "10px",
-              background: "#ffffff"
-            }}
-            title="Log Out"
-          >
-            <LogOut size={12} />
-          </button>
-
-          <div style={{ display: "flex", gap: "8px", color: "#ffffff" }}>
-            <Bell size={16} style={{ cursor: "pointer" }} />
-            <Globe size={16} style={{ cursor: "pointer" }} />
-            <Settings size={16} style={{ cursor: "pointer" }} />
+            <button 
+              onClick={onLogout}
+              className="nes-btn nes-btn-yellow"
+              style={{ padding: "6px 10px", fontSize: "10px" }}
+              title="Logout"
+            >
+              <LogOut size={12} />
+            </button>
           </div>
         </div>
       </div>
-      
-      {/* Ticker Banner */}
-      <div className="retro-ticker">
-        <div className="retro-ticker-content">
-          ★ WELCOME TO SUPERCOIN! PRESS START - GET STARTED HERE. ★ PLACING A LIMIT ORDER LOCKS FUNDS IMMEDIATELY. ★ LATEST PRICE ALIGNMENT POWERED BY BINANCE PRICE ORACLE DATA FEED. ★
+
+      {/* Sub-Header Yellow Ticker Bar */}
+      <div 
+        style={{ 
+          background: "var(--mario-yellow)", 
+          padding: "6px 20px", 
+          display: "flex", 
+          justifyContent: "space-between", 
+          alignItems: "center",
+          borderTop: "2px solid #000000",
+          fontFamily: "var(--font-mono)",
+          fontSize: "14px"
+        }}
+      >
+        <div style={{ display: "flex", gap: "24px" }}>
+          <span><strong>STAGE:</strong> WORLD 1-1</span>
+          <span><strong>MARKET:</strong> BTC/USD (LIVE)</span>
+          <span><strong>24H HIGH:</strong> $68,400.00</span>
+          <span><strong>24H LOW:</strong> $65,120.00</span>
+        </div>
+
+        <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            <div 
+              style={{ 
+                width: "8px", 
+                height: "8px", 
+                backgroundColor: wsStatus === "connected" ? "var(--mario-green)" : "var(--mario-red)",
+                border: "1px solid #000000"
+              }} 
+            />
+            <span style={{ fontSize: "12px", textTransform: "uppercase" }}>{wsStatus}</span>
+          </div>
+          <Bell size={14} style={{ cursor: "pointer" }} />
+          <Globe size={14} style={{ cursor: "pointer" }} />
+          <Settings size={14} style={{ cursor: "pointer" }} />
         </div>
       </div>
     </header>
   );
 };
 
-interface FooterProps {
-  wsStatus: "disconnected" | "connecting" | "connected" | "error";
-  lastUpdate: string | null;
-}
-
-export const Footer: React.FC<FooterProps> = ({ wsStatus, lastUpdate }) => {
-  const getStatusColor = () => {
-    switch (wsStatus) {
-      case "connected": return "var(--mario-yellow)";
-      case "connecting": return "#ffeb3b";
-      case "error": return "#ff1744";
-      default: return "#ffffff";
-    }
-  };
-
-  const getStatusText = () => {
-    switch (wsStatus) {
-      case "connected": return "1-UP ONLINE";
-      case "connecting": return "1-UP CONNECTING";
-      case "error": return "1-UP CONNECTION ERROR";
-      default: return "1-UP OFFLINE";
-    }
-  };
-
+export const Footer: React.FC<{ wsStatus: string; lastUpdate: string | null }> = ({ wsStatus, lastUpdate }) => {
   return (
     <footer 
       style={{ 
-        background: "var(--mario-green)", 
-        borderTop: "3px solid #000000", 
+        background: "var(--bg-dark)", 
+        color: "#ffffff", 
         padding: "8px 20px", 
+        borderTop: "var(--border-retro)",
         display: "flex", 
         justifyContent: "space-between", 
         alignItems: "center",
-        color: "#ffffff",
-        fontFamily: "var(--font-press-start)",
-        fontSize: "9px"
+        fontFamily: "var(--font-mono)",
+        fontSize: "12px"
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-        <span 
-          style={{ 
-            display: "inline-block", 
-            width: "8px", 
-            height: "8px", 
-            background: getStatusColor(),
-            border: "1px solid #000000",
-            boxShadow: "1px 1px 0px #000000"
-          }} 
-        />
-        <span>{getStatusText()}</span>
-        {lastUpdate && (
-          <span style={{ color: "rgba(255, 255, 255, 0.7)", marginLeft: "10px", fontFamily: "var(--font-mono)", fontSize: "12px" }}>
-            (Last P&L tick: {lastUpdate})
-          </span>
-        )}
-      </div>
-
-      <div style={{ display: "flex", gap: "15px" }}>
-        <a href="#" style={{ color: "#ffffff", textDecoration: "none" }}>Docs</a>
-        <a href="#" style={{ color: "#ffffff", textDecoration: "none" }}>Support</a>
-        <a href="#" style={{ color: "#ffffff", textDecoration: "none" }}>Terms</a>
-        <a href="#" style={{ color: "#ffffff", textDecoration: "none" }}>Privacy Policy</a>
+      <div>SUPERCOIN EXCHANGE v1.0.4 | ENGINE: MEMORY-MAPPED BOOK</div>
+      <div style={{ display: "flex", gap: "16px" }}>
+        <span>FEED: {wsStatus.toUpperCase()}</span>
+        {lastUpdate && <span>LAST SYNC: {new Date(lastUpdate).toLocaleTimeString()}</span>}
       </div>
     </footer>
   );

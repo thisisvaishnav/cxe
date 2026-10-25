@@ -1,0 +1,18 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "vite",
+  "outputDirectory": "frontend/dist",
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/index.ts" },
+    { "source": "/signup", "destination": "/api/index.ts" },
+    { "source": "/signin", "destination": "/api/index.ts" },
+    { "source": "/order/(.*)", "destination": "/api/index.ts" },
+    { "source": "/order", "destination": "/api/index.ts" },
+    { "source": "/depth/(.*)", "destination": "/api/index.ts" },
+    { "source": "/balance", "destination": "/api/index.ts" },
+    { "source": "/positions", "destination": "/api/index.ts" },
+    { "source": "/deposit", "destination": "/api/index.ts" },
+    { "source": "/health", "destination": "/api/index.ts" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}

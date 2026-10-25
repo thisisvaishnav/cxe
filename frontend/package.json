@@ -12,11 +12,21 @@
   "dependencies": {
     "@clerk/clerk-react": "^5.61.11",
     "@clerk/react": "^6.18.0",
+    "@hugeicons/core-free-icons": "^4.3.5",
+    "@hugeicons/react": "^1.1.10",
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/react-router-dom": "^5.3.3",
     "canvas-confetti": "^1.9.4",
+    "clsx": "^2.1.1",
+    "hugeicons-react": "^0.4.0",
     "lightweight-charts": "^5.2.0",
     "lucide-react": "^1.17.0",
+    "motion": "^14.6.0",
     "react": "^19.2.6",
-    "react-dom": "^19.2.6"
+    "react-dom": "^19.2.6",
+    "react-router-dom": "^7.18.4",
+    "tailwind-merge": "^3.7.0",
+    "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
