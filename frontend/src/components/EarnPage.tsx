@@ -76,8 +76,8 @@ const POOLS: Pool[] = [
     description: "Leveraged BTC yield strategy. High reward potential with proportional risk exposure.",
   },
   {
-    id: "cxe-staking",
-    name: "CXE Token Staking",
+    id: "supercoin-staking",
+    name: "Supercoin Staking",
     icon: "🪙",
     apy: "18.0%",
     apyNum: 18.0,
@@ -85,7 +85,7 @@ const POOLS: Pool[] = [
     lockPeriod: "14 days",
     risk: "MEDIUM",
     minDeposit: 10,
-    description: "Stake CXE tokens to earn platform fees and governance rights.",
+    description: "Stake Supercoin tokens to earn platform fees and governance rights.",
   },
   {
     id: "eth-flex",

@@ -1,7 +1,7 @@
 // src/components/AuthScreen.tsx - Retro Game Menu × Clean Authentication
 // Designed following the Figma UI/UX principles and design critique:
 // 1. Unified Game Dialog aesthetic with square corners, crisp 2px borders, 4px hard shadows.
-// 2. Clear CTA hierarchy: PRESS START (page title), Sign in to CXE (form title), Continue (primary action).
+// 2. Clear CTA hierarchy: PRESS START (page title), Sign in to Supercoin (form title), Continue (primary action).
 // 3. Single secondary sign-up text link (no duplicated prompts).
 // 4. Disciplined palette: Charcoal (#242329) & White (#FFFFFF) form, Pixel Yellow (#FFD43B) accents, Orange-Red (#F05B43) warnings.
 // 5. Clean, readable typography; removed progress line and decorative clutter.
@@ -729,7 +729,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
             <div className="auth-card-header">
               <h2 className="auth-card-title">PRESS START</h2>
               <p className="auth-card-subtitle">
-                {isSignUp ? "Create your CXE Account" : "Sign in to CXE"}
+                {isSignUp ? "Create your Supercoin Account" : "Sign in to Supercoin"}
               </p>
             </div>
 

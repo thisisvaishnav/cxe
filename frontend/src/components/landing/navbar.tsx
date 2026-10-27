@@ -9,7 +9,7 @@ export interface NavbarProps {
   onGetStarted?: () => void;
 }
 
-export default function Navbar({ title = "CXE TERMINAL", onGetStarted }: NavbarProps) {
+export default function Navbar({ title = "SUPERCOIN TERMINAL", onGetStarted }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 

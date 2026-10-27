@@ -1,9 +1,9 @@
 <p align="center">
-  <img src="https://img.shields.io/badge/CXE-Paper%20Trading%20Exchange-8B5CF6?style=for-the-badge&labelColor=0D1117&logo=bitcoin&logoColor=F7931A" alt="CXE Badge" />
+  <img src="https://img.shields.io/badge/Supercoin-Paper%20Trading%20Exchange-8B5CF6?style=for-the-badge&labelColor=0D1117&logo=bitcoin&logoColor=F7931A" alt="Supercoin Badge" />
 </p>
 
 <h1 align="center">
-  ⚡ CXE — Paper Trading Exchange
+  🪙 Supercoin — Paper Trading Exchange
 </h1>
 
 <p align="center">
@@ -31,13 +31,13 @@
 
 ---
 
-## 🎯 What is CXE?
+## 🎯 What is Supercoin?
 
-**CXE** (Centralized Exchange) is a **production-grade paper trading platform** that mirrors the experience of trading on a real centralized exchange — without risking a single dollar.
+**Supercoin** is a **production-grade paper trading platform** that mirrors the experience of trading on a real centralized exchange — without risking a single dollar.
 
-Unlike toy simulators that use delayed data and simplified logic, CXE connects directly to **Binance's real-time WebSocket streams**, runs a **full in-memory matching engine** with price-time priority, and tracks your **positions, P&L, and balances** tick-by-tick — exactly like a professional trading desk.
+Unlike toy simulators that use delayed data and simplified logic, Supercoin connects directly to **Binance's real-time WebSocket streams**, runs a **full in-memory matching engine** with price-time priority, and tracks your **positions, P&L, and balances** tick-by-tick — exactly like a professional trading desk.
 
-> **🏆 Why CXE stands out from every other paper trading platform:**
+> **🏆 Why Supercoin stands out from every other paper trading platform:**
 >
 > | Feature | CXE | Competitors |
 > |---|---|---|
