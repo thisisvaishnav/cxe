@@ -1,17 +1,17 @@
-# Graph Report - cxe  (2026-10-25)
+# Graph Report - cxe  (2026-10-27)
 
 ## Corpus Check
-- 125 files · ~131,291 words
+- 125 files · ~128,991 words
 - Verdict: corpus is large enough that graph structure adds value.
-- Unclassified: 23 file(s) not represented in the graph (top: (none) 9, .example 3, .lock 3)
+- Unclassified: 24 file(s) not represented in the graph (top: (none) 9, .example 4, .lock 3)
 
 ## Summary
-- 3710 nodes · 5856 edges · 181 communities (97 shown, 84 thin omitted)
+- 3714 nodes · 5860 edges · 180 communities (95 shown, 85 thin omitted)
 - Extraction: 97% EXTRACTED · 3% INFERRED · 0% AMBIGUOUS · INFERRED: 164 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `e9304478`
+- Built from commit: `184361ff`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -25,7 +25,7 @@
 - Order.ts
 - Fill.ts
 - Balance.ts
-- L
+- t
 - r
 - addErrorMessage
 - Stock.ts
@@ -37,9 +37,9 @@
 - commonInputTypes.ts
 - ys
 - edge.js
-- cn
+- features.tsx
 - Prisma__UserClient
-- ze
+- get
 - ve
 - from
 - constructor
@@ -65,23 +65,23 @@
 - StockDelegate
 - UserDelegate
 - write
-- Fe
+- #m
 - constructor
 - engine/package.json
 - compilerOptions
 - prismaNamespaceBrowser.ts
 - write
-- toString
+- ro
 - backend/package.json
 - react
 - exchange-controller.ts
 - PrismaClient
 - EarnPage.tsx
-- PortfolioPage.tsx
+- Layout.tsx
 - PrismaClient
 - G
 - dependencies
-- demo.tsx
+- cn
 - devDependencies
 - Docker Build & Push Job
 - prisma/index-browser.js
@@ -110,7 +110,7 @@
 - getTracingHelper
 - index-browser.d.ts
 - auth-controller.ts
-- t
+- toString
 - PaperEngine
 - Prisma__UserClient
 - PaperEngine.ts
@@ -165,9 +165,8 @@
 - React Logo
 - Vite Logo
 - backend-to-engine-broker
-- handleRequestError
+- digest
 - devDependencies
-- getTracingHelper
 - scripts
 - vercel.json
 - scripts
@@ -180,27 +179,27 @@
 4. `r()` - 28 edges
 5. `interpretNode()` - 28 edges
 6. `r()` - 28 edges
-7. `react` - 26 edges
-8. `cn()` - 26 edges
-9. `interpretNode()` - 25 edges
-10. `slice()` - 25 edges
+7. `cn()` - 26 edges
+8. `react` - 26 edges
+9. `slice()` - 25 edges
+10. `toString()` - 25 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `Backend README` --semantically_similar_to--> `Engine README`  [INFERRED] [semantically similar]
   backend/README.md → engine/README.md
 - `Hero Image` --conceptually_related_to--> `Mini Centralized Exchange (CEX) Assignment`  [INFERRED]
   frontend/src/assets/hero.png → README.md
-- `Mt()` --indirect_call--> `N()`  [INFERRED]
-  backend/generated/prisma/runtime/wasm-compiler-edge.js → backend/generated/prisma/query_compiler_fast_bg.js
 - `q()` --indirect_call--> `t()`  [INFERRED]
   backend/generated/prisma/query_compiler_fast_bg.js → backend/generated/prisma/runtime/wasm-compiler-edge.js
+- `Mt()` --indirect_call--> `N()`  [INFERRED]
+  backend/generated/prisma/runtime/wasm-compiler-edge.js → backend/generated/prisma/query_compiler_fast_bg.js
 - `Frontend CI Job` --calls--> `Vite Build System`  [INFERRED]
   .github/workflows/ci.yml → frontend/README.md
 
 ## Import Cycles
 - None detected.
 
-## Communities (181 total, 84 thin omitted)
+## Communities (180 total, 85 thin omitted)
 
 ### Community 0 - "index.d.ts"
 Cohesion: 0.00
@@ -212,11 +211,11 @@ Nodes (306): AccelerateExtensionFetch, AccelerateExtensionFetchDecorator, Action
 
 ### Community 2 - "runtime/client.js"
 Cohesion: 0.02
-Nodes (79): Ad(), ai(), Am(), an(), bn(), Bp(), bs(), Cd() (+71 more)
+Nodes (77): Ad(), ai(), Am(), an(), bn(), Bp(), Cd(), cm() (+69 more)
 
 ### Community 3 - "wasm-compiler-edge.js"
 Cohesion: 0.02
-Nodes (48): aa(), addItem(), ap(), apiKey(), bc(), Bn(), clone(), _cloneInto() (+40 more)
+Nodes (46): aa(), ap(), apiKey(), bc(), Bn(), clone(), _cloneInto(), cs() (+38 more)
 
 ### Community 4 - "prismaNamespace.ts"
 Cohesion: 0.02
@@ -238,41 +237,41 @@ Nodes (79): AggregateFill, FillAggregateArgs, FillAvgAggregateInputType, FillAvg
 Cohesion: 0.03
 Nodes (73): AggregateBalance, BalanceAggregateArgs, BalanceAvgAggregateInputType, BalanceAvgAggregateOutputType, BalanceAvgOrderByAggregateInput, BalanceCountAggregateInputType, BalanceCountAggregateOutputType, BalanceCountArgs (+65 more)
 
-### Community 9 - "L"
-Cohesion: 0.09
-Nodes (46): _a(), cm(), connect(), dispatchBatches(), dm(), Dp(), ea(), Fi() (+38 more)
+### Community 9 - "t"
+Cohesion: 0.07
+Nodes (55): _a(), as(), Bt(), cm(), connect(), cp(), dispatchBatches(), dm() (+47 more)
 
 ### Community 10 - "r"
-Cohesion: 0.06
-Nodes (58): #a(), aa(), apiKey(), r(), $c(), cl(), commitTransaction(), Da() (+50 more)
+Cohesion: 0.09
+Nodes (46): #a(), apiKey(), r(), $c(), cl(), commitTransaction(), Da(), deserialize() (+38 more)
 
 ### Community 11 - "addErrorMessage"
-Cohesion: 0.09
-Nodes (65): ac(), addErrorMessage(), addField(), addSuggestion(), ar(), asObject(), Be(), cc() (+57 more)
+Cohesion: 0.11
+Nodes (54): ac(), addErrorMessage(), addField(), addSuggestion(), ar(), asObject(), Be(), cc() (+46 more)
 
 ### Community 12 - "Stock.ts"
 Cohesion: 0.03
 Nodes (58): AggregateStock, GetStockAggregateType, GetStockGroupByPayload, StockAggregateArgs, StockAvgAggregateInputType, StockAvgAggregateOutputType, StockAvgOrderByAggregateInput, StockCountAggregateInputType (+50 more)
 
 ### Community 13 - "slice"
-Cohesion: 0.08
-Nodes (40): le(), m(), q(), Ju(), ao(), da(), _e(), Ee() (+32 more)
+Cohesion: 0.07
+Nodes (44): le(), m(), q(), ao(), da(), _e(), Ee(), enabled() (+36 more)
 
 ### Community 14 - "addErrorMessage"
 Cohesion: 0.13
 Nodes (47): ac(), addErrorMessage(), addField(), addSuggestion(), asObject(), _c(), cc(), dc() (+39 more)
 
 ### Community 15 - "e"
-Cohesion: 0.08
-Nodes (32): append(), Bu(), clone(), _cloneInto(), connect(), destroy(), digest(), digestInto() (+24 more)
+Cohesion: 0.09
+Nodes (31): append(), bo(), clone(), _cloneInto(), connect(), destroy(), digest(), digestInto() (+23 more)
 
 ### Community 16 - "interpretNode"
-Cohesion: 0.09
-Nodes (32): ap(), Ba(), Bd(), ds(), Ei(), enumValues(), Ep(), Ge() (+24 more)
+Cohesion: 0.07
+Nodes (44): ap(), Ba(), Bd(), bs(), cp(), Dd(), ds(), Ei() (+36 more)
 
 ### Community 17 - "index.js"
 Cohesion: 0.05
-Nodes (8): config, path, Prisma, PrismaClient, {
+Nodes (7): config, path, Prisma, PrismaClient, {
   PrismaClientKnownRequestError,
   PrismaClientUnknownRequestError,
   PrismaClientRustPanicError,
@@ -297,15 +296,15 @@ Nodes (8): config, path, Prisma, PrismaClient, {
   Public,
   getRuntime,
   createParam,
-}, decodeBase64AsWasm(), empty(), app
+}, decodeBase64AsWasm(), app
 
 ### Community 18 - "commonInputTypes.ts"
 Cohesion: 0.06
 Nodes (34): DateTimeFilter, DateTimeWithAggregatesFilter, EnumOrderSideFilter, EnumOrderSideWithAggregatesFilter, EnumOrderStatusFilter, EnumOrderStatusWithAggregatesFilter, EnumOrderTypeFilter, EnumOrderTypeWithAggregatesFilter (+26 more)
 
 ### Community 19 - "ys"
-Cohesion: 0.13
-Nodes (30): concat(), de(), dt(), ep(), findField(), Gc(), getArgumentName(), getArgumentPath() (+22 more)
+Cohesion: 0.08
+Nodes (43): addItem(), concat(), de(), dt(), ep(), findField(), Gc(), getArgumentName() (+35 more)
 
 ### Community 20 - "edge.js"
 Cohesion: 0.07
@@ -336,29 +335,29 @@ Nodes (5): config, Prisma, PrismaClient, {
   createParam,
 }, empty()
 
-### Community 22 - "cn"
-Cohesion: 0.16
-Nodes (20): BgFrame(), Props, Card(), OpenSourceComponent(), PremiumComponent(), ProductionReadyComponent(), ThemingComponent(), VisualWrapper() (+12 more)
+### Community 22 - "features.tsx"
+Cohesion: 0.58
+Nodes (7): OpenSourceComponent(), PremiumComponent(), ProductionReadyComponent(), ThemingComponent(), VisualWrapper(), FeatureCard(), Features()
 
 ### Community 23 - "Prisma__UserClient"
 Cohesion: 0.07
 Nodes (6): Prisma__BalanceClient, Prisma__FillClient, Prisma__OrderClient, Prisma__StockClient, Prisma__UserClient, PrismaPromise
 
-### Community 24 - "ze"
-Cohesion: 0.19
-Nodes (14): as(), cs(), Id(), kd(), kr(), ls(), Nd(), Od() (+6 more)
+### Community 24 - "get"
+Cohesion: 0.09
+Nodes (26): aa(), as(), cs(), Do(), get(), Id(), il(), Io() (+18 more)
 
 ### Community 25 - "ve"
-Cohesion: 0.10
-Nodes (24): bp(), bs(), ei(), fp(), Fs(), getAllClientExtensions(), getAllModelExtensions(), getAllQueryCallbacks() (+16 more)
+Cohesion: 0.09
+Nodes (27): bp(), bs(), ei(), fp(), Fs(), getAllClientExtensions(), getAllComputedFields(), getAllModelExtensions() (+19 more)
 
 ### Community 26 - "from"
-Cohesion: 0.08
-Nodes (30): alloc(), allocUnsafe(), allocUnsafeSlow(), am(), byteLength(), cd(), construct(), destroy() (+22 more)
+Cohesion: 0.11
+Nodes (20): alloc(), allocUnsafe(), allocUnsafeSlow(), am(), byteLength(), construct(), eo(), Fa() (+12 more)
 
 ### Community 27 - "constructor"
-Cohesion: 0.08
-Nodes (29): br(), Ca(), constructor(), execute(), forSql(), getAllBatchQueryCallbacks(), getPlaceholderValues(), gi() (+21 more)
+Cohesion: 0.11
+Nodes (19): br(), Ca(), constructor(), forSql(), getAllBatchQueryCallbacks(), getConnectionInfo(), gi(), Hd() (+11 more)
 
 ### Community 28 - "compilerOptions"
 Cohesion: 0.09
@@ -369,8 +368,8 @@ Cohesion: 0.13
 Nodes (20): httpServer, PendingResponse, pendingResponses, resolveEngineResponse(), waitForEngineResponse(), EngineCommandType, EngineRequest, EngineResponse (+12 more)
 
 ### Community 30 - "frontend/package.json"
-Cohesion: 0.08
-Nodes (28): typescript, name, private, scripts, build, dev, lint, preview (+20 more)
+Cohesion: 0.07
+Nodes (29): typescript, name, private, scripts, build, dev, lint, preview (+21 more)
 
 ### Community 31 - "client.ts"
 Cohesion: 0.11
@@ -393,12 +392,12 @@ Cohesion: 0.10
 Nodes (19): compilerOptions, allowImportingTsExtensions, allowJs, jsx, lib, module, moduleDetection, moduleResolution (+11 more)
 
 ### Community 36 - "St"
-Cohesion: 0.13
-Nodes (18): Bd(), cu(), equals(), Hd(), jd(), ki(), Ks(), kt() (+10 more)
+Cohesion: 0.12
+Nodes (19): Bd(), cu(), execute(), Hd(), jd(), ki(), Ks(), kt() (+11 more)
 
 ### Community 37 - "api.ts"
-Cohesion: 0.09
-Nodes (19): AuthScreen(), AuthScreenProps, clerkRetroAppearance, FloatingCoin(), PixelMario(), PowerUpMeter(), StarParticle(), OrderBookEntry (+11 more)
+Cohesion: 0.07
+Nodes (34): AuthScreen(), AuthScreenProps, clerkRetroAppearance, FloatingCoin(), PixelMario(), PowerUpMeter(), StarParticle(), formatNumber() (+26 more)
 
 ### Community 38 - "compilerOptions"
 Cohesion: 0.10
@@ -406,15 +405,15 @@ Nodes (20): compilerOptions, allowImportingTsExtensions, erasableSyntaxOnly, ign
 
 ### Community 49 - "write"
 Cohesion: 0.22
-Nodes (18): gt(), addMarginSymbol(), afterNextNewline(), copy(), getCurrentLineLength(), getPrintWidth(), indent(), newLine() (+10 more)
+Nodes (18): gt(), addMarginSymbol(), afterNextNewline(), getCurrentLineLength(), getPrintWidth(), indent(), indentedCurrentLine(), newLine() (+10 more)
 
-### Community 50 - "Fe"
+### Community 50 - "#m"
 Cohesion: 0.08
-Nodes (25): Jm(), au(), Bm(), Cl(), _d(), Fe(), Fr(), generate() (+17 more)
+Nodes (28): Jm(), au(), Bm(), Cl(), _d(), disconnect(), #f(), Fe() (+20 more)
 
 ### Community 51 - "constructor"
-Cohesion: 0.11
-Nodes (19): bu(), constructor(), deserialize(), du(), execute(), forSql(), getConnectionInfo(), im() (+11 more)
+Cohesion: 0.10
+Nodes (22): bu(), constructor(), deserialize(), dispatchEngineSpans(), du(), fl(), forSql(), getActiveContext() (+14 more)
 
 ### Community 52 - "engine/package.json"
 Cohesion: 0.06
@@ -432,41 +431,37 @@ Nodes (15): AnyNull, BalanceScalarFieldEnum, DbNull, Decimal, FillScalarFieldEnu
 Cohesion: 0.22
 Nodes (17): addMarginSymbol(), afterNextNewline(), getCurrentLineLength(), getPrintWidth(), indent(), newLine(), setColor(), underline() (+9 more)
 
-### Community 56 - "toString"
-Cohesion: 0.08
-Nodes (37): addItem(), ae(), At(), bc(), bl(), de(), en(), enabled() (+29 more)
+### Community 56 - "ro"
+Cohesion: 0.11
+Nodes (30): addItem(), ae(), At(), bc(), de(), Fe(), getArgumentName(), getArgumentPath() (+22 more)
 
 ### Community 57 - "backend/package.json"
 Cohesion: 0.07
 Nodes (32): dotenv, pg, prisma, @prisma/adapter-pg, @prisma/client, redis, @types/bun, @types/pg (+24 more)
 
 ### Community 58 - "react"
-Cohesion: 0.14
-Nodes (18): AGENTS, FeatureCard(), slides, ComponentCard(), ComponentsBento(), CarouselSlider(), SlideItem, KnobSlider() (+10 more)
+Cohesion: 0.16
+Nodes (18): AGENTS, AnimatedBento(), FeatureCard(), slides, ComponentCard(), ComponentsBento(), CarouselSlider(), SlideItem (+10 more)
 
 ### Community 59 - "exchange-controller.ts"
 Cohesion: 0.27
 Nodes (15): cancelOrder(), createOrder(), depositFunds(), getBalance(), getDepth(), getOrder(), getPositions(), getUserId() (+7 more)
 
 ### Community 61 - "EarnPage.tsx"
-Cohesion: 0.29
-Nodes (7): EarnPage(), EarnPageProps, Pool, PoolCard(), POOLS, riskColor, tagBg
-
-### Community 62 - "PortfolioPage.tsx"
-Cohesion: 0.16
-Nodes (13): HeaderProps, Page, DonutChart(), makeSpark(), PortfolioPage(), PortfolioPageProps, Sparkline(), OpenOrder (+5 more)
+Cohesion: 0.25
+Nodes (8): EarnPage(), EarnPageProps, Pool, PoolCard(), POOLS, riskColor, tagBg, lucide-react
 
 ### Community 64 - "G"
-Cohesion: 0.18
-Nodes (19): compare(), disconnect(), #f(), G(), #h(), #m(), readIntBE(), readIntLE() (+11 more)
+Cohesion: 0.20
+Nodes (17): compare(), copy(), equals(), G(), readIntBE(), readIntLE(), readUIntBE(), readUIntLE() (+9 more)
 
 ### Community 65 - "dependencies"
 Cohesion: 0.12
 Nodes (16): dependencies, bcryptjs, @clerk/express, cors, dotenv, express, ioredis, jsonwebtoken (+8 more)
 
-### Community 66 - "demo.tsx"
-Cohesion: 0.19
-Nodes (17): Landing01Demo(), Landing01DemoProps, AnimatedBento(), Container(), Heading(), Hero(), Stats(), BrowserMockup() (+9 more)
+### Community 66 - "cn"
+Cohesion: 0.12
+Nodes (29): Landing01Demo(), Landing01DemoProps, BgFrame(), Props, Card(), Container(), Heading(), Hero() (+21 more)
 
 ### Community 67 - "devDependencies"
 Cohesion: 0.14
@@ -497,7 +492,7 @@ Cohesion: 0.18
 Nodes (9): Balance, $Enums, Fill, Order, Stock, User, OrderSide, OrderStatus (+1 more)
 
 ### Community 78 - "App.tsx"
-Cohesion: 0.14
+Cohesion: 0.13
 Nodes (7): App(), AppLegacy(), AppWithClerk(), useWebSocket(), @clerk/react, react-dom, react-router-dom
 
 ### Community 79 - "require"
@@ -537,8 +532,8 @@ Cohesion: 0.22
 Nodes (6): a(), N(), R(), c(), k(), @prisma/client-runtime-utils
 
 ### Community 92 - "getTracingHelper"
-Cohesion: 0.33
-Nodes (7): dispatchEngineSpans(), getActiveContext(), getTraceParent(), getTracingHelper(), isEnabled(), runInChildSpan(), xr()
+Cohesion: 0.29
+Nodes (8): dispatchEngineSpans(), #f(), getActiveContext(), getTraceParent(), getTracingHelper(), isEnabled(), runInChildSpan(), xr()
 
 ### Community 93 - "index-browser.d.ts"
 Cohesion: 0.25
@@ -548,9 +543,9 @@ Nodes (7): Args, Exact, GetRuntimeOutput, Narrowable, Operation, Public, Runtime
 Cohesion: 0.21
 Nodes (15): clerkWebhook(), signin(), signup(), syncUser(), authSchema, createToken(), ensureUserProvisioned(), Express (+7 more)
 
-### Community 95 - "t"
-Cohesion: 0.12
-Nodes (19): as(), Bt(), getAllComputedFields(), getComputedFields(), getOrCreate(), Il(), Jp(), li() (+11 more)
+### Community 95 - "toString"
+Cohesion: 0.10
+Nodes (30): bl(), Bu(), Di(), el(), en(), enabled(), fm(), highlight() (+22 more)
 
 ### Community 99 - "dependencies"
 Cohesion: 0.12
@@ -597,12 +592,12 @@ Cohesion: 0.40
 Nodes (5): ./runtime/wasm-compiler-edge, default, import, require, types
 
 ### Community 117 - "hr"
-Cohesion: 0.08
-Nodes (29): bo(), cp(), ee(), es(), Fd(), getAllClientExtensions(), getAllComputedFields(), getAllModelExtensions() (+21 more)
+Cohesion: 0.12
+Nodes (19): ee(), es(), Fd(), getAllClientExtensions(), getAllModelExtensions(), getAllQueryCallbacks(), Go(), hr() (+11 more)
 
 ### Community 118 - "footer.tsx"
 Cohesion: 0.33
-Nodes (8): LogoIcon(), Crosshair(), Footer(), FooterLink(), FooterLinkColumn(), SocialLink(), Navbar(), NavbarProps
+Nodes (8): LogoIcon(), Crosshair(), Footer(), FooterLink(), FooterLinkColumn(), SocialLink(), NavbarProps, @hugeicons/react
 
 ### Community 122 - "SpanStatusCode"
 Cohesion: 0.50
@@ -616,17 +611,13 @@ Nodes (3): Position, PositionUpdateResult, tracker
 Cohesion: 0.20
 Nodes (9): compilerOptions, esModuleInterop, module, moduleResolution, resolveJsonModule, skipLibCheck, strict, target (+1 more)
 
-### Community 152 - "handleRequestError"
-Cohesion: 0.22
-Nodes (9): El(), handleAndLogRequestError(), handleRequestError(), hc(), kr(), pt(), sanitizeMessage(), Uu() (+1 more)
+### Community 152 - "digest"
+Cohesion: 0.21
+Nodes (13): cd(), destroy(), digest(), digestInto(), finish(), keccak(), ld(), pd() (+5 more)
 
 ### Community 153 - "devDependencies"
 Cohesion: 0.22
 Nodes (9): devDependencies, @types/cors, @types/express, @types/jsonwebtoken, @types/pg, @types/uuid, @types/ws, typescript (+1 more)
-
-### Community 154 - "getTracingHelper"
-Cohesion: 0.29
-Nodes (8): dispatchEngineSpans(), fl(), getActiveContext(), getTraceParent(), getTracingHelper(), isEnabled(), runInChildSpan(), Yr()
 
 ### Community 155 - "scripts"
 Cohesion: 0.40
@@ -641,23 +632,23 @@ Cohesion: 0.50
 Nodes (4): scripts, dev, start, typecheck
 
 ## Knowledge Gaps
-- **1838 isolated node(s):** `httpServer`, `RedisClient`, `name`, `private`, `version` (+1833 more)
+- **1839 isolated node(s):** `EarnPageProps`, `Pool`, `POOLS`, `riskColor`, `tagBg` (+1834 more)
   These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 2458 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **84 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **85 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `@prisma/client-runtime-utils` connect `runtime/index-browser.js` to `runtime/client.d.ts`, `runtime/client.js`, `wasm-compiler-edge.js`, `prisma/package.json`, `index-browser.d.ts`?**
-  _High betweenness centrality (0.398) - this node is a cross-community bridge._
+  _High betweenness centrality (0.366) - this node is a cross-community bridge._
 - **Are the 28 inferred relationships involving `t()` (e.g. with `k()` and `q()`) actually correct?**
   _`t()` has 28 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `httpServer`, `RedisClient`, `name` to the rest of the system?**
-  _1838 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **What connects `EarnPageProps`, `Pool`, `POOLS` to the rest of the system?**
+  _1839 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `index.d.ts` be split into smaller, more focused modules?**
   _Cohesion score 0.003766478342749529 - nodes in this community are weakly interconnected._
 - **Why does `@prisma/client` connect `client.ts` to `prismaNamespace.ts`, `User.ts`, `Order.ts`, `Fill.ts`, `Balance.ts`, `Stock.ts`, `commonInputTypes.ts`, `prismaNamespaceBrowser.ts`, `backend/package.json`?**
-  _High betweenness centrality (0.223) - this node is a cross-community bridge._
+  _High betweenness centrality (0.231) - this node is a cross-community bridge._
 - **Are the 12 inferred relationships involving `e()` (e.g. with `#a()` and `$c()`) actually correct?**
   _`e()` has 12 INFERRED edges - model-reasoned connections that need verification._
 - **Should `runtime/client.d.ts` be split into smaller, more focused modules?**

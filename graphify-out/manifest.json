@@ -450,9 +450,9 @@
     "semantic_hash": ""
   },
   "frontend/src/components/PriceChart.tsx": {
-    "mtime": 1793122699.5204399,
-    "seen": 1793123246.7183511,
-    "ast_hash": "c45ad6c5093793b73c3e47b46bffd8cc",
+    "mtime": 1793123342.1119328,
+    "seen": 1793123387.6694841,
+    "ast_hash": "1702ce0699ef821ee550e4a2d23b494c",
     "semantic_hash": ""
   },
   "frontend/src/hooks/useWebSocket.ts": {
