@@ -167,25 +167,25 @@ export const PriceChart: React.FC<PriceChartProps> = ({
     if (!chartContainerRef.current) return;
 
     const chart = createChart(chartContainerRef.current, {
-      width: chartContainerRef.current.clientWidth || 700,
+      width: chartContainerRef.current.clientWidth || 600,
       height: chartContainerRef.current.clientHeight || 280,
       layout: {
-        background: { color: "#f8f4e6" }, // var(--surface)
+        background: { color: "#faf7ee" }, // var(--surface)
         textColor: "#1c1a17", // var(--ink)
         fontFamily: "'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace",
       },
       grid: {
-        vertLines: { color: "#d9d1b8", style: 2 }, // var(--line)
-        horzLines: { color: "#d9d1b8", style: 2 },
+        vertLines: { color: "#ded7c2", style: 2 }, // var(--line)
+        horzLines: { color: "#ded7c2", style: 2 },
       },
       crosshair: {
         mode: 1,
       },
       rightPriceScale: {
-        borderColor: "#1c1a17",
+        borderColor: "#ded7c2",
       },
       timeScale: {
-        borderColor: "#1c1a17",
+        borderColor: "#ded7c2",
         timeVisible: true,
         secondsVisible: false,
       },
@@ -194,11 +194,11 @@ export const PriceChart: React.FC<PriceChartProps> = ({
     chartRef.current = chart;
 
     const series = chart.addSeries(CandlestickSeries, {
-      upColor: "#4c8a3c", // var(--up)
-      downColor: "#b73234", // var(--down)
-      borderUpColor: "#4c8a3c",
+      upColor: "#2e7d32", // Accessible forest green
+      downColor: "#b73234", // Crisp retro red
+      borderUpColor: "#2e7d32",
       borderDownColor: "#b73234",
-      wickUpColor: "#4c8a3c",
+      wickUpColor: "#2e7d32",
       wickDownColor: "#b73234",
     });
 
@@ -269,35 +269,58 @@ export const PriceChart: React.FC<PriceChartProps> = ({
     : "80,666.92";
 
   return (
-    <>
-      <div className="pair">
-        <h1 className="symbol-title">{symbol === "BTCUSDT" ? "BTC/USDT" : symbol}</h1>
-        <strong className="price" id="last">
-          {displayPrice}
-        </strong>
-        <span className="dn">−0.34%</span>
-        <span>24h vol 140,237</span>
-        <span>24h range 79,020 – 82,010</span>
+    <div className="chart-card supercoin-card">
+      <div className="pair-bar">
+        <div className="pair-primary">
+          <div className="symbol-badge">
+            <span className="symbol-bullet">•</span>
+            <h1 className="symbol-title">{symbol === "BTCUSDT" ? "BTC/USDT" : symbol}</h1>
+            <span className="market-tag">PERP</span>
+          </div>
+
+          <div className="price-group">
+            <strong className="market-price" id="last">
+              {displayPrice}
+            </strong>
+            <span className="price-change-dn">−0.34%</span>
+          </div>
+        </div>
+
+        <div className="pair-stats">
+          <div className="stat-pill">
+            <span className="stat-label">24h Vol</span>
+            <span className="stat-value">140,237 BTC</span>
+          </div>
+          <div className="stat-pill">
+            <span className="stat-label">24h Range</span>
+            <span className="stat-value">79,020 – 82,010</span>
+          </div>
+        </div>
       </div>
 
-      <div className="chart-box">
+      <div className="chart-controls-bar">
+        <div className="timeframe-group" role="group" aria-label="Chart Interval">
+          {(["5m", "15m", "1h", "2h", "1d"] as const).map((tf) => (
+            <button
+              key={tf}
+              aria-pressed={activeTimeframe === tf}
+              onClick={() => setActiveTimeframe(tf)}
+              className="tf-button"
+            >
+              {tf}
+            </button>
+          ))}
+        </div>
+
+        <span className="chart-feed-badge">BINANCE FEED</span>
+      </div>
+
+      <div className="chart-canvas-container">
         <div
           ref={chartContainerRef}
           style={{ width: "100%", height: "100%", minHeight: "260px" }}
         />
       </div>
-
-      <div className="tf" role="group" aria-label="Interval">
-        {(["5m", "15m", "1h", "2h", "1d"] as const).map((tf) => (
-          <button
-            key={tf}
-            aria-pressed={activeTimeframe === tf}
-            onClick={() => setActiveTimeframe(tf)}
-          >
-            {tf}
-          </button>
-        ))}
-      </div>
-    </>
+    </div>
   );
 };

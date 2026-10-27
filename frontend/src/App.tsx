@@ -1,6 +1,6 @@
 // src/App.tsx - Supercoin Exchange App Component
 
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useAuth, useUser } from "@clerk/react";
 import { Header, Footer } from "./components/Layout.js";
 import type { Page } from "./components/Layout.js";
@@ -13,8 +13,103 @@ import { EarnPage } from "./components/EarnPage.js";
 import { AuthScreen } from "./components/AuthScreen.js";
 import Landing01Demo from "./components/demo.js";
 import { useWebSocket } from "./hooks/useWebSocket.js";
+import type { PnLSnapshot } from "./hooks/useWebSocket.js";
 import { api } from "./lib/api.js";
 import type { Position } from "./lib/api.js";
+
+interface TradingDashboardProps {
+  currentPrice: number | null;
+  balance: number;
+  positions: Position[];
+  pnlUpdates: Record<string, PnLSnapshot>;
+  refreshTrigger: number;
+  onOrderSuccess: () => void;
+  onDepositSuccess: () => void;
+}
+
+type MobileTab = "all" | "chart" | "ticket" | "book" | "positions";
+
+const TradingDashboard: React.FC<TradingDashboardProps> = ({
+  currentPrice,
+  balance,
+  positions,
+  pnlUpdates,
+  refreshTrigger,
+  onOrderSuccess,
+  onDepositSuccess,
+}) => {
+  const [mobileTab, setMobileTab] = useState<MobileTab>("all");
+
+  return (
+    <>
+      {/* Mobile-only Segmented Subnav (Figma 13: Hierarchy, Proportion, White Space) */}
+      <nav className="mobile-view-tabs" role="tablist" aria-label="Mobile View Selection">
+        {(
+          [
+            { id: "all", label: "All" },
+            { id: "chart", label: "Chart" },
+            { id: "ticket", label: "Trade" },
+            { id: "book", label: "Book" },
+            { id: "positions", label: "Positions" },
+          ] as const
+        ).map((t) => (
+          <button
+            key={t.id}
+            role="tab"
+            aria-selected={mobileTab === t.id}
+            onClick={() => setMobileTab(t.id)}
+            className="mobile-tab-btn"
+          >
+            {t.label}
+          </button>
+        ))}
+      </nav>
+
+      <main className="supercoin-dashboard">
+        {/* Left Column: Candlestick Chart & Positions/Balances */}
+        {(mobileTab === "all" || mobileTab === "chart" || mobileTab === "positions") && (
+          <div className="col-chart">
+            {(mobileTab === "all" || mobileTab === "chart") && (
+              <PriceChart currentPrice={currentPrice} symbol="BTCUSDT" />
+            )}
+            {(mobileTab === "all" || mobileTab === "positions") && (
+              <PositionsTable
+                balance={balance}
+                positions={positions}
+                pnlUpdates={pnlUpdates}
+                onRefreshNeeded={onOrderSuccess}
+                onDepositSuccess={onDepositSuccess}
+              />
+            )}
+          </div>
+        )}
+
+        {/* Middle Column: Order Book */}
+        {(mobileTab === "all" || mobileTab === "book") && (
+          <div className="col-book">
+            <OrderBook
+              symbol="BTCUSDT"
+              currentPrice={currentPrice}
+              refreshTrigger={refreshTrigger}
+            />
+          </div>
+        )}
+
+        {/* Right Column: Order Ticket */}
+        {(mobileTab === "all" || mobileTab === "ticket") && (
+          <div className="col-ticket">
+            <OrderForm
+              balance={balance}
+              currentPrice={currentPrice}
+              onOrderSuccess={onOrderSuccess}
+              onDepositSuccess={onDepositSuccess}
+            />
+          </div>
+        )}
+      </main>
+    </>
+  );
+};
 
 /* ─── App with Clerk Authentication ─── */
 function AppWithClerk() {
@@ -152,35 +247,15 @@ function AppWithClerk() {
 
       {/* Page: Trade */}
       {activePage === "trade" && (
-        <main className="supercoin-dashboard">
-          <section className="supercoin-section" aria-label="Chart">
-            <PriceChart currentPrice={currentPrice} symbol="BTCUSDT" />
-            <PositionsTable
-              balance={balance}
-              positions={positions}
-              pnlUpdates={pnlUpdates}
-              onRefreshNeeded={handleOrderSuccess}
-              onDepositSuccess={handleDepositSuccess}
-            />
-          </section>
-
-          <section className="supercoin-section" aria-label="Order book">
-            <OrderBook
-              symbol="BTCUSDT"
-              currentPrice={currentPrice}
-              refreshTrigger={refreshTrigger}
-            />
-          </section>
-
-          <section className="supercoin-section" aria-label="Order ticket">
-            <OrderForm
-              balance={balance}
-              currentPrice={currentPrice}
-              onOrderSuccess={handleOrderSuccess}
-              onDepositSuccess={handleDepositSuccess}
-            />
-          </section>
-        </main>
+        <TradingDashboard
+          currentPrice={currentPrice}
+          balance={balance}
+          positions={positions}
+          pnlUpdates={pnlUpdates}
+          refreshTrigger={refreshTrigger}
+          onOrderSuccess={handleOrderSuccess}
+          onDepositSuccess={handleDepositSuccess}
+        />
       )}
 
       {/* Page: Portfolio */}
@@ -219,6 +294,12 @@ function AppLegacy() {
   const [activePage, setActivePage] = useState<Page>("trade");
   const [unauthView, setUnauthView] = useState<"trade" | "auth">("trade");
 
+  useEffect(() => {
+    if (token) {
+      api.setToken(token);
+    }
+  }, [token]);
+
   const { status: wsStatus, pnlUpdates, lastUpdate, prices } = useWebSocket(token);
 
   const fetchData = useCallback(async () => {
@@ -231,9 +312,6 @@ function AppLegacy() {
       setPositions(positionsData.positions || []);
     } catch (err) {
       console.error("Failed to load user account data:", err);
-      if (String(err).includes("Unauthorized") || String(err).includes("JWT")) {
-        handleLogout();
-      }
     }
   }, [token]);
 
@@ -323,35 +401,15 @@ function AppLegacy() {
       />
 
       {activePage === "trade" && (
-        <main className="supercoin-dashboard">
-          <section className="supercoin-section" aria-label="Chart">
-            <PriceChart currentPrice={currentPrice} symbol="BTCUSDT" />
-            <PositionsTable
-              balance={balance}
-              positions={positions}
-              pnlUpdates={pnlUpdates}
-              onRefreshNeeded={handleOrderSuccess}
-              onDepositSuccess={handleDepositSuccess}
-            />
-          </section>
-
-          <section className="supercoin-section" aria-label="Order book">
-            <OrderBook
-              symbol="BTCUSDT"
-              currentPrice={currentPrice}
-              refreshTrigger={refreshTrigger}
-            />
-          </section>
-
-          <section className="supercoin-section" aria-label="Order ticket">
-            <OrderForm
-              balance={balance}
-              currentPrice={currentPrice}
-              onOrderSuccess={handleOrderSuccess}
-              onDepositSuccess={handleDepositSuccess}
-            />
-          </section>
-        </main>
+        <TradingDashboard
+          currentPrice={currentPrice}
+          balance={balance}
+          positions={positions}
+          pnlUpdates={pnlUpdates}
+          refreshTrigger={refreshTrigger}
+          onOrderSuccess={handleOrderSuccess}
+          onDepositSuccess={handleDepositSuccess}
+        />
       )}
 
       {activePage === "portfolio" && (
@@ -378,9 +436,15 @@ function AppLegacy() {
 }
 
 /* ─── Root App Component ─── */
-export default function App({ hasClerk = false }: { hasClerk?: boolean }) {
-  if (hasClerk) {
+export default function App({ hasClerk }: { hasClerk?: boolean } = {}) {
+  const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+
+  if (
+    (hasClerk || (clerkPubKey && clerkPubKey.startsWith("pk_") && !clerkPubKey.includes("your_"))) &&
+    Boolean(clerkPubKey)
+  ) {
     return <AppWithClerk />;
   }
+
   return <AppLegacy />;
 }

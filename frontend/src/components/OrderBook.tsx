@@ -146,46 +146,61 @@ export const OrderBook: React.FC<OrderBookProps> = ({
   const spread = 0.01;
 
   return (
-    <>
-      <h2 className="supercoin-title px">Order book</h2>
-      <div className="cols">
-        <span>Price</span>
-        <span>Size</span>
-        <span>Total</span>
+    <div className="order-book-card supercoin-card">
+      <div className="card-header">
+        <h2 className="card-title">Order Book</h2>
+        <span className="live-pill">LIVE</span>
       </div>
 
-      <div id="asks">
+      <div className="book-columns-header">
+        <span className="col-price">Price (USDT)</span>
+        <span className="col-size">Size (BTC)</span>
+        <span className="col-total">Total</span>
+      </div>
+
+      <div id="asks" className="book-rows-container">
         {asks.map((x, idx) => {
           const widthPct = Math.min(100, Math.max(4, (x.total / maxCumulative) * 100));
           return (
-            <div key={`ask-${idx}`} className="row ask">
-              <i style={{ width: `${widthPct}%` }} />
-              <span>{formatNumber(x.price)}</span>
-              <span>{formatNumber(x.size, 4)}</span>
-              <span>{formatNumber(x.total, 4)}</span>
+            <div key={`ask-${idx}`} className="book-row ask-row">
+              <div
+                className="depth-bar ask-depth"
+                style={{ width: `${widthPct}%` }}
+              />
+              <span className="row-val price-val text-dn">{formatNumber(x.price)}</span>
+              <span className="row-val size-val">{formatNumber(x.size, 4)}</span>
+              <span className="row-val total-val">{formatNumber(x.total, 4)}</span>
             </div>
           );
         })}
       </div>
 
-      <div className="mid">
-        <b id="mid">{formatNumber(midPrice)}</b>
-        <span>Spread {spread.toFixed(2)}</span>
+      <div className="book-mid-bar">
+        <div className="mid-price-group">
+          <strong id="mid" className="mid-price text-up">
+            {formatNumber(midPrice)}
+          </strong>
+          <span className="mid-arrow">↑</span>
+        </div>
+        <span className="spread-label">Spread {spread.toFixed(2)}</span>
       </div>
 
-      <div id="bids">
+      <div id="bids" className="book-rows-container">
         {bids.map((x, idx) => {
           const widthPct = Math.min(100, Math.max(4, (x.total / maxCumulative) * 100));
           return (
-            <div key={`bid-${idx}`} className="row bid">
-              <i style={{ width: `${widthPct}%` }} />
-              <span>{formatNumber(x.price)}</span>
-              <span>{formatNumber(x.size, 4)}</span>
-              <span>{formatNumber(x.total, 4)}</span>
+            <div key={`bid-${idx}`} className="book-row bid-row">
+              <div
+                className="depth-bar bid-depth"
+                style={{ width: `${widthPct}%` }}
+              />
+              <span className="row-val price-val text-up">{formatNumber(x.price)}</span>
+              <span className="row-val size-val">{formatNumber(x.size, 4)}</span>
+              <span className="row-val total-val">{formatNumber(x.total, 4)}</span>
             </div>
           );
         })}
       </div>
-    </>
+    </div>
   );
 };

@@ -27,10 +27,7 @@ type TabKey =
   | "Balances"
   | "Positions"
   | "Open orders"
-  | "Outcomes"
-  | "TWAP"
-  | "Trade history"
-  | "Funding";
+  | "Trade history";
 
 export const PositionsTable: React.FC<PositionsTableProps> = ({
   balance,
@@ -67,137 +64,144 @@ export const PositionsTable: React.FC<PositionsTableProps> = ({
     "Balances",
     "Positions",
     "Open orders",
-    "Outcomes",
-    "TWAP",
     "Trade history",
-    "Funding",
   ];
 
   return (
-    <>
-      <div className="tabs" role="tablist">
+    <div className="positions-card supercoin-card">
+      <div className="tabs-header-bar" role="tablist">
         {tabs.map((tab) => (
           <button
             key={tab}
             role="tab"
             aria-selected={activeTab === tab}
             onClick={() => setActiveTab(tab)}
+            className="tab-pill"
           >
             {tab}
+            {tab === "Positions" && positions.length > 0 && (
+              <span className="tab-count-badge">{positions.length}</span>
+            )}
+            {tab === "Open orders" && openOrders.length > 0 && (
+              <span className="tab-count-badge">{openOrders.length}</span>
+            )}
           </button>
         ))}
       </div>
 
-      <div style={{ marginTop: "12px" }}>
+      <div className="tab-content-area">
         {activeTab === "Balances" && (
-          <p className="empty">
-            USDC{" "}
-            {balance.toLocaleString(undefined, {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}{" "}
-            available. No other assets.
-          </p>
+          <div className="balances-panel">
+            <div className="balance-item-row">
+              <div className="asset-meta">
+                <span className="asset-code">USDC</span>
+                <span className="asset-title">USD Coin</span>
+              </div>
+              <div className="asset-numbers">
+                <span className="asset-amount">
+                  {balance.toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </span>
+                <span className="asset-usd">
+                  ≈ $
+                  {balance.toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </span>
+              </div>
+            </div>
+          </div>
         )}
 
         {activeTab === "Positions" &&
           (positions.length === 0 ? (
-            <p className="empty">No open positions.</p>
+            <div className="empty-panel">
+              <span className="empty-title">No open positions</span>
+              <span className="empty-desc">Your active trades will appear here</span>
+            </div>
           ) : (
-            <div style={{ overflowX: "auto" }}>
-              <div
-                className="cols"
-                style={{
-                  gridTemplateColumns: "1.2fr 1fr 1fr 1fr 1fr 1fr",
-                }}
-              >
-                <span>Market</span>
-                <span>Side</span>
-                <span>Size</span>
-                <span>Entry</span>
-                <span>Mark</span>
-                <span>PnL</span>
-              </div>
-              {positions.map((pos, i) => {
-                const mark = pnlUpdates[pos.symbol]?.currentPrice || pos.avgCost;
-                const pnl =
-                  (mark - pos.avgCost) * Math.abs(pos.qty) * (pos.side === "LONG" ? 1 : -1);
-                return (
-                  <div
-                    key={i}
-                    className="row"
-                    style={{
-                      gridTemplateColumns: "1.2fr 1fr 1fr 1fr 1fr 1fr",
-                      borderBottom: "1px solid var(--line)",
-                    }}
-                  >
-                    <span>{pos.symbol}</span>
-                    <span
-                      style={{
-                        color: pos.side === "LONG" ? "var(--up)" : "var(--down)",
-                      }}
-                    >
-                      {pos.side}
-                    </span>
-                    <span>{Math.abs(pos.qty).toFixed(4)}</span>
-                    <span>${pos.avgCost.toFixed(2)}</span>
-                    <span>${mark.toFixed(2)}</span>
-                    <span style={{ color: pnl >= 0 ? "var(--up)" : "var(--down)" }}>
-                      {pnl >= 0 ? `+$${pnl.toFixed(2)}` : `-$${Math.abs(pnl).toFixed(2)}`}
-                    </span>
-                  </div>
-                );
-              })}
+            <div className="responsive-table-wrapper">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>Market</th>
+                    <th>Side</th>
+                    <th>Size</th>
+                    <th>Entry</th>
+                    <th>Mark</th>
+                    <th>PnL</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {positions.map((pos, i) => {
+                    const mark = pnlUpdates[pos.symbol]?.currentPrice || pos.avgCost;
+                    const pnl =
+                      (mark - pos.avgCost) * Math.abs(pos.qty) * (pos.side === "LONG" ? 1 : -1);
+                    return (
+                      <tr key={i}>
+                        <td className="font-semibold">{pos.symbol}</td>
+                        <td className={pos.side === "LONG" ? "text-up font-semibold" : "text-dn font-semibold"}>
+                          {pos.side}
+                        </td>
+                        <td>{Math.abs(pos.qty).toFixed(4)}</td>
+                        <td>${pos.avgCost.toFixed(2)}</td>
+                        <td>${mark.toFixed(2)}</td>
+                        <td className={pnl >= 0 ? "text-up font-semibold" : "text-dn font-semibold"}>
+                          {pnl >= 0 ? `+$${pnl.toFixed(2)}` : `-$${Math.abs(pnl).toFixed(2)}`}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           ))}
 
         {activeTab === "Open orders" &&
           (openOrders.length === 0 ? (
-            <p className="empty">No open orders.</p>
+            <div className="empty-panel">
+              <span className="empty-title">No open orders</span>
+              <span className="empty-desc">Your unfilled limit orders will appear here</span>
+            </div>
           ) : (
-            <div style={{ overflowX: "auto" }}>
-              <div
-                className="cols"
-                style={{
-                  gridTemplateColumns: "1fr 1fr 1fr 1fr 1fr",
-                }}
-              >
-                <span>ID</span>
-                <span>Type</span>
-                <span>Side</span>
-                <span>Price</span>
-                <span>Size</span>
-              </div>
-              {openOrders.map((ord) => (
-                <div
-                  key={ord.id}
-                  className="row"
-                  style={{
-                    gridTemplateColumns: "1fr 1fr 1fr 1fr 1fr",
-                    borderBottom: "1px solid var(--line)",
-                  }}
-                >
-                  <span>#{ord.id}</span>
-                  <span>{ord.type}</span>
-                  <span
-                    style={{
-                      color: ord.side === "BUY" ? "var(--up)" : "var(--down)",
-                    }}
-                  >
-                    {ord.side}
-                  </span>
-                  <span>{ord.price ? `$${ord.price.toFixed(2)}` : "MKT"}</span>
-                  <span>{ord.qty.toFixed(4)}</span>
-                </div>
-              ))}
+            <div className="responsive-table-wrapper">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Type</th>
+                    <th>Side</th>
+                    <th>Price</th>
+                    <th>Size</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {openOrders.map((ord) => (
+                    <tr key={ord.id}>
+                      <td className="font-mono">#{ord.id}</td>
+                      <td>{ord.type}</td>
+                      <td className={ord.side === "BUY" ? "text-up font-semibold" : "text-dn font-semibold"}>
+                        {ord.side}
+                      </td>
+                      <td className="font-mono">{ord.price ? `$${ord.price.toFixed(2)}` : "MKT"}</td>
+                      <td className="font-mono">{ord.qty.toFixed(4)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           ))}
 
-        {activeTab === "Outcomes" && <p className="empty">No outcomes yet.</p>}
-        {activeTab === "TWAP" && <p className="empty">No TWAP orders.</p>}
-        {activeTab === "Trade history" && <p className="empty">No trades yet.</p>}
-        {activeTab === "Funding" && <p className="empty">No funding payments.</p>}
+        {activeTab === "Trade history" && (
+          <div className="empty-panel">
+            <span className="empty-title">No recent trades</span>
+            <span className="empty-desc">Executed orders will be logged here</span>
+          </div>
+        )}
       </div>
-    </>
+    </div>
   );
 };

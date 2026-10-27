@@ -26,74 +26,71 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   return (
     <header className="supercoin-header">
-      <span
-        className="logo px"
-        onClick={() => onNavigate("trade")}
-        style={{ cursor: "pointer" }}
-      >
-        SUPERCOIN
-      </span>
+      <div className="header-top-row">
+        <span
+          className="logo px"
+          onClick={() => onNavigate("trade")}
+          style={{ cursor: "pointer" }}
+          aria-label="Supercoin Home"
+        >
+          SUPERCOIN
+        </span>
 
-      <nav aria-label="Main">
+        <div className="header-right">
+          <div className="balance-badge" title="Available Cash Balance">
+            <span className="badge-label">Coins</span>
+            <strong className="badge-amount">
+              $
+              {balance.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+            </strong>
+          </div>
+
+          {isSignedIn && username ? (
+            <div className="user-menu">
+              <span className="user-name">{username}</span>
+              <button
+                aria-label="Sign out"
+                onClick={onLogout}
+                title="Sign out"
+                className="signout-button"
+              >
+                ⏻
+              </button>
+            </div>
+          ) : onSignIn ? (
+            <button onClick={onSignIn} className="signin-button">
+              Sign in
+            </button>
+          ) : null}
+        </div>
+      </div>
+
+      <nav aria-label="Main navigation" className="header-nav">
         <button
           aria-current={activePage === "trade" ? "page" : undefined}
           onClick={() => onNavigate("trade")}
+          className="nav-link"
         >
           Trade
         </button>
         <button
           aria-current={activePage === "portfolio" ? "page" : undefined}
           onClick={() => onNavigate("portfolio")}
+          className="nav-link"
         >
           Portfolio
         </button>
         <button
           aria-current={activePage === "earn" ? "page" : undefined}
           onClick={() => onNavigate("earn")}
+          className="nav-link"
         >
           Earn
         </button>
       </nav>
-
-      <div className="acct">
-        <span>
-          Coins{" "}
-          <b>
-            $
-            {balance.toLocaleString(undefined, {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}
-          </b>
-        </span>
-
-        {isSignedIn && username ? (
-          <>
-            <span className="user">{username}</span>
-            <button
-              aria-label="Sign out"
-              onClick={onLogout}
-              title="Sign out"
-              style={{ fontSize: "16px", lineHeight: 1 }}
-            >
-              ⏻
-            </button>
-          </>
-        ) : onSignIn ? (
-          <button
-            onClick={onSignIn}
-            style={{
-              color: "var(--gold)",
-              fontSize: "14px",
-              padding: "4px 10px",
-              border: "1px solid var(--gold)",
-              borderRadius: "2px",
-            }}
-          >
-            Sign in
-          </button>
-        ) : null}
-      </div>
     </header>
   );
 };
@@ -117,19 +114,26 @@ export const Footer: React.FC<{
 
   return (
     <footer className="supercoin-footer">
-      <span>Supercoin Exchange v1.0.4</span>
-      <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-        <span
-          style={{
-            display: "inline-block",
-            width: "7px",
-            height: "7px",
-            borderRadius: "50%",
-            background: isOnline ? "var(--up)" : "var(--down)",
-          }}
-        />
-        {isOnline ? "Feed connected" : "Feed disconnected"} · Last sync {timeString}
-      </span>
+      <div className="footer-left">
+        <span>Supercoin Exchange v1.0.5</span>
+        <span className="footer-separator">•</span>
+        <span>BTC/USDT Perpetual</span>
+      </div>
+
+      <div className="footer-right">
+        <span className="status-indicator">
+          <span
+            className={`status-dot ${isOnline ? "online" : "connecting"}`}
+          />
+          {wsStatus === "connected"
+            ? "WebSocket connected"
+            : wsStatus === "connecting"
+            ? "Connecting..."
+            : "Reconnecting..."}
+        </span>
+        <span className="footer-separator">•</span>
+        <span className="last-update">{timeString}</span>
+      </div>
     </footer>
   );
 };
