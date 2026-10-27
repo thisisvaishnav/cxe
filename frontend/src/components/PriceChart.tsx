@@ -17,25 +17,43 @@ interface CandleData {
   close: number;
 }
 
+type Timeframe = "5m" | "15m" | "1h" | "2h" | "1d";
+
+const intervalSeconds: Record<Timeframe, number> = {
+  "5m": 300,
+  "15m": 900,
+  "1h": 3600,
+  "2h": 7200,
+  "1d": 86400,
+};
+
 // Generate realistic mock history based on starting price (fallback utility)
 const generateMockHistory = (
   startPrice: number,
-  timeframe: string,
+  timeframe: Timeframe,
   count = 70
 ): CandleData[] => {
   const data: CandleData[] = [];
-  let interval = 3600;
-  let priceStep = 50;
-  let randomMultiplier = 35;
+  let interval = 300;
+  let priceStep = 15;
+  let randomMultiplier = 12;
 
   if (timeframe === "5m") {
     interval = 300;
     priceStep = 15;
     randomMultiplier = 12;
+  } else if (timeframe === "15m") {
+    interval = 900;
+    priceStep = 30;
+    randomMultiplier = 20;
   } else if (timeframe === "1h") {
     interval = 3600;
     priceStep = 50;
     randomMultiplier = 35;
+  } else if (timeframe === "2h") {
+    interval = 7200;
+    priceStep = 80;
+    randomMultiplier = 50;
   } else if (timeframe === "1d") {
     interval = 86400;
     priceStep = 200;
@@ -66,9 +84,11 @@ export const PriceChart: React.FC<PriceChartProps> = ({
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
-  const lastPriceRef = useRef<number | null>(null);
-  const [activeTimeframe, setActiveTimeframe] = useState<"5m" | "1h" | "1d">("1h");
-  const isMounted = useRef(false);
+  const latestPriceRef = useRef<number | null>(currentPrice);
+  latestPriceRef.current = currentPrice;
+
+  // Default to 5m timeframe with 2h support for detailed candle viewing
+  const [activeTimeframe, setActiveTimeframe] = useState<Timeframe>("5m");
 
   interface CurrentCandle {
     time: UTCTimestamp;
@@ -79,11 +99,12 @@ export const PriceChart: React.FC<PriceChartProps> = ({
   }
   const currentCandleRef = useRef<CurrentCandle | null>(null);
 
-  // Fetch real historical candlestick data from Binance API
+  // Fetch historical candlestick data from Binance API or fallback
   const fetchHistory = useCallback(
-    async (timeframe: string) => {
+    async (tf: Timeframe) => {
       if (!seriesRef.current) return;
       const series = seriesRef.current;
+      const chart = chartRef.current;
 
       const querySymbol = symbol.toUpperCase().includes("USDT")
         ? symbol.toUpperCase()
@@ -91,13 +112,13 @@ export const PriceChart: React.FC<PriceChartProps> = ({
 
       try {
         const response = await fetch(
-          `https://api.binance.com/api/v3/klines?symbol=${querySymbol}&interval=${timeframe}&limit=80`
+          `https://api.binance.com/api/v3/klines?symbol=${querySymbol}&interval=${tf}&limit=80`
         );
         if (!response.ok) {
           throw new Error(`Binance API response error: ${response.status}`);
         }
         const rawData = await response.json();
-        if (!Array.isArray(rawData)) {
+        if (!Array.isArray(rawData) || rawData.length === 0) {
           throw new Error("Invalid Binance API response format");
         }
 
@@ -110,22 +131,22 @@ export const PriceChart: React.FC<PriceChartProps> = ({
         }));
 
         series.setData(formattedData);
+        chart?.timeScale().fitContent();
 
-        if (formattedData.length > 0) {
-          const lastCandle = formattedData[formattedData.length - 1];
-          currentCandleRef.current = {
-            time: lastCandle.time,
-            open: lastCandle.open,
-            high: lastCandle.high,
-            low: lastCandle.low,
-            close: lastCandle.close,
-          };
-        }
+        const lastCandle = formattedData[formattedData.length - 1];
+        currentCandleRef.current = {
+          time: lastCandle.time,
+          open: lastCandle.open,
+          high: lastCandle.high,
+          low: lastCandle.low,
+          close: lastCandle.close,
+        };
       } catch (error) {
         console.warn("Using mock history fallback for chart:", error);
-        const startVal = currentPrice || 80666.92;
-        const mockData = generateMockHistory(startVal, timeframe, 70);
+        const startVal = latestPriceRef.current || 80666.92;
+        const mockData = generateMockHistory(startVal, tf, 70);
         series.setData(mockData);
+        chart?.timeScale().fitContent();
         if (mockData.length > 0) {
           const lastMock = mockData[mockData.length - 1];
           currentCandleRef.current = {
@@ -138,10 +159,10 @@ export const PriceChart: React.FC<PriceChartProps> = ({
         }
       }
     },
-    [symbol, currentPrice]
+    [symbol]
   );
 
-  // 1. Initialize Lightweight Chart with Clean Modern Typography
+  // 1. Initialize Lightweight Chart ONCE on mount
   useEffect(() => {
     if (!chartContainerRef.current) return;
 
@@ -183,6 +204,7 @@ export const PriceChart: React.FC<PriceChartProps> = ({
 
     seriesRef.current = series;
 
+    // Load initial candles immediately
     fetchHistory(activeTimeframe);
 
     const resizeObserver = new ResizeObserver((entries) => {
@@ -190,6 +212,7 @@ export const PriceChart: React.FC<PriceChartProps> = ({
       const { width, height } = entries[0].contentRect;
       if (chartRef.current && width > 0 && height > 0) {
         chartRef.current.resize(width, height);
+        chartRef.current.timeScale().fitContent();
       }
     });
 
@@ -203,9 +226,9 @@ export const PriceChart: React.FC<PriceChartProps> = ({
       chartRef.current = null;
       seriesRef.current = null;
     };
-  }, [activeTimeframe, fetchHistory]);
+  }, []); // Run once on mount
 
-  // 2. Fetch history when timeframe updates
+  // 2. Fetch history when timeframe or symbol updates
   useEffect(() => {
     fetchHistory(activeTimeframe);
   }, [activeTimeframe, fetchHistory]);
@@ -215,18 +238,7 @@ export const PriceChart: React.FC<PriceChartProps> = ({
     if (!currentPrice || !seriesRef.current) return;
     const series = seriesRef.current;
     const now = Math.floor(Date.now() / 1000);
-
-    const intervalSeconds: Record<"5m" | "1h" | "1d", number> = {
-      "5m": 300,
-      "1h": 3600,
-      "1d": 86400,
-    };
     const interval = intervalSeconds[activeTimeframe];
-
-    if (!isMounted.current) {
-      isMounted.current = true;
-      lastPriceRef.current = currentPrice;
-    }
 
     const candleTime = (Math.floor(now / interval) * interval) as UTCTimestamp;
     let currentCandle = currentCandleRef.current;
@@ -276,24 +288,15 @@ export const PriceChart: React.FC<PriceChartProps> = ({
       </div>
 
       <div className="tf" role="group" aria-label="Interval">
-        <button
-          aria-pressed={activeTimeframe === "5m"}
-          onClick={() => setActiveTimeframe("5m")}
-        >
-          5m
-        </button>
-        <button
-          aria-pressed={activeTimeframe === "1h"}
-          onClick={() => setActiveTimeframe("1h")}
-        >
-          1h
-        </button>
-        <button
-          aria-pressed={activeTimeframe === "1d"}
-          onClick={() => setActiveTimeframe("1d")}
-        >
-          1d
-        </button>
+        {(["5m", "15m", "1h", "2h", "1d"] as const).map((tf) => (
+          <button
+            key={tf}
+            aria-pressed={activeTimeframe === tf}
+            onClick={() => setActiveTimeframe(tf)}
+          >
+            {tf}
+          </button>
+        ))}
       </div>
     </>
   );
