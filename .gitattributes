@@ -1,1 +1,6 @@
 graphify-out/graph.json merge=graphify
+
+# Linguist overrides (exclude generated artifacts from repository language stats)
+graphify-out/** linguist-vendored
+graphify-out/** linguist-generated
+backend/generated/** linguist-generated
