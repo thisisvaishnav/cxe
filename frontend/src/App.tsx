@@ -1,127 +1,91 @@
-// src/App.tsx - Connects Auth and Trading Dashboard components together
+// src/App.tsx - Supercoin Exchange App Component
 
 import { useState, useEffect, useCallback } from "react";
 import { useAuth, useUser } from "@clerk/react";
-import { AuthScreen } from "./components/AuthScreen.js";
 import { Header, Footer } from "./components/Layout.js";
+import type { Page } from "./components/Layout.js";
 import { PriceChart } from "./components/PriceChart.js";
 import { OrderBook } from "./components/OrderBook.js";
 import { OrderForm } from "./components/OrderForm.js";
 import { PositionsTable } from "./components/PositionsTable.js";
 import { PortfolioPage } from "./components/PortfolioPage.js";
 import { EarnPage } from "./components/EarnPage.js";
+import { AuthScreen } from "./components/AuthScreen.js";
+import Landing01Demo from "./components/demo.js";
+import { useWebSocket } from "./hooks/useWebSocket.js";
 import { api } from "./lib/api.js";
 import type { Position } from "./lib/api.js";
-import { useWebSocket } from "./hooks/useWebSocket.js";
-import type { Page } from "./components/Layout.js";
-import Landing01Demo from "./components/demo.js";
 
 /* ─── App with Clerk Authentication ─── */
 function AppWithClerk() {
   const { isSignedIn, isLoaded, getToken, signOut } = useAuth();
   const { user } = useUser();
-  const [token, setToken] = useState<string | null>(() => localStorage.getItem("cxe_token"));
-  const [username, setUsername] = useState<string | null>(() => localStorage.getItem("cxe_username"));
+
   const [balance, setBalance] = useState<number>(50000);
   const [positions, setPositions] = useState<Position[]>([]);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [activePage, setActivePage] = useState<Page>("trade");
-  const [unauthView, setUnauthView] = useState<"landing" | "auth">("landing");
+  const [unauthView, setUnauthView] = useState<"trade" | "auth">("trade");
+  const [jwtToken, setJwtToken] = useState<string | null>(null);
 
-  // Keep Clerk token and user identity synchronized
+  // Sync Clerk session token to CXE API
   useEffect(() => {
-    if (!isLoaded) return;
-
-    if (isSignedIn && user) {
-      let isMounted = true;
-      (async () => {
+    let isMounted = true;
+    async function syncToken() {
+      if (isSignedIn) {
         try {
-          const clerkToken = await getToken();
-          const email = user.primaryEmailAddress?.emailAddress;
-          const displayName =
-            user.username ||
-            user.fullName ||
-            (email ? email.split("@")[0] : null) ||
-            "TRADER";
-
+          const t = await getToken();
           if (isMounted) {
-            setUsername(displayName);
-            localStorage.setItem("cxe_username", displayName);
-            localStorage.setItem("cxe_userId", user.id);
-            if (clerkToken) {
-              setToken(clerkToken);
-              localStorage.setItem("cxe_token", clerkToken);
-            }
+            setJwtToken(t);
+            if (t) api.setToken(t);
           }
-
-          // Optional backend user sync & balance loading
-          if (clerkToken) {
-            try {
-              const res = await api.syncUser(clerkToken, email, displayName);
-              if (isMounted && res) {
-                if (res.username) setUsername(res.username);
-                if (res.balance !== undefined && !isNaN(res.balance)) {
-                  setBalance(res.balance);
-                }
-              }
-            } catch (err) {
-              console.warn("Backend sync offline/deferred:", err);
-            }
-          }
-        } catch (err) {
-          console.error("Clerk session resolution error:", err);
+        } catch (e) {
+          console.error("Failed to acquire Clerk token:", e);
         }
-      })();
-
-      return () => {
-        isMounted = false;
-      };
-    } else if (!isSignedIn) {
-      setToken(null);
-      setUsername(null);
-      localStorage.removeItem("cxe_token");
-      localStorage.removeItem("cxe_username");
-      localStorage.removeItem("cxe_userId");
+      } else {
+        if (isMounted) {
+          setJwtToken(null);
+          api.logout();
+        }
+      }
     }
-  }, [isSignedIn, isLoaded, user, getToken]);
+    syncToken();
+    return () => {
+      isMounted = false;
+    };
+  }, [isSignedIn, getToken]);
 
-  // Hook up WebSocket
-  const { status: wsStatus, pnlUpdates, lastUpdate, prices } = useWebSocket(token);
+  const { status: wsStatus, pnlUpdates, lastUpdate, prices } = useWebSocket(jwtToken);
 
-  // Fetch balances & positions from backend if available
   const fetchData = useCallback(async () => {
-    if (!token) return;
+    if (!isSignedIn) return;
     try {
       const balanceData = await api.getBalance();
-      if (balanceData && typeof balanceData.balance === "number") {
-        setBalance(balanceData.balance);
-      }
+      setBalance(balanceData.balance);
 
       const positionsData = await api.getPositions();
-      if (positionsData && Array.isArray(positionsData.positions)) {
-        setPositions(positionsData.positions);
-      }
+      setPositions(positionsData.positions || []);
     } catch (err) {
-      // Do not log out on network/backend offline errors
-      console.warn("Account polling deferred:", err);
+      console.error("Failed to load user account data:", err);
     }
-  }, [token]);
+  }, [isSignedIn]);
 
   useEffect(() => {
-    if (token) {
+    if (isSignedIn) {
       fetchData();
       const interval = setInterval(fetchData, 4000);
       return () => clearInterval(interval);
     }
-  }, [token, fetchData]);
+  }, [isSignedIn, fetchData, refreshTrigger]);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await signOut();
+    setJwtToken(null);
     api.logout();
-    void signOut();
-    setToken(null);
-    setUsername(null);
     setPositions([]);
+    setBalance(50000);
     setActivePage("trade");
+    setUnauthView("trade");
   };
 
   const handleOrderSuccess = () => {
@@ -134,172 +98,113 @@ function AppWithClerk() {
     setRefreshTrigger((prev) => prev + 1);
   };
 
-  if (!isLoaded) {
-    return (
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          height: "100vh",
-          background: "#0a0a1a",
-          color: "#f1c40f",
-          fontFamily: "'Press Start 2P', monospace",
-          fontSize: "14px",
-        }}
-      >
-        ★ LOADING SUPERCOIN...
-      </div>
-    );
-  }
-
-  // Not signed in -> show modern Landing01Demo or retro Mario AuthScreen
-  if (!isSignedIn) {
-    if (unauthView === "landing") {
-      return <Landing01Demo onGetStarted={() => setUnauthView("auth")} />;
-    }
-    return (
-      <div className="relative">
-        <div style={{ position: "fixed", top: "16px", left: "16px", zIndex: 9999 }}>
-          <button
-            onClick={() => setUnauthView("landing")}
-            className="nes-btn nes-btn-yellow"
-            style={{ fontSize: "10px", padding: "6px 12px" }}
-          >
-            ← BACK TO SHOWCASE
-          </button>
-        </div>
-        <AuthScreen
-          onAuthSuccess={(_newToken, _newUsername, _userId) => {}}
-          hasClerk={true}
-        />
-      </div>
-    );
-  }
-
-  // Signed in -> user enters the trading dashboard immediately!
   const btcUpdate = pnlUpdates["BTCUSDT"];
   const currentPrice = prices["BTCUSDT"] ?? (btcUpdate ? btcUpdate.currentPrice : null);
 
+  if (isLoaded && !isSignedIn && unauthView === "auth") {
+    return (
+      <div className="relative" style={{ background: "var(--bg)", minHeight: "100vh" }}>
+        <div style={{ position: "fixed", top: "16px", left: "16px", zIndex: 9999 }}>
+          <button
+            onClick={() => setUnauthView("trade")}
+            className="px"
+            style={{
+              fontSize: "11px",
+              padding: "8px 14px",
+              background: "var(--surface)",
+              border: "2px solid var(--ink)",
+              cursor: "pointer",
+            }}
+          >
+            ← BACK TO TRADE
+          </button>
+        </div>
+        <AuthScreen onAuthSuccess={() => setUnauthView("trade")} hasClerk={true} />
+      </div>
+    );
+  }
+
+  const username =
+    user?.username ||
+    user?.firstName ||
+    user?.primaryEmailAddress?.emailAddress?.split("@")[0] ||
+    "Trader";
+
   return (
     <div
-      className="app-container"
-      style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "100vh",
+        background: "var(--bg)",
+      }}
     >
       <Header
-        username={username || user?.username || "TRADER"}
+        username={username}
         onLogout={handleLogout}
+        onSignIn={() => setUnauthView("auth")}
+        isSignedIn={Boolean(isSignedIn)}
         wsStatus={wsStatus}
         balance={balance}
         activePage={activePage}
-        onNavigate={setActivePage}
+        onNavigate={(page) => setActivePage(page)}
       />
 
       {/* Page: Trade */}
       {activePage === "trade" && (
-        <main
-          style={{
-            flex: 1,
-            padding: "20px",
-            display: "grid",
-            gridTemplateColumns: "2.2fr 0.8fr 1fr",
-            gap: "20px",
-            background: "var(--bg-canvas)",
-          }}
-          className="trading-dashboard-layout"
-        >
-          {/* Real-time Candlestick Chart */}
-          <PriceChart currentPrice={currentPrice} symbol="BTCUSDT" />
-
-          {/* Interactive Order Book Depth display */}
-          <OrderBook
-            symbol="BTCUSDT"
-            currentPrice={currentPrice}
-            refreshTrigger={refreshTrigger}
-          />
-
-          {/* Order Ticket Form */}
-          <OrderForm
-            balance={balance}
-            currentPrice={currentPrice}
-            onOrderSuccess={handleOrderSuccess}
-            onDepositSuccess={handleDepositSuccess}
-          />
-
-          {/* Positions, Balances and Orders Tab Table */}
-          <div style={{ gridColumn: "span 3" }}>
+        <main className="supercoin-dashboard">
+          <section className="supercoin-section" aria-label="Chart">
+            <PriceChart currentPrice={currentPrice} symbol="BTCUSDT" />
             <PositionsTable
               balance={balance}
               positions={positions}
               pnlUpdates={pnlUpdates}
               onRefreshNeeded={handleOrderSuccess}
+              onDepositSuccess={handleDepositSuccess}
             />
-          </div>
+          </section>
+
+          <section className="supercoin-section" aria-label="Order book">
+            <OrderBook
+              symbol="BTCUSDT"
+              currentPrice={currentPrice}
+              refreshTrigger={refreshTrigger}
+            />
+          </section>
+
+          <section className="supercoin-section" aria-label="Order ticket">
+            <OrderForm
+              balance={balance}
+              currentPrice={currentPrice}
+              onOrderSuccess={handleOrderSuccess}
+              onDepositSuccess={handleDepositSuccess}
+            />
+          </section>
         </main>
       )}
 
       {/* Page: Portfolio */}
       {activePage === "portfolio" && (
-        <main style={{ flex: 1, background: "var(--bg-canvas)", overflowY: "auto" }}>
-          <PortfolioPage
-            balance={balance}
-            positions={positions}
-            pnlUpdates={pnlUpdates}
-          />
-        </main>
-      )}
-
-      {/* Page: Landing / Showcase */}
-      {activePage === "landing" && (
-        <main style={{ flex: 1, background: "#101010", overflowY: "auto" }}>
-          <Landing01Demo onGetStarted={() => setActivePage("trade")} />
-        </main>
-      )}
-
-      {/* Page: Landing / Showcase */}
-      {activePage === "landing" && (
-        <main style={{ flex: 1, background: "#101010", overflowY: "auto" }}>
-          <Landing01Demo onGetStarted={() => setActivePage("trade")} />
+        <main style={{ maxWidth: "1500px", margin: "0 auto", padding: "24px", width: "100%" }}>
+          <PortfolioPage balance={balance} positions={positions} pnlUpdates={pnlUpdates} />
         </main>
       )}
 
       {/* Page: Earn */}
       {activePage === "earn" && (
-        <main style={{ flex: 1, background: "var(--bg-canvas)", overflowY: "auto" }}>
+        <main style={{ maxWidth: "1500px", margin: "0 auto", padding: "24px", width: "100%" }}>
           <EarnPage balance={balance} onDepositSuccess={handleDepositSuccess} />
         </main>
       )}
 
-      {/* Connection status footer bar */}
-      <Footer wsStatus={wsStatus} lastUpdate={lastUpdate} />
+      {/* Page: Showcase */}
+      {activePage === "landing" && (
+        <main style={{ background: "#101010" }}>
+          <Landing01Demo onGetStarted={() => setActivePage("trade")} />
+        </main>
+      )}
 
-      {/* Simple responsive layout styles */}
-      <style>{`
-        @media (min-width: 1025px) {
-          .app-container {
-            height: 100vh !important;
-            overflow: hidden !important;
-          }
-          .trading-dashboard-layout {
-            flex: 1 !important;
-            grid-template-columns: 2.2fr 0.8fr 1fr !important;
-            grid-template-rows: 4fr 1fr !important;
-            overflow: hidden !important;
-            height: 0;
-          }
-          .trading-dashboard-layout > * {
-            min-height: 0 !important;
-          }
-        }
-        @media (max-width: 1024px) {
-          .trading-dashboard-layout {
-            grid-template-columns: 1fr !important;
-          }
-          .trading-dashboard-layout > * {
-            grid-column: span 1 !important;
-          }
-        }
-      `}</style>
+      <Footer wsStatus={wsStatus} lastUpdate={lastUpdate} />
     </div>
   );
 }
@@ -312,7 +217,7 @@ function AppLegacy() {
   const [positions, setPositions] = useState<Position[]>([]);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [activePage, setActivePage] = useState<Page>("trade");
-  const [unauthView, setUnauthView] = useState<"landing" | "auth">("landing");
+  const [unauthView, setUnauthView] = useState<"trade" | "auth">("trade");
 
   const { status: wsStatus, pnlUpdates, lastUpdate, prices } = useWebSocket(token);
 
@@ -338,24 +243,27 @@ function AppLegacy() {
       const interval = setInterval(fetchData, 4000);
       return () => clearInterval(interval);
     }
-  }, [token, fetchData]);
+  }, [token, fetchData, refreshTrigger]);
 
-  const handleAuthSuccess = useCallback((
-    newToken: string,
-    newUsername: string,
-    _userId: string | number,
-  ) => {
+  const handleAuthSuccess = (newToken: string, newUsername: string) => {
     setToken(newToken);
     setUsername(newUsername);
-    setRefreshTrigger((prev) => prev + 1);
-  }, []);
+    localStorage.setItem("cxe_token", newToken);
+    localStorage.setItem("cxe_username", newUsername);
+    api.setToken(newToken);
+    setUnauthView("trade");
+  };
 
   const handleLogout = () => {
-    api.logout();
     setToken(null);
     setUsername(null);
+    localStorage.removeItem("cxe_token");
+    localStorage.removeItem("cxe_username");
+    api.logout();
     setPositions([]);
+    setBalance(50000);
     setActivePage("trade");
+    setUnauthView("trade");
   };
 
   const handleOrderSuccess = () => {
@@ -371,19 +279,22 @@ function AppLegacy() {
   const btcUpdate = pnlUpdates["BTCUSDT"];
   const currentPrice = prices["BTCUSDT"] ?? (btcUpdate ? btcUpdate.currentPrice : null);
 
-  if (!token) {
-    if (unauthView === "landing") {
-      return <Landing01Demo onGetStarted={() => setUnauthView("auth")} />;
-    }
+  if (!token && unauthView === "auth") {
     return (
-      <div className="relative">
+      <div className="relative" style={{ background: "var(--bg)", minHeight: "100vh" }}>
         <div style={{ position: "fixed", top: "16px", left: "16px", zIndex: 9999 }}>
           <button
-            onClick={() => setUnauthView("landing")}
-            className="nes-btn nes-btn-yellow"
-            style={{ fontSize: "10px", padding: "6px 12px" }}
+            onClick={() => setUnauthView("trade")}
+            className="px"
+            style={{
+              fontSize: "11px",
+              padding: "8px 14px",
+              background: "var(--surface)",
+              border: "2px solid var(--ink)",
+              cursor: "pointer",
+            }}
           >
-            ← BACK TO SHOWCASE
+            ← BACK TO TRADE
           </button>
         </div>
         <AuthScreen onAuthSuccess={handleAuthSuccess} hasClerk={false} />
@@ -393,66 +304,71 @@ function AppLegacy() {
 
   return (
     <div
-      className="app-container"
-      style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "100vh",
+        background: "var(--bg)",
+      }}
     >
       <Header
-        username={username}
+        username={username || "Vaishnav"}
         onLogout={handleLogout}
+        onSignIn={() => setUnauthView("auth")}
+        isSignedIn={Boolean(token)}
         wsStatus={wsStatus}
         balance={balance}
         activePage={activePage}
-        onNavigate={setActivePage}
+        onNavigate={(page) => setActivePage(page)}
       />
 
       {activePage === "trade" && (
-        <main
-          style={{
-            flex: 1,
-            padding: "20px",
-            display: "grid",
-            gridTemplateColumns: "2.2fr 0.8fr 1fr",
-            gap: "20px",
-            background: "var(--bg-canvas)",
-          }}
-          className="trading-dashboard-layout"
-        >
-          <PriceChart currentPrice={currentPrice} symbol="BTCUSDT" />
-          <OrderBook
-            symbol="BTCUSDT"
-            currentPrice={currentPrice}
-            refreshTrigger={refreshTrigger}
-          />
-          <OrderForm
-            balance={balance}
-            currentPrice={currentPrice}
-            onOrderSuccess={handleOrderSuccess}
-            onDepositSuccess={handleDepositSuccess}
-          />
-          <div style={{ gridColumn: "span 3" }}>
+        <main className="supercoin-dashboard">
+          <section className="supercoin-section" aria-label="Chart">
+            <PriceChart currentPrice={currentPrice} symbol="BTCUSDT" />
             <PositionsTable
               balance={balance}
               positions={positions}
               pnlUpdates={pnlUpdates}
               onRefreshNeeded={handleOrderSuccess}
+              onDepositSuccess={handleDepositSuccess}
             />
-          </div>
+          </section>
+
+          <section className="supercoin-section" aria-label="Order book">
+            <OrderBook
+              symbol="BTCUSDT"
+              currentPrice={currentPrice}
+              refreshTrigger={refreshTrigger}
+            />
+          </section>
+
+          <section className="supercoin-section" aria-label="Order ticket">
+            <OrderForm
+              balance={balance}
+              currentPrice={currentPrice}
+              onOrderSuccess={handleOrderSuccess}
+              onDepositSuccess={handleDepositSuccess}
+            />
+          </section>
         </main>
       )}
 
       {activePage === "portfolio" && (
-        <main style={{ flex: 1, background: "var(--bg-canvas)", overflowY: "auto" }}>
-          <PortfolioPage
-            balance={balance}
-            positions={positions}
-            pnlUpdates={pnlUpdates}
-          />
+        <main style={{ maxWidth: "1500px", margin: "0 auto", padding: "24px", width: "100%" }}>
+          <PortfolioPage balance={balance} positions={positions} pnlUpdates={pnlUpdates} />
         </main>
       )}
 
       {activePage === "earn" && (
-        <main style={{ flex: 1, background: "var(--bg-canvas)", overflowY: "auto" }}>
+        <main style={{ maxWidth: "1500px", margin: "0 auto", padding: "24px", width: "100%" }}>
           <EarnPage balance={balance} onDepositSuccess={handleDepositSuccess} />
+        </main>
+      )}
+
+      {activePage === "landing" && (
+        <main style={{ background: "#101010" }}>
+          <Landing01Demo onGetStarted={() => setActivePage("trade")} />
         </main>
       )}
 

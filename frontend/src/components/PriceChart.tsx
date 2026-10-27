@@ -1,4 +1,4 @@
-// src/components/PriceChart.tsx - Real-time Candlestick Chart using TradingView's lightweight-charts
+// src/components/PriceChart.tsx - Real-time Candlestick Chart in Clean Retro UI
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { createChart, CandlestickSeries } from "lightweight-charts";
@@ -21,13 +21,12 @@ interface CandleData {
 const generateMockHistory = (
   startPrice: number,
   timeframe: string,
-  count = 100,
+  count = 70
 ): CandleData[] => {
   const data: CandleData[] = [];
-
-  let interval = 60;
-  let priceStep = 10;
-  let randomMultiplier = 8;
+  let interval = 3600;
+  let priceStep = 50;
+  let randomMultiplier = 35;
 
   if (timeframe === "5m") {
     interval = 300;
@@ -68,7 +67,7 @@ export const PriceChart: React.FC<PriceChartProps> = ({
   const chartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
   const lastPriceRef = useRef<number | null>(null);
-  const [activeTimeframe, setActiveTimeframe] = useState("1h");
+  const [activeTimeframe, setActiveTimeframe] = useState<"5m" | "1h" | "1d">("1h");
   const isMounted = useRef(false);
 
   interface CurrentCandle {
@@ -81,94 +80,91 @@ export const PriceChart: React.FC<PriceChartProps> = ({
   const currentCandleRef = useRef<CurrentCandle | null>(null);
 
   // Fetch real historical candlestick data from Binance API
-  const fetchHistory = useCallback(async (timeframe: string) => {
-    if (!seriesRef.current) return;
-    const series = seriesRef.current;
+  const fetchHistory = useCallback(
+    async (timeframe: string) => {
+      if (!seriesRef.current) return;
+      const series = seriesRef.current;
 
-    // Normalize symbol (e.g. BTCUSDT)
-    const querySymbol = symbol.toUpperCase().includes("USDT")
-      ? symbol.toUpperCase()
-      : `${symbol.toUpperCase()}USDT`;
+      const querySymbol = symbol.toUpperCase().includes("USDT")
+        ? symbol.toUpperCase()
+        : `${symbol.toUpperCase()}USDT`;
 
-    try {
-      const response = await fetch(
-        `https://api.binance.com/api/v3/klines?symbol=${querySymbol}&interval=${timeframe}&limit=100`
-      );
-      if (!response.ok) {
-        throw new Error(`Binance API response error: ${response.status}`);
+      try {
+        const response = await fetch(
+          `https://api.binance.com/api/v3/klines?symbol=${querySymbol}&interval=${timeframe}&limit=80`
+        );
+        if (!response.ok) {
+          throw new Error(`Binance API response error: ${response.status}`);
+        }
+        const rawData = await response.json();
+        if (!Array.isArray(rawData)) {
+          throw new Error("Invalid Binance API response format");
+        }
+
+        const formattedData: CandleData[] = rawData.map((item: any) => ({
+          time: Math.floor(Number(item[0]) / 1000) as UTCTimestamp,
+          open: parseFloat(String(item[1])),
+          high: parseFloat(String(item[2])),
+          low: parseFloat(String(item[3])),
+          close: parseFloat(String(item[4])),
+        }));
+
+        series.setData(formattedData);
+
+        if (formattedData.length > 0) {
+          const lastCandle = formattedData[formattedData.length - 1];
+          currentCandleRef.current = {
+            time: lastCandle.time,
+            open: lastCandle.open,
+            high: lastCandle.high,
+            low: lastCandle.low,
+            close: lastCandle.close,
+          };
+        }
+      } catch (error) {
+        console.warn("Using mock history fallback for chart:", error);
+        const startVal = currentPrice || 80666.92;
+        const mockData = generateMockHistory(startVal, timeframe, 70);
+        series.setData(mockData);
+        if (mockData.length > 0) {
+          const lastMock = mockData[mockData.length - 1];
+          currentCandleRef.current = {
+            time: lastMock.time,
+            open: lastMock.open,
+            high: lastMock.high,
+            low: lastMock.low,
+            close: lastMock.close,
+          };
+        }
       }
-      const rawData = await response.json();
-      if (!Array.isArray(rawData)) {
-        throw new Error("Invalid Binance API response format");
-      }
+    },
+    [symbol, currentPrice]
+  );
 
-      const formattedData = rawData.map((item: unknown) => {
-        const kline = item as (string | number)[];
-        return {
-          time: Math.floor(Number(kline[0]) / 1000) as UTCTimestamp,
-          open: parseFloat(String(kline[1])),
-          high: parseFloat(String(kline[2])),
-          low: parseFloat(String(kline[3])),
-          close: parseFloat(String(kline[4])),
-        };
-      });
-
-      series.setData(formattedData);
-
-      // Set the last candle reference so subsequent WS updates extend or modify it
-      if (formattedData.length > 0) {
-        const lastCandle = formattedData[formattedData.length - 1];
-        currentCandleRef.current = {
-          time: lastCandle.time,
-          open: lastCandle.open,
-          high: lastCandle.high,
-          low: lastCandle.low,
-          close: lastCandle.close,
-        };
-      }
-    } catch (error) {
-      console.error("Failed to fetch real history from Binance, falling back to mock history:", error);
-      const startVal = currentPrice || 60000;
-      const mockData = generateMockHistory(startVal, timeframe, 100);
-      series.setData(mockData);
-      if (mockData.length > 0) {
-        const lastMock = mockData[mockData.length - 1];
-        currentCandleRef.current = {
-          time: lastMock.time,
-          open: lastMock.open,
-          high: lastMock.high,
-          low: lastMock.low,
-          close: lastMock.close,
-        };
-      }
-    }
-  }, [symbol, currentPrice]);
-
-  // 1. Initialize Chart
+  // 1. Initialize Lightweight Chart with Clean Modern Typography
   useEffect(() => {
     if (!chartContainerRef.current) return;
 
-    // Create chart instance with initial container measurements
     const chart = createChart(chartContainerRef.current, {
-      width: chartContainerRef.current.clientWidth || 600,
-      height: chartContainerRef.current.clientHeight || 380,
+      width: chartContainerRef.current.clientWidth || 700,
+      height: chartContainerRef.current.clientHeight || 280,
       layout: {
-        background: { color: "#ffffff" },
-        textColor: "#000000",
-        fontFamily: "'Share Tech Mono', monospace",
+        background: { color: "#f8f4e6" }, // var(--surface)
+        textColor: "#1c1a17", // var(--ink)
+        fontFamily: "'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace",
       },
       grid: {
-        vertLines: { color: "#f0f0f0", style: 2 },
-        horzLines: { color: "#f0f0f0", style: 2 },
+        vertLines: { color: "#d9d1b8", style: 2 }, // var(--line)
+        horzLines: { color: "#d9d1b8", style: 2 },
       },
       crosshair: {
-        mode: 1, // Normal crosshair
+        mode: 1,
       },
       rightPriceScale: {
-        borderColor: "#000000",
+        borderColor: "#1c1a17",
       },
       timeScale: {
-        borderColor: "#000000",
+        borderColor: "#1c1a17",
         timeVisible: true,
         secondsVisible: false,
       },
@@ -176,22 +172,19 @@ export const PriceChart: React.FC<PriceChartProps> = ({
 
     chartRef.current = chart;
 
-    // Add candlestick series
     const series = chart.addSeries(CandlestickSeries, {
-      upColor: "rgba(56, 142, 60, 0.9)",
-      downColor: "rgba(211, 47, 47, 0.9)",
-      borderUpColor: "rgba(56, 142, 60, 1)",
-      borderDownColor: "rgba(211, 47, 47, 1)",
-      wickUpColor: "rgba(56, 142, 60, 1)",
-      wickDownColor: "rgba(211, 47, 47, 1)",
+      upColor: "#4c8a3c", // var(--up)
+      downColor: "#b73234", // var(--down)
+      borderUpColor: "#4c8a3c",
+      borderDownColor: "#b73234",
+      wickUpColor: "#4c8a3c",
+      wickDownColor: "#b73234",
     });
 
     seriesRef.current = series;
 
-    // Set initial data using real-time API fetch
     fetchHistory(activeTimeframe);
 
-    // Make chart responsive in both width and height using ResizeObserver
     const resizeObserver = new ResizeObserver((entries) => {
       if (!entries || entries.length === 0) return;
       const { width, height } = entries[0].contentRect;
@@ -207,45 +200,38 @@ export const PriceChart: React.FC<PriceChartProps> = ({
     return () => {
       resizeObserver.disconnect();
       chart.remove();
+      chartRef.current = null;
+      seriesRef.current = null;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // 1.5. Update history data when timeframe changes
-  useEffect(() => {
-    if (!isMounted.current) {
-      isMounted.current = true;
-      return;
-    }
-    fetchHistory(activeTimeframe);
-    lastPriceRef.current = null;
-    currentCandleRef.current = null;
   }, [activeTimeframe, fetchHistory]);
 
-  // 2. Stream Live Ticks to Chart
+  // 2. Fetch history when timeframe updates
   useEffect(() => {
-    if (!seriesRef.current || currentPrice === null) return;
+    fetchHistory(activeTimeframe);
+  }, [activeTimeframe, fetchHistory]);
 
-    // Prevent duplicate updates for the same tick price
-    if (lastPriceRef.current === currentPrice) return;
-    lastPriceRef.current = currentPrice;
-
+  // 3. Stream real-time price updates into active candle
+  useEffect(() => {
+    if (!currentPrice || !seriesRef.current) return;
     const series = seriesRef.current;
+    const now = Math.floor(Date.now() / 1000);
 
-    const now = Math.floor(Date.now() / 1000) as UTCTimestamp;
+    const intervalSeconds: Record<"5m" | "1h" | "1d", number> = {
+      "5m": 300,
+      "1h": 3600,
+      "1d": 86400,
+    };
+    const interval = intervalSeconds[activeTimeframe];
 
-    // Use interval corresponding to the active timeframe
-    let interval = 60;
-    if (activeTimeframe === "5m") interval = 300;
-    else if (activeTimeframe === "1h") interval = 3600;
-    else if (activeTimeframe === "1d") interval = 86400;
+    if (!isMounted.current) {
+      isMounted.current = true;
+      lastPriceRef.current = currentPrice;
+    }
 
     const candleTime = (Math.floor(now / interval) * interval) as UTCTimestamp;
-
     let currentCandle = currentCandleRef.current;
 
     if (!currentCandle || currentCandle.time !== candleTime) {
-      // Start a new candle block
       currentCandle = {
         time: candleTime,
         open: currentPrice,
@@ -254,7 +240,6 @@ export const PriceChart: React.FC<PriceChartProps> = ({
         close: currentPrice,
       };
     } else {
-      // Update existing candle block
       currentCandle.high = Math.max(currentCandle.high, currentPrice);
       currentCandle.low = Math.min(currentCandle.low, currentPrice);
       currentCandle.close = currentPrice;
@@ -264,127 +249,52 @@ export const PriceChart: React.FC<PriceChartProps> = ({
     series.update(currentCandle);
   }, [currentPrice, activeTimeframe]);
 
+  const displayPrice = currentPrice
+    ? currentPrice.toLocaleString("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })
+    : "80,666.92";
+
   return (
-    <div
-      className="nes-container"
-      style={{
-        padding: "15px",
-        height: "100%",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
-      {/* Ticker Symbol bar */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "15px",
-          borderBottom: "2px solid #000000",
-          paddingBottom: "10px",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <span
-            style={{
-              fontFamily: "var(--font-press-start)",
-              fontSize: "14px",
-              color: "var(--mario-red)",
-              fontWeight: "bold",
-            }}
-          >
-            ★ {symbol}
-          </span>
-          <span
-            style={{
-              fontFamily: "var(--font-press-start)",
-              fontSize: "12px",
-              fontWeight: "bold",
-            }}
-          >
-            {currentPrice ? currentPrice.toFixed(2) : "60000.00"}
-          </span>
-          <span
-            className="text-red"
-            style={{ fontSize: "12px", fontWeight: "bold" }}
-          >
-            -0.34% / -0.60%
-          </span>
-        </div>
+    <>
+      <div className="pair">
+        <h1 className="symbol-title">{symbol === "BTCUSDT" ? "BTC/USDT" : symbol}</h1>
+        <strong className="price" id="last">
+          {displayPrice}
+        </strong>
+        <span className="dn">−0.34%</span>
+        <span>24h vol 140,237</span>
+        <span>24h range 79,020 – 82,010</span>
+      </div>
 
+      <div className="chart-box">
         <div
-          style={{
-            fontSize: "12px",
-            display: "flex",
-            gap: "12px",
-            opacity: 0.8,
-          }}
+          ref={chartContainerRef}
+          style={{ width: "100%", height: "100%", minHeight: "260px" }}
+        />
+      </div>
+
+      <div className="tf" role="group" aria-label="Interval">
+        <button
+          aria-pressed={activeTimeframe === "5m"}
+          onClick={() => setActiveTimeframe("5m")}
         >
-          <span>
-            24h Vol: <strong style={{ color: "#000" }}>140,237 USDC</strong>
-          </span>
-          <span>
-            Cap: <strong style={{ color: "#000" }}>16.98M USDC</strong>
-          </span>
-        </div>
+          5m
+        </button>
+        <button
+          aria-pressed={activeTimeframe === "1h"}
+          onClick={() => setActiveTimeframe("1h")}
+        >
+          1h
+        </button>
+        <button
+          aria-pressed={activeTimeframe === "1d"}
+          onClick={() => setActiveTimeframe("1d")}
+        >
+          1d
+        </button>
       </div>
-
-      {/* Chart Canvas */}
-      <div
-        ref={chartContainerRef}
-        style={{
-          width: "100%",
-          flex: 1,
-          minHeight: "180px",
-          background: "#ffffff",
-          border: "2px solid #000",
-        }}
-      />
-
-      {/* Timeframe selector toolbar */}
-      <div
-        style={{
-          marginTop: "12px",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          fontFamily: "var(--font-press-start)",
-          fontSize: "8px",
-        }}
-      >
-        <div style={{ display: "flex", gap: "10px" }}>
-          {["5m", "1h", "1d", "Indicators"].map((tf) => (
-            <button
-              key={tf}
-              onClick={() => tf !== "Indicators" && setActiveTimeframe(tf)}
-              className="nes-btn"
-              style={{
-                fontSize: "7px",
-                padding: "4px 8px",
-                background:
-                  activeTimeframe === tf ? "var(--mario-yellow)" : "#ffffff",
-                boxShadow:
-                  activeTimeframe === tf ? "none" : "var(--shadow-retro-small)",
-                transform:
-                  activeTimeframe === tf ? "translate(1px, 1px)" : "none",
-                opacity: tf === "Indicators" ? 0.6 : 1,
-                cursor: tf === "Indicators" ? "not-allowed" : "pointer",
-              }}
-            >
-              {tf}
-            </button>
-          ))}
-        </div>
-
-        <div style={{ display: "flex", gap: "6px", color: "#666" }}>
-          {["5y", "2y", "1y", "6m", "3m", "1m", "5d", "1d"].map((range) => (
-            <span key={range} style={{ cursor: "pointer" }}>
-              {range}
-            </span>
-          ))}
-        </div>
-      </div>
-    </div>
+    </>
   );
 };

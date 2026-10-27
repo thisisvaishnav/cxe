@@ -102,15 +102,15 @@ const POOLS: Pool[] = [
 ];
 
 const riskColor: Record<string, string> = {
-  LOW: "var(--mario-green)",
-  MEDIUM: "var(--mario-yellow)",
-  HIGH: "var(--mario-red)",
+  LOW: "var(--up)",
+  MEDIUM: "var(--gold)",
+  HIGH: "var(--down)",
 };
 
 const tagBg: Record<string, string> = {
-  POPULAR: "var(--mario-blue)",
-  "BEST APY": "var(--mario-green)",
-  HOT: "var(--mario-red)",
+  POPULAR: "#2196f3",
+  "BEST APY": "var(--up)",
+  HOT: "var(--down)",
   "HIGH RISK": "#9c27b0",
 };
 
@@ -141,9 +141,12 @@ const PoolCard: React.FC<{ pool: Pool; balance: number }> = ({ pool, balance }) 
 
   return (
     <div
-      className="nes-container"
       style={{
         padding: "0",
+        background: "var(--surface)",
+        border: "1px solid var(--ink)",
+        borderRadius: "2px",
+        overflow: "hidden",
         transition: "box-shadow 0.15s",
         cursor: "pointer",
       }}
@@ -155,20 +158,21 @@ const PoolCard: React.FC<{ pool: Pool; balance: number }> = ({ pool, balance }) 
           padding: "16px 20px",
           display: "flex",
           alignItems: "center",
-          gap: "12px",
+          gap: "14px",
         }}
       >
         {/* Icon */}
         <div
           style={{
-            fontSize: "28px",
-            width: "48px",
-            height: "48px",
+            fontSize: "24px",
+            width: "44px",
+            height: "44px",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            background: "#f0e8d0",
-            border: "2px solid #000",
+            background: "var(--bg)",
+            border: "1px solid var(--line)",
+            borderRadius: "2px",
             flexShrink: 0,
           }}
         >
@@ -178,47 +182,49 @@ const PoolCard: React.FC<{ pool: Pool; balance: number }> = ({ pool, balance }) 
         {/* Name & description */}
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
-            <span style={{ fontFamily: "var(--font-press-start)", fontSize: "10px" }}>{pool.name}</span>
+            <span style={{ fontFamily: "var(--font-sans)", fontSize: "14px", fontWeight: 700 }}>{pool.name}</span>
             {pool.tag && (
               <span
                 style={{
                   background: tagBg[pool.tag] || "#000",
                   color: "#fff",
-                  fontFamily: "var(--font-press-start)",
-                  fontSize: "6px",
+                  fontFamily: "var(--font-sans)",
+                  fontSize: "10px",
+                  fontWeight: 700,
                   padding: "2px 6px",
-                  border: "1px solid #000",
+                  borderRadius: "2px",
+                  letterSpacing: "0.03em",
                 }}
               >
                 {pool.tag}
               </span>
             )}
           </div>
-          <div style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "#666", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+          <div style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--mute)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
             {pool.description}
           </div>
         </div>
 
         {/* Stats */}
-        <div style={{ display: "flex", gap: "32px", alignItems: "center", flexShrink: 0 }}>
+        <div style={{ display: "flex", gap: "28px", alignItems: "center", flexShrink: 0 }}>
           <div style={{ textAlign: "center" }}>
-            <div style={{ fontFamily: "var(--font-press-start)", fontSize: "16px", color: "var(--mario-green)" }}>{pool.apy}</div>
-            <div style={{ fontFamily: "var(--font-press-start)", fontSize: "6px", color: "#888", marginTop: "2px" }}>APY</div>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: "17px", fontWeight: 700, color: "var(--up)" }}>{pool.apy}</div>
+            <div style={{ fontFamily: "var(--font-sans)", fontSize: "10px", fontWeight: 600, color: "var(--mute)", marginTop: "2px", letterSpacing: "0.04em" }}>APY</div>
           </div>
           <div style={{ textAlign: "center" }}>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: "14px", fontWeight: "bold" }}>{pool.tvl}</div>
-            <div style={{ fontFamily: "var(--font-press-start)", fontSize: "6px", color: "#888", marginTop: "2px" }}>TVL</div>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: "14px", fontWeight: 600 }}>{pool.tvl}</div>
+            <div style={{ fontFamily: "var(--font-sans)", fontSize: "10px", fontWeight: 600, color: "var(--mute)", marginTop: "2px", letterSpacing: "0.04em" }}>TVL</div>
           </div>
           <div style={{ textAlign: "center" }}>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: "14px" }}>{pool.lockPeriod}</div>
-            <div style={{ fontFamily: "var(--font-press-start)", fontSize: "6px", color: "#888", marginTop: "2px" }}>LOCK</div>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: "13px" }}>{pool.lockPeriod}</div>
+            <div style={{ fontFamily: "var(--font-sans)", fontSize: "10px", fontWeight: 600, color: "var(--mute)", marginTop: "2px", letterSpacing: "0.04em" }}>LOCK</div>
           </div>
           <div style={{ textAlign: "center" }}>
-            <div style={{ fontFamily: "var(--font-press-start)", fontSize: "8px", color: riskColor[pool.risk] }}>{pool.risk}</div>
-            <div style={{ fontFamily: "var(--font-press-start)", fontSize: "6px", color: "#888", marginTop: "2px" }}>RISK</div>
+            <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 700, color: riskColor[pool.risk] }}>{pool.risk}</div>
+            <div style={{ fontFamily: "var(--font-sans)", fontSize: "10px", fontWeight: 600, color: "var(--mute)", marginTop: "2px", letterSpacing: "0.04em" }}>RISK</div>
           </div>
-          <div style={{ color: "#666" }}>
-            {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+          <div style={{ color: "var(--mute)" }}>
+            {expanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
           </div>
         </div>
       </div>
@@ -227,49 +233,70 @@ const PoolCard: React.FC<{ pool: Pool; balance: number }> = ({ pool, balance }) 
       {expanded && (
         <div
           style={{
-            borderTop: "3px solid #000",
+            borderTop: "1px solid var(--line)",
             padding: "20px",
-            background: "#fafafa",
+            background: "var(--bg)",
             display: "grid",
             gridTemplateColumns: "1fr 1fr",
-            gap: "20px",
+            gap: "24px",
           }}
         >
           {/* Deposit form */}
           <div>
-            <div style={{ fontFamily: "var(--font-press-start)", fontSize: "8px", marginBottom: "12px" }}>DEPOSIT AMOUNT</div>
+            <div style={{ fontFamily: "var(--font-sans)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.04em", textTransform: "uppercase", marginBottom: "8px", color: "var(--mute)" }}>
+              DEPOSIT AMOUNT
+            </div>
 
-            <div style={{ display: "flex", gap: "8px", marginBottom: "12px" }}>
+            <div style={{ display: "flex", gap: "8px", marginBottom: "10px" }}>
               <input
                 type="number"
-                className="nes-input"
                 placeholder={`Min $${pool.minDeposit}`}
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                style={{ flex: 1 }}
+                style={{
+                  flex: 1,
+                  padding: "8px 12px",
+                  border: "1px solid var(--ink)",
+                  borderRadius: "2px",
+                  background: "var(--surface)",
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "14px",
+                  color: "var(--ink)",
+                }}
               />
               <button
-                className="nes-btn yellow"
-                style={{ padding: "8px 12px", fontSize: "9px", whiteSpace: "nowrap" }}
+                style={{
+                  padding: "8px 14px",
+                  fontSize: "12px",
+                  fontWeight: 700,
+                  fontFamily: "var(--font-mono)",
+                  whiteSpace: "nowrap",
+                  background: "var(--gold)",
+                  border: "1px solid var(--ink)",
+                  borderRadius: "2px",
+                  cursor: "pointer",
+                }}
                 onClick={() => setAmount(String(Math.floor(balance)))}
               >
                 MAX
               </button>
             </div>
 
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "#666", marginBottom: "16px" }}>
-              Available: <b>${balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</b>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--mute)", marginBottom: "14px" }}>
+              Available: <b style={{ color: "var(--ink)" }}>${balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</b>
             </div>
 
             {success ? (
               <div
                 style={{
-                  padding: "12px",
-                  background: "var(--mario-green)",
-                  border: "2px solid #000",
+                  padding: "10px",
+                  background: "var(--up)",
+                  border: "1px solid var(--ink)",
+                  borderRadius: "2px",
                   color: "#fff",
-                  fontFamily: "var(--font-press-start)",
-                  fontSize: "8px",
+                  fontFamily: "var(--font-sans)",
+                  fontSize: "12px",
+                  fontWeight: 700,
                   textAlign: "center",
                 }}
               >
@@ -277,8 +304,20 @@ const PoolCard: React.FC<{ pool: Pool; balance: number }> = ({ pool, balance }) 
               </div>
             ) : (
               <button
-                className={`nes-btn ${canDeposit ? "green" : "disabled"}`}
-                style={{ width: "100%", padding: "12px", fontSize: "10px" }}
+                style={{
+                  width: "100%",
+                  padding: "10px",
+                  fontSize: "12px",
+                  fontWeight: 700,
+                  fontFamily: "var(--font-sans)",
+                  letterSpacing: "0.04em",
+                  color: "#fff",
+                  background: canDeposit ? "var(--up)" : "var(--mute)",
+                  border: "1px solid var(--ink)",
+                  borderRadius: "2px",
+                  cursor: canDeposit && !depositing ? "pointer" : "not-allowed",
+                  opacity: canDeposit ? 1 : 0.6,
+                }}
                 onClick={handleDeposit}
                 disabled={!canDeposit || depositing}
               >
@@ -287,7 +326,7 @@ const PoolCard: React.FC<{ pool: Pool; balance: number }> = ({ pool, balance }) 
             )}
 
             {parseFloat(amount) > 0 && parseFloat(amount) < pool.minDeposit && (
-              <div style={{ marginTop: "8px", fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--mario-red)" }}>
+              <div style={{ marginTop: "8px", fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--down)" }}>
                 Minimum deposit is ${pool.minDeposit}
               </div>
             )}
@@ -295,15 +334,18 @@ const PoolCard: React.FC<{ pool: Pool; balance: number }> = ({ pool, balance }) 
 
           {/* Projected earnings */}
           <div>
-            <div style={{ fontFamily: "var(--font-press-start)", fontSize: "8px", marginBottom: "12px" }}>PROJECTED EARNINGS</div>
+            <div style={{ fontFamily: "var(--font-sans)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.04em", textTransform: "uppercase", marginBottom: "8px", color: "var(--mute)" }}>
+              PROJECTED EARNINGS
+            </div>
             <div
               style={{
-                background: "#fff",
-                border: "2px solid #000",
-                padding: "16px",
+                background: "var(--surface)",
+                border: "1px solid var(--line)",
+                borderRadius: "2px",
+                padding: "14px 16px",
                 display: "flex",
                 flexDirection: "column",
-                gap: "10px",
+                gap: "8px",
               }}
             >
               {[
@@ -311,16 +353,16 @@ const PoolCard: React.FC<{ pool: Pool; balance: number }> = ({ pool, balance }) 
                 { label: "Monthly", value: monthlyEarn },
                 { label: "Yearly", value: yearlyEarn },
               ].map((row) => (
-                <div key={row.label} style={{ display: "flex", justifyContent: "space-between", fontFamily: "var(--font-mono)", fontSize: "13px" }}>
-                  <span style={{ color: "#666" }}>{row.label}</span>
-                  <span style={{ fontWeight: "bold", color: "var(--mario-green)" }}>
+                <div key={row.label} style={{ display: "flex", justifyContent: "space-between", fontFamily: "var(--font-mono)", fontSize: "12.5px" }}>
+                  <span style={{ color: "var(--mute)" }}>{row.label}</span>
+                  <span style={{ fontWeight: 600, color: "var(--up)" }}>
                     +${amtNum > 0 ? row.value.toFixed(2) : "0.00"}
                   </span>
                 </div>
               ))}
-              <div style={{ borderTop: "2px dashed #ccc", paddingTop: "10px", display: "flex", justifyContent: "space-between", fontFamily: "var(--font-press-start)", fontSize: "8px" }}>
+              <div style={{ borderTop: "1px solid var(--line)", paddingTop: "8px", display: "flex", justifyContent: "space-between", fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 600 }}>
                 <span>APY</span>
-                <span style={{ color: "var(--mario-green)" }}>{pool.apy}</span>
+                <span style={{ color: "var(--up)", fontFamily: "var(--font-mono)", fontWeight: 700 }}>{pool.apy}</span>
               </div>
             </div>
           </div>
@@ -343,15 +385,15 @@ export const EarnPage: React.FC<EarnPageProps> = ({ balance }) => {
   );
 
   return (
-    <div style={{ padding: "24px", background: "var(--bg-canvas)", minHeight: "calc(100vh - 180px)" }}>
+    <div style={{ padding: "24px", background: "var(--bg)", minHeight: "calc(100vh - 120px)", maxWidth: "1500px", margin: "0 auto" }}>
       
       {/* Page Header */}
       <div style={{ marginBottom: "24px" }}>
-        <h1 style={{ fontFamily: "var(--font-press-start)", fontSize: "16px", letterSpacing: "1px", marginBottom: "6px", display: "flex", alignItems: "center", gap: "10px" }}>
-          <Zap size={20} color="var(--mario-yellow)" />
+        <h1 style={{ fontFamily: "var(--font-sans)", fontSize: "20px", fontWeight: 700, letterSpacing: "-0.01em", marginBottom: "4px", display: "flex", alignItems: "center", gap: "8px" }}>
+          <Zap size={20} color="var(--gold)" />
           EARN
         </h1>
-        <p style={{ fontFamily: "var(--font-mono)", fontSize: "14px", color: "#666" }}>
+        <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "var(--mute)" }}>
           Put your assets to work. Earn yield through flexible savings, locked deposits and liquidity pools.
         </p>
       </div>
@@ -359,29 +401,30 @@ export const EarnPage: React.FC<EarnPageProps> = ({ balance }) => {
       {/* Global Stats Banner */}
       <div
         style={{
-          background: "var(--mario-red)",
-          border: "3px solid #000",
-          boxShadow: "4px 4px 0 #000",
-          padding: "20px 24px",
+          background: "var(--red)",
+          border: "1px solid var(--ink)",
+          borderRadius: "2px",
+          padding: "16px 20px",
           display: "flex",
-          gap: "40px",
+          gap: "36px",
           marginBottom: "24px",
           color: "#fff",
           alignItems: "center",
+          flexWrap: "wrap",
         }}
       >
         {[
-          { icon: <Lock size={18} />, label: "TOTAL VALUE LOCKED", value: totalTVL },
-          { icon: <TrendingUp size={18} />, label: "AVG APY", value: `${avgApy}%` },
-          { icon: <Gift size={18} />, label: "ACTIVE POOLS", value: `${POOLS.length}` },
-          { icon: <Shield size={18} />, label: "AUDITED & SECURE", value: "✓ VERIFIED" },
-          { icon: <Star size={18} />, label: "YOUR BALANCE", value: `$${balance.toLocaleString(undefined, { maximumFractionDigits: 0 })}` },
+          { icon: <Lock size={16} />, label: "TOTAL VALUE LOCKED", value: totalTVL },
+          { icon: <TrendingUp size={16} />, label: "AVG APY", value: `${avgApy}%` },
+          { icon: <Gift size={16} />, label: "ACTIVE POOLS", value: `${POOLS.length}` },
+          { icon: <Shield size={16} />, label: "AUDITED & SECURE", value: "✓ VERIFIED" },
+          { icon: <Star size={16} />, label: "YOUR BALANCE", value: `$${balance.toLocaleString(undefined, { maximumFractionDigits: 0 })}` },
         ].map((stat, i) => (
           <div key={i} style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-            <div style={{ opacity: 0.8 }}>{stat.icon}</div>
+            <div style={{ opacity: 0.85 }}>{stat.icon}</div>
             <div>
-              <div style={{ fontFamily: "var(--font-press-start)", fontSize: "6px", opacity: 0.7, marginBottom: "4px" }}>{stat.label}</div>
-              <div style={{ fontFamily: "var(--font-press-start)", fontSize: "12px" }}>{stat.value}</div>
+              <div style={{ fontFamily: "var(--font-sans)", fontSize: "10px", fontWeight: 600, opacity: 0.8, marginBottom: "2px", letterSpacing: "0.04em" }}>{stat.label}</div>
+              <div style={{ fontFamily: "var(--font-mono)", fontSize: "15px", fontWeight: 700 }}>{stat.value}</div>
             </div>
           </div>
         ))}
@@ -389,22 +432,40 @@ export const EarnPage: React.FC<EarnPageProps> = ({ balance }) => {
 
       {/* Filters */}
       <div style={{ display: "flex", gap: "8px", marginBottom: "16px", alignItems: "center" }}>
-        <span style={{ fontFamily: "var(--font-press-start)", fontSize: "8px", marginRight: "4px" }}>RISK:</span>
+        <span style={{ fontFamily: "var(--font-sans)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.04em", marginRight: "4px", color: "var(--mute)" }}>RISK:</span>
         {(["ALL", "LOW", "MEDIUM", "HIGH"] as const).map((r) => (
           <button
             key={r}
-            className={`nes-btn ${filter === r ? "yellow" : ""}`}
-            style={{ padding: "4px 12px", fontSize: "8px" }}
+            style={{
+              padding: "4px 12px",
+              fontSize: "11.5px",
+              fontWeight: 600,
+              fontFamily: "var(--font-sans)",
+              borderRadius: "2px",
+              border: "1px solid var(--ink)",
+              background: filter === r ? "var(--gold)" : "var(--surface)",
+              color: "var(--ink)",
+              cursor: "pointer",
+            }}
             onClick={() => setFilter(r)}
           >
             {r}
           </button>
         ))}
         <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "8px" }}>
-          <span style={{ fontFamily: "var(--font-press-start)", fontSize: "8px" }}>SORT:</span>
+          <span style={{ fontFamily: "var(--font-sans)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.04em", color: "var(--mute)" }}>SORT:</span>
           <button
-            className={`nes-btn ${sortBy === "apy" ? "yellow" : ""}`}
-            style={{ padding: "4px 10px", fontSize: "8px" }}
+            style={{
+              padding: "4px 10px",
+              fontSize: "11.5px",
+              fontWeight: 600,
+              fontFamily: "var(--font-sans)",
+              borderRadius: "2px",
+              border: "1px solid var(--ink)",
+              background: sortBy === "apy" ? "var(--gold)" : "var(--surface)",
+              color: "var(--ink)",
+              cursor: "pointer",
+            }}
             onClick={() => setSortBy("apy")}
           >
             APY ↓
@@ -413,7 +474,7 @@ export const EarnPage: React.FC<EarnPageProps> = ({ balance }) => {
       </div>
 
       {/* Pool Cards */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
         {filtered.map((pool) => (
           <PoolCard key={pool.id} pool={pool} balance={balance} />
         ))}
@@ -424,11 +485,12 @@ export const EarnPage: React.FC<EarnPageProps> = ({ balance }) => {
         style={{
           marginTop: "24px",
           padding: "12px 16px",
-          border: "2px dashed #ccc",
+          border: "1px solid var(--line)",
+          borderRadius: "2px",
           fontFamily: "var(--font-mono)",
-          fontSize: "11px",
-          color: "#888",
-          background: "#f8f5ee",
+          fontSize: "12px",
+          color: "var(--mute)",
+          background: "var(--surface)",
         }}
       >
         ⚠️ <b>RISK DISCLAIMER:</b> Yield rates are variable and subject to market conditions. Past performance does not guarantee future returns. MEDIUM and HIGH risk pools carry significant risk of loss. Always invest only what you can afford to lose.

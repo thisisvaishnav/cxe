@@ -74,7 +74,7 @@ const DonutChart: React.FC<{ slices: { pct: number; color: string; label: string
   return (
     <svg width="160" height="160" viewBox="0 0 160 160">
       {paths}
-      <circle cx={cx} cy={cy} r={r * 0.52} fill="var(--bg-card)" />
+      <circle cx={cx} cy={cy} r={r * 0.52} fill="var(--surface)" />
     </svg>
   );
 };
@@ -110,10 +110,10 @@ export const PortfolioPage: React.FC<PortfolioPageProps> = ({ balance, positions
   const usdcVal = balance;
   const total = usdcVal + btcValue || 1;
   const slices = [
-    { pct: (usdcVal / total) * 100, color: "var(--mario-blue)", label: "USDC" },
-    { pct: (btcValue / total) * 100, color: "var(--mario-yellow)", label: "BTC" },
+    { pct: (usdcVal / total) * 100, color: "#2196f3", label: "USDC" },
+    { pct: (btcValue / total) * 100, color: "var(--gold)", label: "BTC" },
   ].filter((s) => s.pct > 0);
-  if (slices.length === 0) slices.push({ pct: 100, color: "var(--mario-blue)", label: "USDC" });
+  if (slices.length === 0) slices.push({ pct: 100, color: "#2196f3", label: "USDC" });
 
   // Asset rows
   const assets = [
@@ -148,26 +148,28 @@ export const PortfolioPage: React.FC<PortfolioPageProps> = ({ balance, positions
   ];
 
   return (
-    <div style={{ padding: "24px", background: "var(--bg-canvas)", minHeight: "calc(100vh - 180px)" }}>
+    <div style={{ padding: "24px", background: "var(--bg)", minHeight: "calc(100vh - 120px)", maxWidth: "1500px", margin: "0 auto" }}>
 
       {/* Page Header */}
       <div style={{ marginBottom: "24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div>
-          <h1 style={{ fontFamily: "var(--font-press-start)", fontSize: "16px", letterSpacing: "1px", marginBottom: "6px" }}>
+          <h1 style={{ fontFamily: "var(--font-sans)", fontSize: "20px", fontWeight: 700, letterSpacing: "-0.01em", marginBottom: "4px" }}>
             MY PORTFOLIO
           </h1>
-          <p style={{ fontFamily: "var(--font-mono)", fontSize: "14px", color: "#666" }}>
+          <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "var(--mute)" }}>
             Overview of your holdings, performance, and history
           </p>
         </div>
         <div
           style={{
-            background: "var(--mario-red)",
-            border: "3px solid #000",
-            boxShadow: "4px 4px 0 #000",
-            padding: "8px 16px",
-            fontFamily: "var(--font-press-start)",
-            fontSize: "9px",
+            background: "var(--red)",
+            border: "1px solid var(--ink)",
+            borderRadius: "2px",
+            padding: "6px 12px",
+            fontFamily: "var(--font-sans)",
+            fontSize: "11px",
+            fontWeight: 700,
+            letterSpacing: "0.04em",
             color: "#fff",
             cursor: "default",
           }}
@@ -180,47 +182,54 @@ export const PortfolioPage: React.FC<PortfolioPageProps> = ({ balance, positions
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "16px", marginBottom: "24px" }}>
         {[
           {
-            icon: <Wallet size={20} />,
+            icon: <Wallet size={18} />,
             label: "TOTAL EQUITY",
             value: `$${totalEquity.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
             sub: `Incl. unrealised P&L`,
-            color: "var(--mario-blue)",
+            color: "var(--ink)",
           },
           {
-            icon: <BarChart2 size={20} />,
+            icon: <BarChart2 size={18} />,
             label: "CASH BALANCE",
             value: `$${balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
             sub: "Available to trade",
-            color: "var(--mario-green)",
+            color: "var(--up)",
           },
           {
-            icon: totalUnrPnL >= 0 ? <TrendingUp size={20} /> : <TrendingDown size={20} />,
+            icon: totalUnrPnL >= 0 ? <TrendingUp size={18} /> : <TrendingDown size={18} />,
             label: "UNREALISED P&L",
             value: `${totalUnrPnL >= 0 ? "+" : ""}$${totalUnrPnL.toFixed(2)}`,
             sub: `Across ${positions.length} open position${positions.length !== 1 ? "s" : ""}`,
-            color: totalUnrPnL >= 0 ? "var(--mario-green)" : "var(--mario-red)",
+            color: totalUnrPnL >= 0 ? "var(--up)" : "var(--down)",
           },
           {
-            icon: <Activity size={20} />,
+            icon: <Activity size={18} />,
             label: "7-DAY RETURN",
             value: `${pctChange >= 0 ? "+" : ""}${pctChange.toFixed(2)}%`,
             sub: `Since Jun 1`,
-            color: pctChange >= 0 ? "var(--mario-green)" : "var(--mario-red)",
+            color: pctChange >= 0 ? "var(--up)" : "var(--down)",
           },
         ].map((card, i) => (
           <div
             key={i}
-            className="nes-container"
-            style={{ padding: "16px", gap: "6px" }}
+            style={{
+              padding: "16px",
+              background: "var(--surface)",
+              border: "1px solid var(--ink)",
+              borderRadius: "2px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "4px",
+            }}
           >
-            <div style={{ color: card.color, marginBottom: "8px" }}>{card.icon}</div>
-            <div style={{ fontFamily: "var(--font-press-start)", fontSize: "7px", color: "#888", textTransform: "uppercase", marginBottom: "4px" }}>
+            <div style={{ color: card.color, marginBottom: "4px" }}>{card.icon}</div>
+            <div style={{ fontFamily: "var(--font-sans)", fontSize: "11px", fontWeight: 600, color: "var(--mute)", textTransform: "uppercase", letterSpacing: "0.04em" }}>
               {card.label}
             </div>
-            <div style={{ fontFamily: "var(--font-press-start)", fontSize: "13px", color: card.color, marginBottom: "4px" }}>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: "20px", fontWeight: 700, color: card.color, letterSpacing: "-0.01em" }}>
               {card.value}
             </div>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "#666" }}>{card.sub}</div>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: "11.5px", color: "var(--mute)" }}>{card.sub}</div>
           </div>
         ))}
       </div>
@@ -229,10 +238,10 @@ export const PortfolioPage: React.FC<PortfolioPageProps> = ({ balance, positions
       <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: "16px", marginBottom: "24px" }}>
 
         {/* Equity Chart */}
-        <div className="nes-container" style={{ padding: "20px" }}>
-          <div style={{ fontFamily: "var(--font-press-start)", fontSize: "9px", marginBottom: "16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div style={{ padding: "20px", background: "var(--surface)", border: "1px solid var(--ink)", borderRadius: "2px" }}>
+          <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 700, letterSpacing: "0.04em", marginBottom: "16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span>EQUITY OVER TIME (7D)</span>
-            <span style={{ color: pctChange >= 0 ? "var(--mario-green)" : "var(--mario-red)" }}>
+            <span style={{ fontFamily: "var(--font-mono)", fontWeight: 600, color: pctChange >= 0 ? "var(--up)" : "var(--down)" }}>
               {pctChange >= 0 ? "▲" : "▼"} {Math.abs(pctChange).toFixed(2)}%
             </span>
           </div>
@@ -250,34 +259,34 @@ export const PortfolioPage: React.FC<PortfolioPageProps> = ({ balance, positions
                       width: "100%",
                       height: `${barH}%`,
                       minHeight: "8px",
-                      background: isLast ? "var(--mario-yellow)" : pt.value > startVal ? "var(--mario-green)" : "var(--mario-red)",
-                      border: "2px solid #000",
-                      boxShadow: isLast ? "2px 2px 0 #000" : "none",
+                      background: isLast ? "var(--gold)" : pt.value > startVal ? "var(--up)" : "var(--down)",
+                      border: "1px solid var(--ink)",
+                      borderRadius: "1px",
                       transition: "height 0.3s ease",
                     }}
                   />
-                  <span style={{ fontFamily: "var(--font-press-start)", fontSize: "6px", color: "#666" }}>{pt.date.replace("Jun ", "")}</span>
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--mute)" }}>{pt.date.replace("Jun ", "")}</span>
                 </div>
               );
             })}
           </div>
-          <div style={{ marginTop: "12px", display: "flex", gap: "16px", fontFamily: "var(--font-mono)", fontSize: "12px", color: "#666" }}>
-            <span>Start: <b>${startVal.toLocaleString()}</b></span>
-            <span>Current: <b style={{ color: "var(--mario-green)" }}>${totalEquity.toLocaleString(undefined, { maximumFractionDigits: 0 })}</b></span>
-            <span>Change: <b style={{ color: pctChange >= 0 ? "var(--mario-green)" : "var(--mario-red)" }}>{pctChange >= 0 ? "+" : ""}{pctChange.toFixed(2)}%</b></span>
+          <div style={{ marginTop: "14px", display: "flex", gap: "20px", fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--mute)", borderTop: "1px solid var(--line)", paddingTop: "10px" }}>
+            <span>Start: <b style={{ color: "var(--ink)" }}>${startVal.toLocaleString()}</b></span>
+            <span>Current: <b style={{ color: "var(--up)" }}>${totalEquity.toLocaleString(undefined, { maximumFractionDigits: 0 })}</b></span>
+            <span>Change: <b style={{ color: pctChange >= 0 ? "var(--up)" : "var(--down)" }}>{pctChange >= 0 ? "+" : ""}{pctChange.toFixed(2)}%</b></span>
           </div>
         </div>
 
         {/* Allocation Pie */}
-        <div className="nes-container" style={{ padding: "20px", minWidth: "220px", alignItems: "center" }}>
-          <div style={{ fontFamily: "var(--font-press-start)", fontSize: "9px", marginBottom: "12px", textAlign: "center" }}>ALLOCATION</div>
+        <div style={{ padding: "20px", background: "var(--surface)", border: "1px solid var(--ink)", borderRadius: "2px", minWidth: "220px", display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 700, letterSpacing: "0.04em", marginBottom: "12px", textAlign: "center" }}>ALLOCATION</div>
           <DonutChart slices={slices} />
-          <div style={{ marginTop: "12px", display: "flex", flexDirection: "column", gap: "6px", width: "100%" }}>
+          <div style={{ marginTop: "14px", display: "flex", flexDirection: "column", gap: "6px", width: "100%" }}>
             {slices.map((s, i) => (
               <div key={i} style={{ display: "flex", alignItems: "center", gap: "8px", fontFamily: "var(--font-mono)", fontSize: "12px" }}>
-                <div style={{ width: "12px", height: "12px", background: s.color, border: "2px solid #000", flexShrink: 0 }} />
+                <div style={{ width: "10px", height: "10px", background: s.color, border: "1px solid var(--ink)", borderRadius: "1px", flexShrink: 0 }} />
                 <span>{s.label}</span>
-                <span style={{ marginLeft: "auto", fontWeight: "bold" }}>{s.pct.toFixed(1)}%</span>
+                <span style={{ marginLeft: "auto", fontWeight: 600 }}>{s.pct.toFixed(1)}%</span>
               </div>
             ))}
           </div>
@@ -285,41 +294,41 @@ export const PortfolioPage: React.FC<PortfolioPageProps> = ({ balance, positions
       </div>
 
       {/* Assets Table */}
-      <div className="nes-container" style={{ padding: "0" }}>
-        <div style={{ fontFamily: "var(--font-press-start)", fontSize: "9px", padding: "16px 20px", borderBottom: "3px solid #000", background: "#f0e8d0", display: "flex", alignItems: "center", gap: "8px" }}>
-          <PieChart size={14} /> MY ASSETS
+      <div style={{ padding: "0", background: "var(--surface)", border: "1px solid var(--ink)", borderRadius: "2px", overflow: "hidden" }}>
+        <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 700, letterSpacing: "0.04em", padding: "14px 20px", borderBottom: "1px solid var(--line)", background: "var(--bg)", display: "flex", alignItems: "center", gap: "8px" }}>
+          <PieChart size={15} /> MY ASSETS
         </div>
-        <div className="retro-table-container" style={{ border: "none" }}>
-          <table className="retro-table">
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
             <thead>
-              <tr>
-                <th>ASSET</th>
-                <th>BALANCE</th>
-                <th>PRICE</th>
-                <th>VALUE</th>
-                <th>24H CHANGE</th>
-                <th>7D TREND</th>
+              <tr style={{ borderBottom: "1px solid var(--line)", color: "var(--mute)", fontFamily: "var(--font-sans)", fontSize: "11px", fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase" }}>
+                <th style={{ padding: "10px 16px" }}>ASSET</th>
+                <th style={{ padding: "10px 16px" }}>BALANCE</th>
+                <th style={{ padding: "10px 16px" }}>PRICE</th>
+                <th style={{ padding: "10px 16px" }}>VALUE</th>
+                <th style={{ padding: "10px 16px" }}>24H CHANGE</th>
+                <th style={{ padding: "10px 16px" }}>7D TREND</th>
               </tr>
             </thead>
             <tbody>
               {assets.map((a) => (
-                <tr key={a.coin}>
-                  <td>
+                <tr key={a.coin} style={{ borderBottom: "1px solid var(--line)", fontFamily: "var(--font-mono)", fontSize: "13px" }}>
+                  <td style={{ padding: "10px 16px" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                      <span style={{ fontSize: "20px" }}>{a.icon}</span>
-                      <span style={{ fontWeight: "bold", fontFamily: "var(--font-press-start)", fontSize: "10px" }}>{a.coin}</span>
+                      <span style={{ fontSize: "16px" }}>{a.icon}</span>
+                      <span style={{ fontWeight: 600, fontFamily: "var(--font-sans)", fontSize: "13px" }}>{a.coin}</span>
                     </div>
                   </td>
-                  <td style={{ fontFamily: "var(--font-mono)" }}>{a.balance}</td>
-                  <td style={{ fontFamily: "var(--font-mono)" }}>{a.price}</td>
-                  <td style={{ fontFamily: "var(--font-press-start)", fontSize: "11px" }}>{a.value}</td>
-                  <td>
-                    <span style={{ color: a.positive ? "var(--mario-green)" : "var(--mario-red)", fontWeight: "bold", fontFamily: "var(--font-mono)" }}>
+                  <td style={{ padding: "10px 16px" }}>{a.balance}</td>
+                  <td style={{ padding: "10px 16px" }}>{a.price}</td>
+                  <td style={{ padding: "10px 16px", fontWeight: 600 }}>{a.value}</td>
+                  <td style={{ padding: "10px 16px" }}>
+                    <span style={{ color: a.positive ? "var(--up)" : "var(--down)", fontWeight: 600 }}>
                       {a.change}
                     </span>
                   </td>
-                  <td>
-                    <Sparkline data={a.spark} color={a.positive ? "#388e3c" : "#d32f2f"} />
+                  <td style={{ padding: "10px 16px" }}>
+                    <Sparkline data={a.spark} color={a.positive ? "var(--up)" : "var(--down)"} />
                   </td>
                 </tr>
               ))}
@@ -328,7 +337,7 @@ export const PortfolioPage: React.FC<PortfolioPageProps> = ({ balance, positions
         </div>
 
         {assets.length === 0 && (
-          <div style={{ padding: "60px", textAlign: "center", fontFamily: "var(--font-press-start)", fontSize: "10px", color: "#888" }}>
+          <div style={{ padding: "48px", textAlign: "center", fontFamily: "var(--font-sans)", fontSize: "13px", color: "var(--mute)" }}>
             NO ASSETS YET. GO TO TRADE TO GET STARTED!
           </div>
         )}
