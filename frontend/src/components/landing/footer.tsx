@@ -97,7 +97,7 @@ export default function Footer() {
 
             <FooterLinkColumn title="COMMUNITY">
               <FooterLink href="">Discord</FooterLink>
-              <FooterLink href="https://github.com/WatermelonCorp/watermelon-platform">GitHub</FooterLink>
+              <FooterLink href="https://github.com/thisisvaishnav/supercoin">GitHub</FooterLink>
               <FooterLink href="https://x.com/watermelonui">X (Twitter)</FooterLink>
             </FooterLinkColumn>
 
@@ -186,7 +186,7 @@ export default function Footer() {
             </div>
             <div className="flex items-center gap-4">
               <SocialLink href="https://x.com/watermelonui" icon={NewTwitterIcon} />
-              <SocialLink href="https://github.com/WatermelonCorp/watermelon-platform" icon={GithubIcon} />
+              <SocialLink href="https://github.com/thisisvaishnav/supercoin" icon={GithubIcon} />
               <SocialLink href="#" icon={DiscordIcon} />
             </div>
           </div>

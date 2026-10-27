@@ -236,6 +236,27 @@ nav.header-nav .nav-link[aria-current="page"] {
   white-space: nowrap;
 }
 
+.github-header-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  color: #ffffff;
+  opacity: 0.85;
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.github-header-link:hover {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.35);
+  color: var(--gold);
+  transform: translateY(-1px);
+}
+
 @media (max-width: 767px) {
   header.supercoin-header {
     flex-direction: column;
