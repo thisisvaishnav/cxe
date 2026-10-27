@@ -414,9 +414,9 @@
     "semantic_hash": ""
   },
   "frontend/src/App.tsx": {
-    "mtime": 1793123056.4088287,
-    "seen": 1793123246.718345,
-    "ast_hash": "9e04d54c7570529c324933ce7b4d6572",
+    "mtime": 1793130604.708683,
+    "seen": 1793130783.636998,
+    "ast_hash": "f98f4617fbe1d76ee18a1cec796dba92",
     "semantic_hash": ""
   },
   "frontend/src/components/AuthScreen.tsx": {
@@ -426,33 +426,33 @@
     "semantic_hash": ""
   },
   "frontend/src/components/Layout.tsx": {
-    "mtime": 1793122727.282975,
-    "seen": 1793123246.718348,
-    "ast_hash": "5348fec74f437886239760de75123642",
+    "mtime": 1793130633.279738,
+    "seen": 1793130783.637001,
+    "ast_hash": "e1c46c115ba98c319caf37685170b2b8",
     "semantic_hash": ""
   },
   "frontend/src/components/OrderBook.tsx": {
-    "mtime": 1793120305.9367073,
-    "seen": 1793123246.718349,
-    "ast_hash": "f1634975af108c1d00344edee85f6b0b",
+    "mtime": 1793130492.6290603,
+    "seen": 1793130783.637002,
+    "ast_hash": "9ffc03004ed83a757fd4db3b2be30d1e",
     "semantic_hash": ""
   },
   "frontend/src/components/OrderForm.tsx": {
-    "mtime": 1793120316.23609,
-    "seen": 1793123246.718349,
-    "ast_hash": "a76a41f0ca47b0b93b5afe2ce5b5684c",
+    "mtime": 1793130499.869121,
+    "seen": 1793130783.637003,
+    "ast_hash": "b2f1f421341862ba07c2e8962fde3097",
     "semantic_hash": ""
   },
   "frontend/src/components/PositionsTable.tsx": {
-    "mtime": 1793120469.10012,
-    "seen": 1793123246.7183511,
-    "ast_hash": "8c65d4dcb2d634fce7ecea0e92c21393",
+    "mtime": 1793130512.4537961,
+    "seen": 1793130783.6370041,
+    "ast_hash": "18974f4c3215251de7fa089f9f47687b",
     "semantic_hash": ""
   },
   "frontend/src/components/PriceChart.tsx": {
-    "mtime": 1793123342.1119328,
-    "seen": 1793123387.6694841,
-    "ast_hash": "1702ce0699ef821ee550e4a2d23b494c",
+    "mtime": 1793130486.3907473,
+    "seen": 1793130783.637005,
+    "ast_hash": "6b584c58f8c1d82b0138a0c6ce41cf21",
     "semantic_hash": ""
   },
   "frontend/src/hooks/useWebSocket.ts": {

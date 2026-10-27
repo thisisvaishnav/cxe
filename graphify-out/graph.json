@@ -69270,18 +69270,6 @@
       "weight": 1.0
     },
     {
-      "source": "frontend_src_components_landing_navbar",
-      "target": "frontend_src_assets_logo_icon_logoicon",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "frontend/src/components/landing/navbar.tsx",
-      "source_location": "L5",
-      "weight": 1.0
-    },
-    {
       "source": "frontend_src_components_landing_stats",
       "target": "frontend_src_components_landing_heading_heading",
       "relation": "imports",
@@ -112597,5 +112585,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "f171a50aea695f1d86ed491aaf7a8b6e98d69a60"
+  "built_at_commit": "af2f76ec2e12fd4ea1a098446d535bfa09d762f8"
 }

@@ -1,17 +1,17 @@
 # Graph Report - cxe  (2026-10-28)
 
 ## Corpus Check
-- 125 files · ~129,407 words
+- 125 files · ~129,404 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 24 file(s) not represented in the graph (top: (none) 9, .example 4, .lock 3)
 
 ## Summary
-- 3719 nodes · 5870 edges · 178 communities (94 shown, 84 thin omitted)
+- 3719 nodes · 5869 edges · 178 communities (94 shown, 84 thin omitted)
 - Extraction: 97% EXTRACTED · 3% INFERRED · 0% AMBIGUOUS · INFERRED: 164 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `f171a50a`
+- Built from commit: `af2f76ec`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -179,18 +179,18 @@
 6. `r()` - 28 edges
 7. `cn()` - 26 edges
 8. `react` - 26 edges
-9. `slice()` - 25 edges
-10. `toString()` - 25 edges
+9. `interpretNode()` - 25 edges
+10. `slice()` - 25 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `Backend README` --semantically_similar_to--> `Engine README`  [INFERRED] [semantically similar]
   backend/README.md → engine/README.md
 - `Hero Image` --conceptually_related_to--> `Mini Centralized Exchange (CEX) Assignment`  [INFERRED]
   frontend/src/assets/hero.png → README.md
-- `Mt()` --indirect_call--> `N()`  [INFERRED]
-  backend/generated/prisma/runtime/wasm-compiler-edge.js → backend/generated/prisma/query_compiler_fast_bg.js
 - `q()` --indirect_call--> `t()`  [INFERRED]
   backend/generated/prisma/query_compiler_fast_bg.js → backend/generated/prisma/runtime/wasm-compiler-edge.js
+- `Mt()` --indirect_call--> `N()`  [INFERRED]
+  backend/generated/prisma/runtime/wasm-compiler-edge.js → backend/generated/prisma/query_compiler_fast_bg.js
 - `Frontend CI Job` --calls--> `Vite Build System`  [INFERRED]
   .github/workflows/ci.yml → frontend/README.md
 
@@ -626,7 +626,7 @@ Cohesion: 0.50
 Nodes (4): scripts, dev, start, typecheck
 
 ## Knowledge Gaps
-- **1842 isolated node(s):** `MobileTab`, `Page`, `HeaderProps`, `OrderBookProps`, `OrderBookEntry` (+1837 more)
+- **1842 isolated node(s):** `AuthScreenProps`, `clerkRetroAppearance`, `EarnPageProps`, `Pool`, `POOLS` (+1837 more)
   These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 2461 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 - **84 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -634,15 +634,15 @@ Nodes (4): scripts, dev, start, typecheck
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `@prisma/client-runtime-utils` connect `runtime/index-browser.js` to `runtime/client.d.ts`, `runtime/client.js`, `wasm-compiler-edge.js`, `prisma/package.json`, `index-browser.d.ts`?**
-  _High betweenness centrality (0.353) - this node is a cross-community bridge._
+  _High betweenness centrality (0.351) - this node is a cross-community bridge._
 - **Are the 28 inferred relationships involving `t()` (e.g. with `k()` and `q()`) actually correct?**
   _`t()` has 28 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `MobileTab`, `Page`, `HeaderProps` to the rest of the system?**
+- **What connects `AuthScreenProps`, `clerkRetroAppearance`, `EarnPageProps` to the rest of the system?**
   _1842 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `index.d.ts` be split into smaller, more focused modules?**
   _Cohesion score 0.003766478342749529 - nodes in this community are weakly interconnected._
 - **Why does `@prisma/client` connect `client.ts` to `prismaNamespace.ts`, `User.ts`, `Order.ts`, `Fill.ts`, `Balance.ts`, `Stock.ts`, `commonInputTypes.ts`, `prismaNamespaceBrowser.ts`, `backend/package.json`?**
-  _High betweenness centrality (0.219) - this node is a cross-community bridge._
+  _High betweenness centrality (0.231) - this node is a cross-community bridge._
 - **Are the 12 inferred relationships involving `e()` (e.g. with `#a()` and `$c()`) actually correct?**
   _`e()` has 12 INFERRED edges - model-reasoned connections that need verification._
 - **Should `runtime/client.d.ts` be split into smaller, more focused modules?**

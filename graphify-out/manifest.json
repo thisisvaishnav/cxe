@@ -420,9 +420,9 @@
     "semantic_hash": ""
   },
   "frontend/src/components/AuthScreen.tsx": {
-    "mtime": 1793116890.4115098,
-    "seen": 1793123246.718347,
-    "ast_hash": "8bbc3e2c45ce4ab6c007babec52cdbf0",
+    "mtime": 1793131444.8799965,
+    "seen": 1793131481.981591,
+    "ast_hash": "3aaecef55397d96e10c1382da8f19f2e",
     "semantic_hash": ""
   },
   "frontend/src/components/Layout.tsx": {
@@ -504,9 +504,9 @@
     "semantic_hash": "cdc8999e01cfbb98ada51a4407d6d0d1"
   },
   "README.md": {
-    "mtime": 1792752501.984762,
-    "seen": 1792773820.5220742,
-    "ast_hash": "3e35d339a827b04a1bb75ea9c270b283",
+    "mtime": 1793131456.904901,
+    "seen": 1793131481.981627,
+    "ast_hash": "5fb9f25a55ead051d0bff705ef1d47da",
     "semantic_hash": ""
   },
   "docker-compose.yml": {
@@ -546,9 +546,9 @@
     "semantic_hash": "f6e3faf55d738cf2affe1b44195f27cf"
   },
   "frontend/src/components/EarnPage.tsx": {
-    "mtime": 1793122919.2669456,
-    "seen": 1793123246.718348,
-    "ast_hash": "f8ee9847574fdaff5535e091414dfb17",
+    "mtime": 1793131466.902397,
+    "seen": 1793131481.9815922,
+    "ast_hash": "58d331b49a0999cf1efc9e64c7abf37c",
     "semantic_hash": ""
   },
   "frontend/src/components/PortfolioPage.tsx": {
@@ -702,9 +702,9 @@
     "semantic_hash": ""
   },
   "frontend/src/components/landing/navbar.tsx": {
-    "mtime": 1793116890.418091,
-    "seen": 1793123246.71836,
-    "ast_hash": "7e8fe45648907376329c2e78a713d459",
+    "mtime": 1793131447.4472244,
+    "seen": 1793131481.981605,
+    "ast_hash": "e5feef3423d8766f8af19e0b56955d2c",
     "semantic_hash": ""
   },
   "frontend/src/components/landing/stats.tsx": {
